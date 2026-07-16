@@ -189,3 +189,32 @@ Stage Summary:
 - **Dev server**: rodando em http://localhost:3000 com Supabase como backend.
 - **Arquivos modificados nesta task**: `src/lib/db.ts` (fallback de env), `scripts/import-csv-to-supabase.ts` (novo), `scripts/test-e2e-supabase.sh` (novo), `scripts/verify-supabase.ts` (novo), `scripts/check-exercises.ts` (novo), `scripts/check-supabase.ts` (novo), `scripts/clear-supabase.ts` (novo).
 - **Para publicar**: ao rodar `bash .zscripts/build.sh`, o `.env` com as URLs do Supabase será embutido no build standalone. O `start.sh` usa `DATABASE_URL` do `.env` empacotado (ou variável externa se definida).
+
+---
+Task ID: vercel-deploy-prep
+Agent: main
+Task: Preparar projeto para deploy no Vercel mantendo compatibilidade com sandbox atual.
+
+Work Log:
+- Adicionado `postinstall: prisma generate` em `package.json` — Vercel roda automaticamente após `bun install`.
+- Adicionado script `vercel-build: prisma generate && next build` em `package.json` — usado pelo Vercel como build command.
+- Criado `vercel.json` com configuração explícita:
+  - framework: nextjs
+  - buildCommand: bun run vercel-build
+  - installCommand: bun install
+- `.env` trocado para usar pooler transacional com `?pgbouncer=true` (porta 6543):
+  - Necessário para Vercel serverless (funções efêmeras precisam de pool de conexões)
+  - Funciona também para dev local (testado: login, criar treino, finalizar treino, last-sets — todos passaram)
+  - `DIRECT_URL` mantido com session-mode (porta 5432) para migrations
+- Criado `README.md` com instruções completas de deploy no Vercel (GitHub integration, env vars, etc.)
+- Testado `bun run vercel-build` localmente: build passou em 14.5s, 15 páginas estáticas + 17 API routes geradas.
+- Commit feito: `4be86c7 feat: prepara projeto para deploy no Vercel`.
+
+Stage Summary:
+- Projeto pronto para deploy no Vercel via GitHub integration.
+- 4 arquivos modificados: `.env`, `package.json`, `vercel.json` (novo), `README.md` (novo).
+- Build testado localmente e funcionando.
+- Variáveis de ambiente que precisam ser cadastradas no Vercel dashboard:
+  - DATABASE_URL (com pgbouncer=true)
+  - DIRECT_URL (sem pgbouncer)
+- Dev server no sandbox continua funcionando normalmente com as mesmas URLs.
