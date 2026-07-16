@@ -1,0 +1,140 @@
+// Hevy Web - Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  bio          String?
+  weight       Float?
+  height       Float?
+  sex          String?  // "M" | "F" | "Outro"
+  birthDate    DateTime?
+  goal         String?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  workouts  Workout[]
+  sessions  WorkoutSession[]
+  favorites Favorite[]
+}
+
+model Exercise {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  muscleGroup     String   // grupo muscular primário
+  secondaryMuscles String? // músculos secundários (separados por vírgula)
+  equipment       String?  // equipamento principal
+  category        String   // categoria: "Força", "Hipertrofia", "Cardio", "Mobilidade"
+  equipmentType   String?  // "Livre", "Máquina", "Cabo", "Halteres", "Peso do corpo"
+  level           String   // "Iniciante", "Intermediário", "Avançado"
+  description     String?
+  executionSteps  String?  // passo a passo (separado por \n)
+  commonMistakes  String?
+  tips            String?
+  imageUrl        String?
+  gifUrl          String?
+  videoUrl        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  workoutExercises WorkoutExercise[]
+  sessionSets     SessionSet[]
+  favorites       Favorite[]
+}
+
+model Workout {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String   // "Treino A", "Push", "Upper", etc.
+  description String?
+  defaultRest Int      @default(90) // descanso padrão em segundos
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercises WorkoutExercise[]
+  sessions  WorkoutSession[]
+
+  @@index([userId])
+}
+
+model WorkoutExercise {
+  id          String  @id @default(cuid())
+  workoutId   String
+  exerciseId  String
+  order       Int
+  targetSets  Int     @default(3)
+  targetReps  Int     @default(10)
+  restSeconds Int     @default(90)
+  notes       String?
+
+  workout  Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@index([workoutId])
+}
+
+model WorkoutSession {
+  id           String   @id @default(cuid())
+  userId       String
+  workoutId    String?
+  workoutName  String
+  startedAt    DateTime @default(now())
+  endedAt      DateTime?
+  durationSec  Int      @default(0)
+  totalVolume  Float    @default(0)
+  notes        String?
+
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workout Workout?     @relation(fields: [workoutId], references: [id])
+  sets    SessionSet[]
+
+  @@index([userId])
+  @@index([startedAt])
+}
+
+model SessionSet {
+  id          String  @id @default(cuid())
+  sessionId   String
+  exerciseId  String
+  exerciseName String
+  setNumber   Int
+  weight      Float
+  reps        Int
+  rpe         Float?
+  rir         Float?
+  restSeconds Int     @default(90)
+  completedAt DateTime @default(now())
+  isPR        Boolean @default(false)
+
+  session  WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  exercise Exercise       @relation(fields: [exerciseId], references: [id])
+
+  @@index([sessionId])
+  @@index([exerciseId])
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  userId     String
+  exerciseId String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, exerciseId])
+}

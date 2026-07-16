@@ -1,0 +1,590 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useAppStore } from "@/lib/store";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
+import { toast } from "sonner";
+import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical } from "lucide-react";
+import { motion } from "framer-motion";
+import { muscleGroups } from "@/lib/exercises-data";
+
+type Exercise = {
+  id: string;
+  name: string;
+  muscleGroup: string;
+  equipment: string | null;
+  equipmentType: string | null;
+  level: string;
+};
+
+type WorkoutExercise = {
+  id: string;
+  exerciseId: string;
+  order: number;
+  targetSets: number;
+  targetReps: number;
+  restSeconds: number;
+  notes: string | null;
+  exercise: Exercise;
+};
+
+type Workout = {
+  id: string;
+  name: string;
+  description: string | null;
+  defaultRest: number;
+  color: string | null;
+  exercises: WorkoutExercise[];
+  _count: { sessions: number };
+};
+
+const COLOR_OPTIONS = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
+
+export function WorkoutsView() {
+  const setView = useAppStore((s) => s.setView);
+  const setActiveWorkoutId = useAppStore((s) => s.setActiveWorkoutId);
+  const editingWorkoutId = useAppStore((s) => s.editingWorkoutId);
+  const setEditingWorkoutId = useAppStore((s) => s.setEditingWorkoutId);
+
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showEditor, setShowEditor] = useState(false);
+
+  const load = () => {
+    setLoading(true);
+    apiGet<{ workouts: Workout[] }>("/api/workouts")
+      .then((d) => setWorkouts(d.workouts))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  useEffect(() => {
+    if (editingWorkoutId) {
+      setShowEditor(true);
+    }
+  }, [editingWorkoutId]);
+
+  const startWorkout = (id: string) => {
+    setActiveWorkoutId(id);
+    setView("active-workout");
+  };
+
+  const handleEdit = (id: string) => {
+    setEditingWorkoutId(id);
+    setShowEditor(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este treino?")) return;
+    try {
+      await apiDelete(`/api/workouts/${id}`);
+      toast.success("Treino excluído");
+      load();
+    } catch (e) {
+      toast.error("Erro ao excluir");
+    }
+  };
+
+  const handleCloseEditor = () => {
+    setShowEditor(false);
+    setEditingWorkoutId(null);
+    load();
+  };
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Meus Treinos</h1>
+          <p className="text-sm text-muted-foreground mt-1">Crie divisões (ABC, PPL, Upper/Lower) e personalize.</p>
+        </div>
+        <Button
+          onClick={() => {
+            setEditingWorkoutId(null);
+            setShowEditor(true);
+          }}
+          className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Criar treino
+        </Button>
+      </div>
+
+      {/* Sugestões de divisão */}
+      {workouts.length === 0 && !loading && (
+        <Card className="p-6">
+          <h2 className="font-semibold mb-3">Comece com uma divisão popular:</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {[
+              { name: "Treino A", desc: "Peito + Tríceps", color: "#ef4444" },
+              { name: "Treino B", desc: "Costas + Bíceps", color: "#10b981" },
+              { name: "Treino C", desc: "Pernas", color: "#f59e0b" },
+              { name: "Push", desc: "Empurrar", color: "#3b82f6" },
+            ].map((t) => (
+              <button
+                key={t.name}
+                onClick={() => {
+                  setEditingWorkoutId(null);
+                  setShowEditor(true);
+                }}
+                className="text-left p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-md mb-2" style={{ background: t.color }} />
+                <p className="font-medium text-sm">{t.name}</p>
+                <p className="text-xs text-muted-foreground">{t.desc}</p>
+              </button>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Lista de treinos */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-40 bg-card rounded-xl animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {workouts.map((w, i) => (
+            <motion.div
+              key={w.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+            >
+              <Card className="p-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg" style={{ background: w.color || "var(--primary)" }}>
+                      {w.name.charAt(0)}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{w.name}</h3>
+                      <p className="text-xs text-muted-foreground">{w._count.sessions}× realizado</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(w.id)}>
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive" onClick={() => handleDelete(w.id)}>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+
+                {w.description && <p className="text-xs text-muted-foreground mb-3">{w.description}</p>}
+
+                <div className="space-y-2 mb-4">
+                  {w.exercises.map((ex) => (
+                    <div key={ex.id} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground truncate flex-1">{ex.exercise.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2 shrink-0">
+                        {ex.targetSets}×{ex.targetReps} · {ex.restSeconds}s
+                      </span>
+                    </div>
+                  ))}
+                  {w.exercises.length === 0 && (
+                    <p className="text-xs text-muted-foreground italic">Sem exercícios</p>
+                  )}
+                </div>
+
+                <Button onClick={() => startWorkout(w.id)} className="w-full">
+                  <Play className="w-4 h-4 mr-2" />
+                  Iniciar treino
+                </Button>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {showEditor && <WorkoutEditor workoutId={editingWorkoutId} onClose={handleCloseEditor} />}
+    </div>
+  );
+}
+
+// ============== EDITOR DE TREINO ==============
+function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClose: () => void }) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [color, setColor] = useState(COLOR_OPTIONS[0]);
+  const [defaultRest, setDefaultRest] = useState(90);
+  const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
+  const [loading, setLoading] = useState(!!workoutId);
+  const [saving, setSaving] = useState(false);
+  const [showExercisePicker, setShowExercisePicker] = useState(false);
+
+  useEffect(() => {
+    if (workoutId) {
+      apiGet<{ workout: Workout }>(`/api/workouts/${workoutId}`)
+        .then((data) => {
+          const w = data.workout;
+          setName(w.name);
+          setDescription(w.description || "");
+          setColor(w.color || COLOR_OPTIONS[0]);
+          setDefaultRest(w.defaultRest);
+          setExercises(w.exercises);
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [workoutId]);
+
+  const handleSave = async () => {
+    if (!name.trim()) {
+      toast.error("Digite um nome para o treino");
+      return;
+    }
+    if (exercises.length === 0) {
+      toast.error("Adicione pelo menos um exercício");
+      return;
+    }
+
+    setSaving(true);
+    const payload = {
+      name,
+      description,
+      color,
+      defaultRest,
+      exercises: exercises.map((ex) => ({
+        exerciseId: ex.exerciseId,
+        targetSets: ex.targetSets,
+        targetReps: ex.targetReps,
+        restSeconds: ex.restSeconds,
+        notes: ex.notes,
+      })),
+    };
+
+    try {
+      if (workoutId) {
+        await apiPut(`/api/workouts/${workoutId}`, payload);
+        toast.success("Treino atualizado!");
+      } else {
+        await apiPost("/api/workouts", payload);
+        toast.success("Treino criado!");
+      }
+      onClose();
+    } catch (e) {
+      toast.error("Erro ao salvar treino");
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const addExercise = (ex: Exercise) => {
+    setExercises([
+      ...exercises,
+      {
+        id: `temp-${Date.now()}`,
+        exerciseId: ex.id,
+        order: exercises.length + 1,
+        targetSets: 3,
+        targetReps: 10,
+        restSeconds: defaultRest,
+        notes: null,
+        exercise: ex,
+      },
+    ]);
+    setShowExercisePicker(false);
+  };
+
+  const removeExercise = (idx: number) => {
+    setExercises(exercises.filter((_, i) => i !== idx));
+  };
+
+  const updateExercise = (idx: number, updates: Partial<WorkoutExercise>) => {
+    setExercises(exercises.map((ex, i) => (i === idx ? { ...ex, ...updates } : ex)));
+  };
+
+  const moveExercise = (idx: number, dir: -1 | 1) => {
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= exercises.length) return;
+    const newArr = [...exercises];
+    [newArr[idx], newArr[newIdx]] = [newArr[newIdx], newArr[idx]];
+    setExercises(newArr);
+  };
+
+  if (loading) {
+    return (
+      <Dialog open onOpenChange={() => onClose()}>
+        <DialogContent className="max-w-2xl">
+          <div className="py-12 flex justify-center">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <>
+      <Dialog open onOpenChange={() => onClose()}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{workoutId ? "Editar treino" : "Criar treino"}</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Nome */}
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome do treino</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ex: Treino A - Peito e Tríceps"
+              />
+            </div>
+
+            {/* Cor */}
+            <div className="space-y-2">
+              <Label>Cor</Label>
+              <div className="flex gap-2 flex-wrap">
+                {COLOR_OPTIONS.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setColor(c)}
+                    className={`w-8 h-8 rounded-full transition-transform ${color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground scale-110" : ""}`}
+                    style={{ background: c }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Descrição */}
+            <div className="space-y-2">
+              <Label htmlFor="desc">Descrição (opcional)</Label>
+              <Textarea
+                id="desc"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Notas gerais sobre este treino"
+                rows={2}
+              />
+            </div>
+
+            {/* Descanso padrão */}
+            <div className="space-y-2">
+              <Label htmlFor="rest">Descanso padrão (segundos)</Label>
+              <Input
+                id="rest"
+                type="number"
+                value={defaultRest}
+                onChange={(e) => setDefaultRest(parseInt(e.target.value) || 90)}
+              />
+            </div>
+
+            {/* Exercícios */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Exercícios ({exercises.length})</Label>
+                <Button size="sm" variant="outline" onClick={() => setShowExercisePicker(true)}>
+                  <Plus className="w-4 h-4 mr-1" />
+                  Adicionar
+                </Button>
+              </div>
+
+              {exercises.length === 0 ? (
+                <div className="text-center py-8 text-sm text-muted-foreground border border-dashed border-border rounded-lg">
+                  Nenhum exercício. Clique em "Adicionar".
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {exercises.map((ex, idx) => (
+                    <div key={ex.id} className="bg-card rounded-lg p-3 border border-border">
+                      <div className="flex items-center gap-2 mb-2">
+                        <GripVertical className="w-4 h-4 text-muted-foreground" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{ex.exercise.name}</p>
+                          <p className="text-xs text-muted-foreground">{ex.exercise.muscleGroup}</p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            onClick={() => moveExercise(idx, -1)}
+                            disabled={idx === 0}
+                          >
+                            ↑
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            onClick={() => moveExercise(idx, 1)}
+                            disabled={idx === exercises.length - 1}
+                          >
+                            ↓
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 hover:text-destructive"
+                            onClick={() => removeExercise(idx)}
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 pl-6">
+                        <div>
+                          <label className="text-[10px] text-muted-foreground">Séries</label>
+                          <Input
+                            type="number"
+                            value={ex.targetSets}
+                            onChange={(e) => updateExercise(idx, { targetSets: parseInt(e.target.value) || 3 })}
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-muted-foreground">Reps</label>
+                          <Input
+                            type="number"
+                            value={ex.targetReps}
+                            onChange={(e) => updateExercise(idx, { targetReps: parseInt(e.target.value) || 10 })}
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-muted-foreground">Descanso (s)</label>
+                          <Input
+                            type="number"
+                            value={ex.restSeconds}
+                            onChange={(e) => updateExercise(idx, { restSeconds: parseInt(e.target.value) || 90 })}
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={onClose} disabled={saving}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "Salvando..." : workoutId ? "Salvar alterações" : "Criar treino"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {showExercisePicker && (
+        <ExercisePicker
+          onPick={addExercise}
+          onClose={() => setShowExercisePicker(false)}
+          excludeIds={exercises.map((e) => e.exerciseId)}
+        />
+      )}
+    </>
+  );
+}
+
+// ============== SELETOR DE EXERCÍCIOS ==============
+function ExercisePicker({
+  onPick,
+  onClose,
+  excludeIds,
+}: {
+  onPick: (ex: Exercise) => void;
+  onClose: () => void;
+  excludeIds: string[];
+}) {
+  const [search, setSearch] = useState("");
+  const [filterMuscle, setFilterMuscle] = useState("");
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (filterMuscle) params.set("muscleGroup", filterMuscle);
+    apiGet<{ exercises: Exercise[] }>(`/api/exercises?${params.toString()}`)
+      .then((d) => setExercises(d.exercises))
+      .finally(() => setLoading(false));
+  }, [search, filterMuscle]);
+
+  const filtered = exercises.filter((e) => !excludeIds.includes(e.id));
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Adicionar exercício</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar exercício..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+              autoFocus
+            />
+          </div>
+          <select
+            value={filterMuscle}
+            onChange={(e) => setFilterMuscle(e.target.value)}
+            className="w-full h-9 px-3 rounded-md bg-card border border-border text-sm"
+          >
+            <option value="">Todos os músculos</option>
+            {muscleGroups.map((m) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex-1 overflow-y-auto -mx-2 px-2 space-y-1 mt-2">
+          {loading ? (
+            <div className="text-center py-8 text-sm text-muted-foreground">Carregando...</div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-8 text-sm text-muted-foreground">Nenhum exercício encontrado</div>
+          ) : (
+            filtered.map((ex) => (
+              <button
+                key={ex.id}
+                onClick={() => onPick(ex)}
+                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors text-left"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
+                  {ex.name.charAt(0)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{ex.name}</p>
+                  <p className="text-xs text-muted-foreground">{ex.muscleGroup} · {ex.equipment}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
+            ))
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
