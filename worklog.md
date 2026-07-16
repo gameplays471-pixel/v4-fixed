@@ -146,3 +146,46 @@ Stage Summary:
 - 7 CSVs prontos para import manual via Supabase Dashboard → Table Editor → "Import data from CSV".
 - Ordem de import respeitando FKs: User → Exercise → Workout → WorkoutExercise → WorkoutSession → SessionSet → Favorite.
 - Dev server ainda rodando com SQLite local (não reiniciado com Supabase ainda — aguardando import).
+
+---
+Task ID: migrate-supabase-complete
+Agent: main
+Task: Subir todas as tabelas (exceto Exercise) para o Supabase e validar funcionamento end-to-end.
+
+Work Log:
+- Script `scripts/import-csv-to-supabase.ts` criado: parser CSV puro (sem dependências), preserva IDs para integridade referencial, batches de 50 para SessionSet.
+- 6 CSVs importados com sucesso (pulando Exercise.csv, que já estava populado por seed anterior completo):
+  - User.csv: 2 linhas (demo + erick)
+  - Workout.csv: 2 treinos
+  - WorkoutExercise.csv: 11 relações
+  - WorkoutSession.csv: 15 sessões
+  - SessionSet.csv: 249 sets (em batches de 50)
+  - Favorite.csv: 0
+- Total no Supabase após import: 2 users, 180 exercises, 2 workouts, 11 wExercises, 15 sessions, 249 sessionSets, 0 favorites.
+
+- **Problema crítico corrigido**: Prisma Client em runtime no Next.js dev (Turbopack) não resolvia `env("DATABASE_URL")` do schema.prisma.
+  - Causa raiz: variáveis de ambiente do shell (`DATABASE_URL=file:/home/z/my-project/db/custom.db`) estavam override o `.env` quando o dev.sh era executado.
+  - Solução: `unset DATABASE_URL` e `unset DIRECT_URL` antes de iniciar o dev server, garantindo que apenas o `.env` do projeto seja lido.
+  - Adicionalmente: `src/lib/db.ts` agora faz fallback explícito — lê `process.env.DATABASE_URL` OU carrega `.env` do CWD se process.env estiver vazio, e passa a URL via `datasources: { db: { url } }` para o PrismaClient.
+
+- **URL final usada**: session-mode pooler do Supabase (`aws-1-us-west-2.pooler.supabase.com:5432`). Pooler transacional (porta 6543 com `?pgbouncer=true`) causava erro de validação no Prisma Client runtime. Session-mode funciona para ambos runtime e migrations.
+
+- **Teste E2E completo passou** (`scripts/test-e2e-supabase.sh`):
+  1. Login: ✅ Token gerado
+  2. Exercises count: ✅ 180 exercícios
+  3. Listar workouts: ✅ 2 treinos
+  4. Listar sessões: ✅ 14 sessões (15 após criar nova)
+  5. Criar novo treino: ✅ ID retornado
+  6. **Finalizar treino (POST /api/sessions)**: ✅ Sessão criada com sucesso (este era o bug original do projeto)
+  7. Sessions count após criar: ✅ 15 (subiu de 14)
+  8. **Endpoint /api/sessions/last-sets**: ✅ Retornou o set recém-criado (80kg × 8)
+  9. Deletar treino de teste: ✅
+
+Stage Summary:
+- **Banco migrado com sucesso**: SQLite → Supabase PostgreSQL (pooler IPv4 em aws-1-us-west-2).
+- **Todos os dados preservados**: 180 exercícios, 2 usuários, 2 treinos, 11 treino-exercícios, 15 sessões, 249 sets.
+- **Bug original de finalizar treino**: confirmado corrigido no Supabase (POST /api/sessions retorna 200 e cria a sessão).
+- **Feature "última vez"**: confirmada funcionando no Supabase (retorna histórico de sets do mesmo exercício em qualquer treino).
+- **Dev server**: rodando em http://localhost:3000 com Supabase como backend.
+- **Arquivos modificados nesta task**: `src/lib/db.ts` (fallback de env), `scripts/import-csv-to-supabase.ts` (novo), `scripts/test-e2e-supabase.sh` (novo), `scripts/verify-supabase.ts` (novo), `scripts/check-exercises.ts` (novo), `scripts/check-supabase.ts` (novo), `scripts/clear-supabase.ts` (novo).
+- **Para publicar**: ao rodar `bash .zscripts/build.sh`, o `.env` com as URLs do Supabase será embutido no build standalone. O `start.sh` usa `DATABASE_URL` do `.env` empacotado (ou variável externa se definida).
