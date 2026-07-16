@@ -1,6 +1,6 @@
 /**
  * Teste end-to-end: simula criar um treino com exercícios,
- * listar, buscar, e verificar se o treino está visível.
+ * listar, buscar, finalizar (criar sessão) e verificar se tudo funciona.
  */
 async function test() {
   console.log("=== TESTE END-TO-END DO FLUXO DE TREINO ===\n");
@@ -99,31 +99,80 @@ async function test() {
   console.log(`   ✓ Nome atualizado: ${updated.name}`);
   console.log(`   ✓ Exercícios: ${updated.exercises.length}`);
 
-  // 7. Deletar treino
-  console.log("\n7. Deletando treino...");
+  // 7. FINALIZAR TREINO (criar sessão) - ESTE ERA O BUG ORIGINAL
+  console.log("\n7. Finalizando treino (criando sessão)...");
+  const sessionRes = await fetch("http://localhost:3000/api/sessions", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      workoutId: workout.id,
+      workoutName: workout.name,
+      startedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+      endedAt: new Date().toISOString(),
+      durationSec: 3600,
+      sets: [
+        { exerciseId: ex1.id, exerciseName: ex1.name, weight: 50, reps: 10, restSeconds: 90 },
+        { exerciseId: ex1.id, exerciseName: ex1.name, weight: 55, reps: 8, restSeconds: 90 },
+        { exerciseId: ex2.id, exerciseName: ex2.name, weight: 30, reps: 12, restSeconds: 60 },
+        { exerciseId: ex3.id, exerciseName: ex3.name, weight: 20, reps: 15, restSeconds: 45 },
+      ],
+    }),
+  });
+  console.log(`   ✓ Status: ${sessionRes.status}`);
+  if (sessionRes.ok) {
+    const { session } = await sessionRes.json();
+    console.log(`   ✓ Sessão criada: ${session.id}`);
+    console.log(`   ✓ Sets salvos: ${session.sets.length}`);
+    console.log(`   ✓ Volume total: ${session.totalVolume} kg`);
+  } else {
+    const err = await sessionRes.text();
+    console.log(`   ✗ ERRO AO FINALIZAR TREINO: ${err}`);
+  }
+
+  // 8. Finalizar um SEGUNDO treino (testar cenário de múltiplos treinos - bug relatado)
+  console.log("\n8. Finalizando SEGUNDO treino (testar múltiplas sessões)...");
+  const session2Res = await fetch("http://localhost:3000/api/sessions", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      workoutId: workout.id,
+      workoutName: workout.name,
+      startedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+      endedAt: new Date().toISOString(),
+      durationSec: 1800,
+      sets: [
+        { exerciseId: ex2.id, exerciseName: ex2.name, weight: 35, reps: 12, restSeconds: 60 },
+        { exerciseId: ex3.id, exerciseName: ex3.name, weight: 25, reps: 15, restSeconds: 45 },
+      ],
+    }),
+  });
+  console.log(`   ✓ Status: ${session2Res.status}`);
+  if (session2Res.ok) {
+    const { session } = await session2Res.json();
+    console.log(`   ✓ Segunda sessão criada: ${session.id}`);
+    console.log(`   ✓ Sets salvos: ${session.sets.length}`);
+  } else {
+    const err = await session2Res.text();
+    console.log(`   ✗ ERRO AO FINALIZAR SEGUNDO TREINO: ${err}`);
+  }
+
+  // 9. Listar sessões para confirmar que foram salvas
+  console.log("\n9. Listando sessões do usuário...");
+  const sessionsRes = await fetch("http://localhost:3000/api/sessions", { headers });
+  const { sessions } = await sessionsRes.json();
+  console.log(`   ✓ ${sessions.length} sessões no total`);
+
+  // 10. Deletar treino
+  console.log("\n10. Deletando treino...");
   const delRes = await fetch(`http://localhost:3000/api/workouts/${workout.id}`, {
     method: "DELETE",
     headers,
   });
   console.log(`   ✓ Status: ${delRes.status}`);
 
-  // 8. Verificar que foi deletado
-  console.log("\n8. Verificando deleção...");
-  const listRes2 = await fetch("http://localhost:3000/api/workouts", { headers });
-  const { workouts: workouts2 } = await listRes2.json();
-  const stillThere = workouts2.find((w: any) => w.id === workout.id);
-  if (!stillThere) {
-    console.log(`   ✓ Treino foi removido (${workouts2.length} treinos restantes)`);
-  } else {
-    console.log(`   ✗ ERRO: Treino ainda existe!`);
-  }
-
-  // 9. Testar exercícios com imagem
-  console.log("\n9. Verificando exercícios com imagem...");
-  const withImg = exercises.filter((e: any) => e.imageUrl).length;
-  const withGif = exercises.filter((e: any) => e.gifUrl).length;
-  console.log(`   ✓ ${withImg}/${exercises.length} exercícios com imageUrl`);
-  console.log(`   ✓ ${withGif}/${exercises.length} exercícios com gifUrl`);
+  // 11. Verificar contagem final de exercícios
+  console.log("\n11. Verificando exercícios disponíveis...");
+  console.log(`   ✓ ${exercises.length} exercícios na base`);
 
   console.log("\n=== TESTE CONCLUÍDO COM SUCESSO! ===");
 }

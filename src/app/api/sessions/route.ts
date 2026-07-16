@@ -50,17 +50,19 @@ export async function POST(req: NextRequest) {
     const prUpdates: Array<{
       exerciseId: string;
       exerciseName: string;
-      setNumber: number;
       weight: number;
       reps: number;
       restSeconds: number;
+      isPR: boolean;
     }> = [];
 
+    // Detectar PRs — consulta o maior peso já registrado para o mesmo exercício
+    // pelo usuário atual (via relação session -> userId).
     for (const s of sets || []) {
       const previousMax = await db.sessionSet.findFirst({
         where: {
           exerciseId: s.exerciseId,
-          userId: user.id,
+          session: { userId: user.id },
         },
         orderBy: { weight: "desc" },
         select: { weight: true },
@@ -68,9 +70,13 @@ export async function POST(req: NextRequest) {
 
       const isNewPR = !previousMax || s.weight > previousMax.weight;
       prUpdates.push({
-        ...s,
-        isPR: isNewPR ? true : false,
-      } as typeof prUpdates[number]);
+        exerciseId: s.exerciseId,
+        exerciseName: s.exerciseName,
+        weight: s.weight,
+        reps: s.reps,
+        restSeconds: s.restSeconds || 90,
+        isPR: isNewPR,
+      });
     }
 
     const session = await db.workoutSession.create({

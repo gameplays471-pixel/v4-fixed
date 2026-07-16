@@ -1,6 +1,6 @@
-// Base de dados com 100 exercícios mais usados nas academias do Brasil
+// Base de dados com TODOS os exercícios mais usados nas academias do Brasil
 // Cada exercício contém: nome, grupo muscular, equipamento, categoria, nível,
-// descrição, execução passo a passo, erros comuns, dicas, imagem e GIF
+// descrição, execução passo a passo, erros comuns e dicas
 
 export type ExerciseData = {
   name: string;
@@ -15,14 +15,10 @@ export type ExerciseData = {
   executionSteps?: string;
   commonMistakes?: string;
   tips?: string;
-  imageUrl?: string;
-  gifUrl?: string;
-  videoUrl?: string;
 };
 
 export const exercisesData: ExerciseData[] = [
-  // ===== PEITO =====
-  {
+{
     name: "Supino Reto com Barra",
     slug: "supino-reto-barra",
     muscleGroup: "Peito",
@@ -39,7 +35,7 @@ export const exercisesData: ExerciseData[] = [
       "Arquear excessivamente a lombar; quicar a barra no peito; descer muito rápido sem controle; não tocar o peito; abrir demais os cotovelos.",
     tips: "Mantenha as escápulas retraídas durante todo o movimento para proteger os ombros. Use o peito para empurrar, não os braços.",
   },
-  {
+{
     name: "Supino Reto com Halteres",
     slug: "supino-reto-halteres",
     muscleGroup: "Peito",
@@ -56,7 +52,7 @@ export const exercisesData: ExerciseData[] = [
       "Bater os halteres no topo; descer rápido demais; não alinhar os halteres; arquear a lombar.",
     tips: "Mantenha os pulsos retos e firmes. Controle a descida em 2-3 segundos para máxima ativação.",
   },
-  {
+{
     name: "Supino Inclinado com Barra",
     slug: "supino-inclinado-barra",
     muscleGroup: "Peito",
@@ -73,7 +69,7 @@ export const exercisesData: ExerciseData[] = [
       "Inclinar o banco mais que 45 graus (vira exercício de ombro); jogar a barra no peito; não controlar a descida.",
     tips: "Inclinação de 30° é o ideal para focar no peito sem transferir carga para o deltoide.",
   },
-  {
+{
     name: "Supino Inclinado com Halteres",
     slug: "supino-inclinado-halteres",
     muscleGroup: "Peito",
@@ -90,7 +86,7 @@ export const exercisesData: ExerciseData[] = [
       "Inclinação muito alta; cotovelos muito abertos; descer assimétrico; arquear lombar.",
     tips: "Use espelho lateral para garantir simetria no movimento de ambos os braços.",
   },
-  {
+{
     name: "Crucifixo com Halteres",
     slug: "crucifixo-halteres",
     muscleGroup: "Peito",
@@ -107,7 +103,7 @@ export const exercisesData: ExerciseData[] = [
       "Flexionar muito os cotovelos (vira supino); descer além do alongamento confortável; usar carga excessiva.",
     tips: "Imagine que está abraçando uma árvore. Mantenha cotovelos fixos em leve flexão durante todo o movimento.",
   },
-  {
+{
     name: "Crossover na Polia",
     slug: "crossover-polia",
     muscleGroup: "Peito",
@@ -124,7 +120,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar muito peso e virar empurrão; não cruzar as mãos; jogar o corpo para frente.",
     tips: "Para máxima contração, cruze completamente as mãos na frente do corpo e segure por 1 segundo.",
   },
-  {
+{
     name: "Flexão de Braço",
     slug: "flexao-braco",
     muscleGroup: "Peito",
@@ -141,7 +137,7 @@ export const exercisesData: ExerciseData[] = [
       "Subir o quadril; deixar a cabeça caída; não descer o suficiente; abrir cotovelos em 90°.",
     tips: "Mantenha o core firme como uma prancha. Para iniciantes, apoie os joelhos no chão.",
   },
-  {
+{
     name: "Paralelas (Mergulho)",
     slug: "paralelas-mergulho",
     muscleGroup: "Peito",
@@ -158,9 +154,7 @@ export const exercisesData: ExerciseData[] = [
       "Descer demais (lesão no ombro); não inclinar o tronco (vira tríceps); balancear o corpo.",
     tips: "Para iniciantes, use a máquina de mergulho assistida. Mantenha os ombros afastados das orelhas.",
   },
-
-  // ===== COSTAS =====
-  {
+{
     name: "Puxada Frontal",
     slug: "puxada-frontal",
     muscleGroup: "Costas",
@@ -177,7 +171,7 @@ export const exercisesData: ExerciseData[] = [
       "Puxar com os braços em vez das costas; balançar o corpo; descer rápido demais; puxar atrás do pescoço.",
     tips: "Imagine que está fazendo o movimento com os cotovelos, não com as mãos. Incline levemente o tronco para trás.",
   },
-  {
+{
     name: "Barra Fixa",
     slug: "barra-fixa",
     muscleGroup: "Costas",
@@ -194,7 +188,7 @@ export const exercisesData: ExerciseData[] = [
       "Balancear o corpo; não estender totalmente os braços; puxar com os braços; usar impulso.",
     tips: "Foque em levar os cotovelos para baixo e para trás. Inicie o movimento contraindo as escápulas.",
   },
-  {
+{
     name: "Remada Curvada com Barra",
     slug: "remada-curvada-barra",
     muscleGroup: "Costas",
@@ -211,7 +205,7 @@ export const exercisesData: ExerciseData[] = [
       "Arredondar a lombar; usar impulso; puxar para o peito; não contrair as escápulas.",
     tips: "Mantenha o core firme e a coluna neutra. O movimento vem das escápulas, não dos braços.",
   },
-  {
+{
     name: "Remada Baixa na Polia",
     slug: "remada-baixa-polia",
     muscleGroup: "Costas",
@@ -228,7 +222,7 @@ export const exercisesData: ExerciseData[] = [
       "Balancear o tronco para frente e trás; arredondar as costas; puxar com os braços.",
     tips: "Concentre-se em juntar as escápulas no final do movimento. Mantenha o peito alto.",
   },
-  {
+{
     name: "Remada com Halter (Serrote)",
     slug: "remada-halter-serrote",
     muscleGroup: "Costas",
@@ -245,7 +239,7 @@ export const exercisesData: ExerciseData[] = [
       "Girar o tronco; puxar com impulso; não contrair as costas; arredondar a lombar.",
     tips: "Mantenha o ombro relaxado no início e puxe com o cotovelo. Imagine que está puxando uma corda.",
   },
-  {
+{
     name: "Levantamento Terra",
     slug: "levantamento-terra",
     muscleGroup: "Costas",
@@ -262,7 +256,7 @@ export const exercisesData: ExerciseData[] = [
       "Arredondar a lombar; levantar o quadril antes dos ombros; jogar a barra para frente; não usar as pernas.",
     tips: "Use calçado raso e firme. A barra deve deslizar pelas canelas. Comece com carga leve para dominar a técnica.",
   },
-  {
+{
     name: "Pullover com Halter",
     slug: "pullover-halter",
     muscleGroup: "Costas",
@@ -279,7 +273,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar carga excessiva; arquear a lombar; soltar a respiração; flexionar muito os cotovelos.",
     tips: "Respire fundo ao descer e solte ao subir. Mantenha os quadris baixos.",
   },
-  {
+{
     name: "Face Pull",
     slug: "face-pull",
     muscleGroup: "Costas",
@@ -296,9 +290,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar muito peso; puxar para o peito; não abrir os cotovelos; jogar o tronco para trás.",
     tips: "Use carga moderada e foque na contração. Excelente para aquecimento de ombros.",
   },
-
-  // ===== PERNAS =====
-  {
+{
     name: "Agachamento Livre com Barra",
     slug: "agachamento-livre-barra",
     muscleGroup: "Pernas",
@@ -315,7 +307,7 @@ export const exercisesData: ExerciseData[] = [
       "Arredondar a lombar; joelhos para dentro; subir os calcanhares; não atingir paralelo; olhar para baixo.",
     tips: "Mantenha o peito alto e o core firme. Desça como se fosse sentar em uma cadeira.",
   },
-  {
+{
     name: "Leg Press 45°",
     slug: "leg-press-45",
     muscleGroup: "Pernas",
@@ -332,7 +324,7 @@ export const exercisesData: ExerciseData[] = [
       "Descer demais (lombar descola); joelhos para dentro; tranca as pernas no topo; subir os calcanhares.",
     tips: "Pés altos = mais glúteo. Pés baixos = mais quadríceps. Pés juntos = mais vasto lateral.",
   },
-  {
+{
     name: "Cadeira Extensora",
     slug: "cadeira-extensora",
     muscleGroup: "Pernas",
@@ -349,7 +341,7 @@ export const exercisesData: ExerciseData[] = [
       "Jogar o corpo para trás; soltar rapidamente; não contrair no topo; usar impulso.",
     tips: "Segure 1 segundo no topo com pernas estendidas para máxima contração.",
   },
-  {
+{
     name: "Mesa Flexora",
     slug: "mesa-flexora",
     muscleGroup: "Pernas",
@@ -366,7 +358,7 @@ export const exercisesData: ExerciseData[] = [
       "Arquear a lombar; soltar rápido; usar impulso; não contrair no final.",
     tips: "Mantenha o quadril firme na máquina. Contraia os posteriores no pico do movimento.",
   },
-  {
+{
     name: "Cadeira Flexora Sentada",
     slug: "cadeira-flexora-sentada",
     muscleGroup: "Pernas",
@@ -383,7 +375,7 @@ export const exercisesData: ExerciseData[] = [
       "Jogar o corpo para frente; soltar rápido; não contrair; arredondar as costas.",
     tips: "Mantenha o tronco firme. Contraia os posteriores no pico do movimento.",
   },
-  {
+{
     name: "Stiff com Barra",
     slug: "stiff-barra",
     muscleGroup: "Pernas",
@@ -400,7 +392,7 @@ export const exercisesData: ExerciseData[] = [
       "Arredondar a lombar; flexionar muito os joelhos; jogar a barra para frente; não contrair os glúteos.",
     tips: "Mantenha a barra sempre rente às pernas. O movimento vem do quadril, não das costas.",
   },
-  {
+{
     name: "RDL (Romanian Deadlift)",
     slug: "rdl-romanian-deadlift",
     muscleGroup: "Pernas",
@@ -417,7 +409,7 @@ export const exercisesData: ExerciseData[] = [
       "Arredondar lombar; flexionar muito os joelhos; barra longe do corpo; usar as costas em vez do quadril.",
     tips: "Foque em empurrar o quadril para trás como se fosse fechar uma porta com os glúteos.",
   },
-  {
+{
     name: "Afundo (Lunge)",
     slug: "afundo-lunge",
     muscleGroup: "Pernas",
@@ -434,7 +426,7 @@ export const exercisesData: ExerciseData[] = [
       "Passo curto demais; joelho da frente passa do pé; inclinar o tronco; não descer o suficiente.",
     tips: "Mantenha o tronco ereto. O joelho da frente deve estar alinhado com o tornozelo.",
   },
-  {
+{
     name: "Panturrilha em Pé",
     slug: "panturrilha-pe",
     muscleGroup: "Panturrilhas",
@@ -451,7 +443,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar impulso; não descer o suficiente; rapidez excessiva; não contrair no topo.",
     tips: "Faça pausa de 1-2 segundos no topo para máxima contração. Alongamento profundo é essencial.",
   },
-  {
+{
     name: "Panturrilha Sentada",
     slug: "panturrilha-sentada",
     muscleGroup: "Panturrilhas",
@@ -468,7 +460,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar impulso; não alongar; rapidez excessiva; usar carga excessiva.",
     tips: "Maior amplitude de movimento é mais importante que carga. Faça pause no topo.",
   },
-  {
+{
     name: "Agachamento Búlgaro",
     slug: "agachamento-bulgaro",
     muscleGroup: "Pernas",
@@ -485,7 +477,7 @@ export const exercisesData: ExerciseData[] = [
       "Joelho da frente passa do pé; tronco inclinado; pé traseiro muito perto; não descer o suficiente.",
     tips: "Mantenha o tronco ereto. Quanto mais longe o pé da frente, mais glúteo; quanto mais perto, mais quadríceps.",
   },
-  {
+{
     name: "Hack Machine",
     slug: "hack-machine",
     muscleGroup: "Pernas",
@@ -502,7 +494,7 @@ export const exercisesData: ExerciseData[] = [
       "Descer rápido; joelhos para dentro; tirar a lombar do apoio; subir os calcanhares.",
     tips: "Pés baixos e juntos = mais quadríceps. Use cargas moderadas para focar no músculo.",
   },
-  {
+{
     name: "Agachamento Livre no Smith",
     slug: "agachamento-smith",
     muscleGroup: "Pernas",
@@ -519,7 +511,7 @@ export const exercisesData: ExerciseData[] = [
       "Pés muito à frente (vira panturrilha); joelhos para dentro; não descer o suficiente.",
     tips: "Posicione os pés à frente para proteger joelhos e focar mais em glúteos.",
   },
-  {
+{
     name: "Cadeira Abdutora",
     slug: "cadeira-abdutora",
     muscleGroup: "Glúteos",
@@ -536,7 +528,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar impulso; jogar o corpo para trás; rapidez excessiva; não contrair no final.",
     tips: "Incline o tronco levemente à frente para mais ativação do glúteo médio.",
   },
-  {
+{
     name: "Cadeira Adutora",
     slug: "cadeira-adutora",
     muscleGroup: "Pernas",
@@ -553,7 +545,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar impulso; não contrair; rapidez excessiva; jogar o corpo.",
     tips: "Mantenha o tronco firme. Concentre-se na contração da parte interna das coxas.",
   },
-  {
+{
     name: "Elevação Pélvica (Hip Thrust)",
     slug: "elevacao-pelvica-hip-thrust",
     muscleGroup: "Glúteos",
@@ -570,7 +562,7 @@ export const exercisesData: ExerciseData[] = [
       "Arquear a lombar no topo; usar as pernas em vez dos glúteos; não subir o suficiente; soltar rápido.",
     tips: "Use uma almofada na barra para conforto. Contraia os glúteos com força no topo.",
   },
-  {
+{
     name: "Glúteo no Cabo (Coice)",
     slug: "gluteo-cabo-coice",
     muscleGroup: "Glúteos",
@@ -587,9 +579,7 @@ export const exercisesData: ExerciseData[] = [
       "Arquear a lombar; usar o movimento das costas; não contrair o glúteo; balançar a perna.",
     tips: "Mantenha o core firme e o movimento isolado no quadril. Pequena pausa no topo.",
   },
-
-  // ===== OMBROS =====
-  {
+{
     name: "Desenvolvimento Militar com Barra",
     slug: "desenvolvimento-militar-barra",
     muscleGroup: "Ombros",
@@ -606,7 +596,7 @@ export const exercisesData: ExerciseData[] = [
       "Arredondar as costas; jogar a barra para cima; não estender totalmente; usar impulso das pernas.",
     tips: "Use cinto se for carga máxima. Mantenha os glúteos contraídos para estabilizar.",
   },
-  {
+{
     name: "Desenvolvimento com Halteres",
     slug: "desenvolvimento-halteres",
     muscleGroup: "Ombros",
@@ -623,7 +613,7 @@ export const exercisesData: ExerciseData[] = [
       "Arquear a lombar; não descer o suficiente; bater os halteres; usar impulso.",
     tips: "Faça o movimento sentado para proteger a lombar. Use banco com encosto.",
   },
-  {
+{
     name: "Elevação Lateral com Halteres",
     slug: "elevacao-lateral-halteres",
     muscleGroup: "Ombros",
@@ -640,7 +630,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar impulso; subir acima dos ombros; balançar o corpo; girar os pulsos.",
     tips: "Imagine que está jogando água para os lados. Pequena inclinação do tronco ajuda a isolar.",
   },
-  {
+{
     name: "Elevação Frontal com Halteres",
     slug: "elevacao-frontal-halteres",
     muscleGroup: "Ombros",
@@ -657,7 +647,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar impulso; balançar o corpo; subir acima dos ombros; cotovelos muito flexionados.",
     tips: "Use carga moderada e foque no movimento isolado do deltoide anterior.",
   },
-  {
+{
     name: "Crucifixo Inverso (Peck Reverse)",
     slug: "crucifixo-inverso-peck-reverse",
     muscleGroup: "Ombros",
@@ -674,7 +664,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar muito peso; jogar o corpo; não contrair; rapidez excessiva.",
     tips: "Concentre-se em juntar as escápulas. Use carga moderada para isolamento.",
   },
-  {
+{
     name: "Encolhimento com Halteres",
     slug: "encolhimento-halteres",
     muscleGroup: "Ombros",
@@ -691,9 +681,7 @@ export const exercisesData: ExerciseData[] = [
       "Girar os ombros (lesão); usar impulso; não segurar no topo; usar cargas excessivas.",
     tips: "Não gire os ombros - movimento reto para cima e para baixo. Concentre-se na contração.",
   },
-
-  // ===== TRÍCEPS =====
-  {
+{
     name: "Tríceps Pulley",
     slug: "triceps-pulley",
     muscleGroup: "Tríceps",
@@ -710,7 +698,7 @@ export const exercisesData: ExerciseData[] = [
       "Afastar os cotovelos; usar os ombros; jogar o corpo para frente; não estender totalmente.",
     tips: "Mantenha os cotovelos fixos ao corpo. O movimento vem apenas do cotovelo.",
   },
-  {
+{
     name: "Tríceps Corda",
     slug: "triceps-corda",
     muscleGroup: "Tríceps",
@@ -727,7 +715,7 @@ export const exercisesData: ExerciseData[] = [
       "Não separar as mãos no final; afastar cotovelos; usar impulso; jogar o corpo.",
     tips: "A separação das mãos no final ativa a porção lateral do tríceps. Segure 1 segundo.",
   },
-  {
+{
     name: "Tríceps Francês",
     slug: "triceps-frances",
     muscleGroup: "Tríceps",
@@ -744,7 +732,7 @@ export const exercisesData: ExerciseData[] = [
       "Afastar os cotovelos; arquear a lombar; usar barra reta (lesão no pulso); jogar a barra na testa.",
     tips: "Use barra W para proteger os pulsos. Mantenha os cotovelos apontados para o teto.",
   },
-  {
+{
     name: "Tríceps Banco",
     slug: "triceps-banco",
     muscleGroup: "Tríceps",
@@ -761,7 +749,7 @@ export const exercisesData: ExerciseData[] = [
       "Descer rápido; afastar os cotovelos; não descer o suficiente; jogar os ombros.",
     tips: "Mantenha os cotovelos apontados para trás. Para dificultar, eleve os pés em outro banco.",
   },
-  {
+{
     name: "Mergulho entre Bancos",
     slug: "mergulho-bancos",
     muscleGroup: "Tríceps",
@@ -778,9 +766,7 @@ export const exercisesData: ExerciseData[] = [
       "Descer rápido; afastar cotovelos; não descer o suficiente; jogar os ombros.",
     tips: "Mantenha os cotovelos para trás. Adicione peso apenas quando dominar a técnica.",
   },
-
-  // ===== BÍCEPS =====
-  {
+{
     name: "Rosca Direta com Barra",
     slug: "rosca-direta-barra",
     muscleGroup: "Bíceps",
@@ -797,7 +783,7 @@ export const exercisesData: ExerciseData[] = [
       "Jogar o corpo para trás; afastar os cotovelos; descer rápido demais; não estender totalmente.",
     tips: "Mantenha os cotovelos fixos. Encoste as costas na parede para evitar impulso.",
   },
-  {
+{
     name: "Rosca Direta com Halteres",
     slug: "rosca-direta-halteres",
     muscleGroup: "Bíceps",
@@ -814,7 +800,7 @@ export const exercisesData: ExerciseData[] = [
       "Jogar o corpo; afastar cotovelos; girar os pulsos; descer rápido.",
     tips: "Mantenha os pulsos retos e firmes. Varie alternando os braços para mais foco.",
   },
-  {
+{
     name: "Rosca Alternada",
     slug: "rosca-alternada",
     muscleGroup: "Bíceps",
@@ -831,7 +817,7 @@ export const exercisesData: ExerciseData[] = [
       "Jogar o corpo; não supinar; afastar cotovelos; rapidez excessiva.",
     tips: "A supinação ativa mais o bíceps. Faça o movimento lentamente e com controle.",
   },
-  {
+{
     name: "Rosca Martelo",
     slug: "rosca-martelo",
     muscleGroup: "Bíceps",
@@ -848,7 +834,7 @@ export const exercisesData: ExerciseData[] = [
       "Jogar o corpo; afastar cotovelos; girar os pulsos; descer rápido.",
     tips: "Mantenha os pulsos firmes em pegada neutra. Pode ser feito alternado ou simultâneo.",
   },
-  {
+{
     name: "Rosca Scott",
     slug: "rosca-scott",
     muscleGroup: "Bíceps",
@@ -865,7 +851,7 @@ export const exercisesData: ExerciseData[] = [
       "Soltar rápido; não estender totalmente; jogar o corpo; usar peso excessivo.",
     tips: "Use carga moderada e foque no movimento controlado. Excelente para finalização.",
   },
-  {
+{
     name: "Rosca Concentrada",
     slug: "rosca-concentrada",
     muscleGroup: "Bíceps",
@@ -882,9 +868,7 @@ export const exercisesData: ExerciseData[] = [
       "Jogar o braço; usar impulso do corpo; não apoiar o cotovelo; rapidez excessiva.",
     tips: "Use carga moderada e foque na contração. Excelente para finalização do treino.",
   },
-
-  // ===== ABDÔMEN =====
-  {
+{
     name: "Prancha (Plank)",
     slug: "prancha-plank",
     muscleGroup: "Abdômen",
@@ -901,7 +885,7 @@ export const exercisesData: ExerciseData[] = [
       "Subir o quadril; deixar cair o quadril; arquear a lombar; esquecer de respirar.",
     tips: "Mantenha o core firme e respire normalmente. Comece com 30 segundos e aumente gradualmente.",
   },
-  {
+{
     name: "Abdominal Supra",
     slug: "abdominal-supra",
     muscleGroup: "Abdômen",
@@ -918,7 +902,7 @@ export const exercisesData: ExerciseData[] = [
       "Puxar a cabeça com as mãos; usar impulso; não contrair o abdômen; subir totalmente.",
     tips: "Mantenha o queixo afastado do peito. Foque em contrair o abdômen, não em subir alto.",
   },
-  {
+{
     name: "Infra na Banca",
     slug: "infra-banca",
     muscleGroup: "Abdômen",
@@ -935,7 +919,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar impulso; jogar as pernas; arquear a lombar; rapidez excessiva.",
     tips: "Mantenha as pernas levemente flexionadas. Foque na contração do abdômen inferior.",
   },
-  {
+{
     name: "Prancha Lateral",
     slug: "prancha-lateral",
     muscleGroup: "Abdômen",
@@ -952,7 +936,7 @@ export const exercisesData: ExerciseData[] = [
       "Deixar o quadril cair; rodar o corpo; não alinhar; esquecer de respirar.",
     tips: "Mantenha o quadril elevado e alinhado. Comece com 20 segundos e aumente gradualmente.",
   },
-  {
+{
     name: "Abdominal Bicicleta",
     slug: "abdominal-bicicleta",
     muscleGroup: "Abdômen",
@@ -969,7 +953,7 @@ export const exercisesData: ExerciseData[] = [
       "Puxar a cabeça; rapidez excessiva; não contrair; usar impulso.",
     tips: "Faça o movimento de forma controlada. Concentre-se na contração dos oblíquos.",
   },
-  {
+{
     name: "Hanging Leg Raise",
     slug: "hanging-leg-raise",
     muscleGroup: "Abdômen",
@@ -986,9 +970,7 @@ export const exercisesData: ExerciseData[] = [
       "Balançar o corpo; usar impulso; descer rápido; arquear a lombar.",
     tips: "Para iniciantes, faça com joelhos flexionados. Mantenha o core firme para evitar balanço.",
   },
-
-  // ===== TRAPÉZIO =====
-  {
+{
     name: "Encolhimento com Barra",
     slug: "encolhimento-barra",
     muscleGroup: "Trapézio",
@@ -1005,7 +987,7 @@ export const exercisesData: ExerciseData[] = [
       "Girar os ombros (lesão); usar impulso; não segurar no topo; cargas excessivas.",
     tips: "Movimento reto para cima e para baixo. Não gire os ombros para evitar lesões.",
   },
-  {
+{
     name: "Remada Alta com Barra",
     slug: "remada-alta-barra",
     muscleGroup: "Trapézio",
@@ -1022,9 +1004,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar impulso; subir acima do queixo; jogar o corpo; pegada muito aberta.",
     tips: "Use pegada na largura dos ombros. Não suba acima do queixo para proteger os ombros.",
   },
-
-  // ===== ANTEBRAÇO =====
-  {
+{
     name: "Punho com Barra",
     slug: "punho-barra",
     muscleGroup: "Antebraço",
@@ -1041,7 +1021,7 @@ export const exercisesData: ExerciseData[] = [
       "Levantar o antebraço; usar impulso; rapidez excessiva; não contrair.",
     tips: "Use carga moderada e faça o movimento completo. Excelente para força de pegada.",
   },
-  {
+{
     name: "Punho Invertido",
     slug: "punho-invertido",
     muscleGroup: "Antebraço",
@@ -1058,9 +1038,7 @@ export const exercisesData: ExerciseData[] = [
       "Levantar o antebraço; usar impulso; rapidez excessiva; não contrair.",
     tips: "Use carga leve. Os extensores são mais fracos que os flexores.",
   },
-
-  // ===== EXERCÍCIOS COMPLEMENTARES =====
-  {
+{
     name: "Hip Thrust com Barra",
     slug: "hip-thrust-barra",
     muscleGroup: "Glúteos",
@@ -1077,7 +1055,7 @@ export const exercisesData: ExerciseData[] = [
       "Arquear a lombar no topo; usar as pernas em vez dos glúteos; não subir o suficiente; soltar rápido.",
     tips: "Use almofada na barra. Contraia os glúteos com força no topo por 1-2 segundos.",
   },
-  {
+{
     name: "Agachamento Goblet",
     slug: "agachamento-goblet",
     muscleGroup: "Pernas",
@@ -1094,7 +1072,7 @@ export const exercisesData: ExerciseData[] = [
       "Joelhos para dentro; arredondar as costas; não descer o suficiente; inclinar para frente.",
     tips: "Mantenha o halter próximo ao peito e o tronco ereto. Excelente para aprender técnica.",
   },
-  {
+{
     name: "Stiff com Halteres",
     slug: "stiff-halteres",
     muscleGroup: "Pernas",
@@ -1111,7 +1089,7 @@ export const exercisesData: ExerciseData[] = [
       "Arredondar a lombar; flexionar muito os joelhos; afastar os halteres; usar as costas.",
     tips: "Mantenha os halteres rente às pernas. O movimento vem do quadril.",
   },
-  {
+{
     name: "Avanço (Step-up)",
     slug: "avanco-step-up",
     muscleGroup: "Pernas",
@@ -1128,7 +1106,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar impulso do pé de trás; descer rápido; joelho para dentro; não subir totalmente.",
     tips: "Use altura de banco que permita joelho a 90° no início. Foque em usar a perna do banco.",
   },
-  {
+{
     name: "Sumo Squat com Halter",
     slug: "sumo-squat-halter",
     muscleGroup: "Pernas",
@@ -1145,7 +1123,7 @@ export const exercisesData: ExerciseData[] = [
       "Joelhos para dentro; não descer o suficiente; inclinar o tronco; pontas dos pés para frente.",
     tips: "Mantenha o tronco ereto e joelhos alinhados com as pontas dos pés.",
   },
-  {
+{
     name: "Good Morning",
     slug: "good-morning",
     muscleGroup: "Pernas",
@@ -1162,7 +1140,7 @@ export const exercisesData: ExerciseData[] = [
       "Arredondar a lombar; flexionar muito os joelhos; usar carga excessiva; jogar o corpo.",
     tips: "Comece com carga leve para dominar a técnica. Mantenha a coluna neutra.",
   },
-  {
+{
     name: "Cadeira Adutora no Cabo",
     slug: "cadeira-adutora-cabo",
     muscleGroup: "Pernas",
@@ -1179,7 +1157,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar impulso; jogar o corpo; não contrair; rapidez excessiva.",
     tips: "Use carga moderada. Foque na contração da parte interna da coxa.",
   },
-  {
+{
     name: "Wall Ball (Remada Face Pull com Kettlebell)",
     slug: "remada-kettlebell",
     muscleGroup: "Costas",
@@ -1196,7 +1174,7 @@ export const exercisesData: ExerciseData[] = [
       "Girar o tronco; balançar o corpo; não contrair; usar impulso.",
     tips: "Mantenha o core firme e o quadril estável. Use carga moderada.",
   },
-  {
+{
     name: "Kettlebell Swing",
     slug: "kettlebell-swing",
     muscleGroup: "Glúteos",
@@ -1213,8 +1191,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar os braços; arredondar a lombar; não usar o quadril; carga excessiva.",
     tips: "O movimento vem do quadril, não dos braços. Mantenha o core firme e coluna neutra.",
   },
-  // ===== EXERCÍCIOS ADICIONAIS (31) PARA COMPLETAR 100 =====
-  {
+{
     name: "Supino Declinado com Barra",
     slug: "supino-declinado-barra",
     muscleGroup: "Peito",
@@ -1231,7 +1208,7 @@ export const exercisesData: ExerciseData[] = [
       "Quicar a barra no peito; soltar a barra; não usar os pés como apoio; cotovelos muito abertos.",
     tips: "Use um banco com ângulo de 15 a 30 graus de declínio. Sempre peça ajuda ao segurar/liberar a barra.",
   },
-  {
+{
     name: "Crucifixo Inclinado com Halteres",
     slug: "crucifixo-inclinado-halteres",
     muscleGroup: "Peito",
@@ -1248,7 +1225,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar muito peso; transformar em supino (flexionar cotovelos demais); descer rápido.",
     tips: "Use carga moderada. Foque no alongamento e contração do peito superior.",
   },
-  {
+{
     name: "Peck Deck (Máquina)",
     slug: "peck-deck",
     muscleGroup: "Peito",
@@ -1265,7 +1242,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar muito peso; jogar o tronco; não controlar a volta; cotovelos muito baixos.",
     tips: "Use como finalizador. Foque na contração e no squeeze no meio do movimento.",
   },
-  {
+{
     name: "Elevação Lateral na Polia",
     slug: "elevacao-lateral-polia",
     muscleGroup: "Ombros",
@@ -1282,7 +1259,7 @@ export const exercisesData: ExerciseData[] = [
       "Elevar acima do ombro; usar trapézio (encolher); balançar o corpo; usar muito peso.",
     tips: "Mantenha o core firme e o corpo estável. A tensão constante da polia é o grande diferencial.",
   },
-  {
+{
     name: "Desenvolvimento Arnold",
     slug: "desenvolvimento-arnold",
     muscleGroup: "Ombros",
@@ -1299,7 +1276,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar muito peso; não fazer a rotação completa; arquear a lombar; pressa no movimento.",
     tips: "Use carga moderada. A rotação é o que torna o exercício único - não pule essa parte.",
   },
-  {
+{
     name: "Remada Unilateral com Halter",
     slug: "remada-unilateral-halter",
     muscleGroup: "Costas",
@@ -1316,7 +1293,7 @@ export const exercisesData: ExerciseData[] = [
       "Girar o tronco; puxar com o bíceps; não contrair as costas; usar impulso.",
     tips: "Imagine puxar o halter com o cotovelo, não com a mão. Isso ativa mais as costas.",
   },
-  {
+{
     name: "Pulldown com Pulley",
     slug: "pulldown-pulley",
     muscleGroup: "Costas",
@@ -1333,7 +1310,7 @@ export const exercisesData: ExerciseData[] = [
       "Balançar o corpo; puxar com os braços; não contrair; usar muito peso.",
     tips: "Sinta as costas trabalhando. Jogue o peito fora ao puxar para melhor contração.",
   },
-  {
+{
     name: "Levantamento Terra Sumô",
     slug: "levantamento-terra-sumo",
     muscleGroup: "Pernas",
@@ -1350,7 +1327,7 @@ export const exercisesData: ExerciseData[] = [
       "Arredondar a lombar; joelhos para dentro; barra longe do corpo; falta de mobilidade.",
     tips: "Excelente para quem tem pouca mobilidade no terra convencional. Use calçados baixos.",
   },
-  {
+{
     name: "Agachamento Frontal",
     slug: "agachamento-frontal",
     muscleGroup: "Pernas",
@@ -1367,7 +1344,7 @@ export const exercisesData: ExerciseData[] = [
       "Cotovelos caídos; inclinar o tronco para frente; joelhos para dentro; descer rápido.",
     tips: "Mantenha os cotovelos altos durante todo o movimento. Core firme é essencial.",
   },
-  {
+{
     name: "Cadeira Extensora Unilateral",
     slug: "cadeira-extensora-unilateral",
     muscleGroup: "Pernas",
@@ -1384,7 +1361,7 @@ export const exercisesData: ExerciseData[] = [
       "Quicar no topo; usar impulso; não contrair; descer rápido demais.",
     tips: "Use carga menor do que bilateral. Foque na contração e no squeeze.",
   },
-  {
+{
     name: "Leg Press 90° (Vertical)",
     slug: "leg-press-90",
     muscleGroup: "Pernas",
@@ -1401,7 +1378,7 @@ export const exercisesData: ExerciseData[] = [
       "Colar os joelhos no peito; empurrar com as costas; não controlar a descida; joelhos para dentro.",
     tips: "Não destrave totalmente os joelhos no topo. Mantenha tensão constante.",
   },
-  {
+{
     name: "Panturrilha no Leg Press",
     slug: "panturrilha-leg-press",
     muscleGroup: "Panturrilhas",
@@ -1418,7 +1395,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar muito peso; não fazer amplitude completa; joelhos travados; quicar.",
     tips: "Faça amplitude completa. Segure 1 segundo no topo para melhor contração.",
   },
-  {
+{
     name: "Elevação Pélvica Unilateral",
     slug: "elevacao-pelvica-unilateral",
     muscleGroup: "Glúteos",
@@ -1435,7 +1412,7 @@ export const exercisesData: ExerciseData[] = [
       "Arquear a lombar; não contrair o glúteo; usar os posteriores demais; subir rápido.",
     tips: "Use a mão no glúteo para sentir a contração. Carga adicional opcional no quadril.",
   },
-  {
+{
     name: "Coice de Glúteo no Solo",
     slug: "coice-gluteo-solo",
     muscleGroup: "Glúteos",
@@ -1452,7 +1429,7 @@ export const exercisesData: ExerciseData[] = [
       "Arquear a lombar; girar o quadril; usar impulso; não contrair o glúteo.",
     tips: "Adicione caneleira para dificultar. Foque na contração no topo do movimento.",
   },
-  {
+{
     name: "Tríceps Testa com Halteres",
     slug: "triceps-testa-halteres",
     muscleGroup: "Tríceps",
@@ -1469,7 +1446,7 @@ export const exercisesData: ExerciseData[] = [
       "Abrir os cotovelos; deixar os halteres caírem longe da testa; arquear lombar.",
     tips: "Use carga moderada. Cotovelos fixos apontados para o teto durante todo o movimento.",
   },
-  {
+{
     name: "Tríceps Coice",
     slug: "triceps-coice",
     muscleGroup: "Tríceps",
@@ -1486,7 +1463,7 @@ export const exercisesData: ExerciseData[] = [
       "Mover os cotovelos; usar os ombros; balançar o corpo; usar muito peso.",
     tips: "Pegada supinada é mais fraca que pronada - use menos carga. Foque na contração.",
   },
-  {
+{
     name: "Rosca 21",
     slug: "rosca-21",
     muscleGroup: "Bíceps",
@@ -1503,7 +1480,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar impulso; não respeitar as metades; balançar o corpo; usar muito peso.",
     tips: "Use carga menor que a rosca direta normal. O burn vai ser intenso - aguenta!",
   },
-  {
+{
     name: "Rosca Direta na Polia",
     slug: "rosca-direta-polia",
     muscleGroup: "Bíceps",
@@ -1520,7 +1497,7 @@ export const exercisesData: ExerciseData[] = [
       "Mover os cotovelos para frente; balançar o corpo; usar impulso; descer rápido.",
     tips: "A tensão constante da polia é o grande diferencial. Foque na contração no topo.",
   },
-  {
+{
     name: "Rosca Punho na Polia",
     slug: "rosca-punho-polia",
     muscleGroup: "Antebraço",
@@ -1537,7 +1514,7 @@ export const exercisesData: ExerciseData[] = [
       "Levantar os antebraços; usar muito peso; não fazer amplitude completa; pressa.",
     tips: "Use carga leve. O movimento é pequeno - foque na contração dos flexores.",
   },
-  {
+{
     name: "Abdominal na Polia (Crunch)",
     slug: "abdominal-polia",
     muscleGroup: "Abdômen",
@@ -1554,7 +1531,7 @@ export const exercisesData: ExerciseData[] = [
       "Usar os braços; balançar o corpo; não contrair o abdômen; usar quadril.",
     tips: "Use carga moderada. O movimento é pequeno, foque na contração do abdômen.",
   },
-  {
+{
     name: "Abdominal Infra na Barra",
     slug: "abdominal-infra-barra",
     muscleGroup: "Abdômen",
@@ -1571,7 +1548,7 @@ export const exercisesData: ExerciseData[] = [
       "Balançar o corpo; usar impulso; flexionar joelhos; não fazer amplitude completa.",
     tips: "Se for muito difícil, comece elevando até 90 graus. Evite balançar usando o core.",
   },
-  {
+{
     name: "Hollow Body (Corpo Oco)",
     slug: "hollow-body",
     muscleGroup: "Abdômen",
@@ -1588,7 +1565,7 @@ export const exercisesData: ExerciseData[] = [
       "Arquear a lombar; elevar demais as pernas; não contrair o abdômen; soltar o core.",
     tips: "Se a lombar descolar do chão, eleve mais as pernas. Foque na contração.",
   },
-  {
+{
     name: "Russian Twist",
     slug: "russian-twist",
     muscleGroup: "Abdômen",
@@ -1605,7 +1582,7 @@ export const exercisesData: ExerciseData[] = [
       "Mover apenas os braços; arquear a lombar; usar muito peso; pressa no movimento.",
     tips: "Use peso adicional para dificultar. Movimento controlado, foque nos oblíquos.",
   },
-  {
+{
     name: "Remada Cavalinho (T-Bar)",
     slug: "remada-t-bar",
     muscleGroup: "Costas",
@@ -1622,7 +1599,7 @@ export const exercisesData: ExerciseData[] = [
       "Arredondar a lombar; usar impulso; não contrair; balançar o corpo.",
     tips: "Use cinto de halterofilismo para cargas elevadas. Foque na contração no topo.",
   },
-  {
+{
     name: "Levantamento Terra Romeno com Barra",
     slug: "terra-romeno-barra",
     muscleGroup: "Posteriores",
@@ -1639,7 +1616,7 @@ export const exercisesData: ExerciseData[] = [
       "Arredondar a lombar; flexionar demais os joelhos; barra longe do corpo; usar impulso.",
     tips: "A barra deve descer rente às pernas. Foque no alongamento dos posteriores.",
   },
-  {
+{
     name: "Cadeira Flexora Deitada",
     slug: "cadeira-flexora-deitada",
     muscleGroup: "Posteriores",
@@ -1656,7 +1633,7 @@ export const exercisesData: ExerciseData[] = [
       "Quicar; usar impulso; levantar o quadril; não contrair; descer rápido.",
     tips: "Mantenha o quadril colado no banco. Faça pausa de 1 segundo no topo.",
   },
-  {
+{
     name: "Good Morning com Halteres",
     slug: "good-morning-halteres",
     muscleGroup: "Posteriores",
@@ -1673,7 +1650,7 @@ export const exercisesData: ExerciseData[] = [
       "Arredondar a lombar; flexionar demais os joelhos; usar muito peso; descer rápido.",
     tips: "Use carga moderada. Foque em manter as costas retas durante todo o movimento.",
   },
-  {
+{
     name: "Agachamento Pulsatório",
     slug: "agachamento-pulsatorio",
     muscleGroup: "Pernas",
@@ -1690,7 +1667,7 @@ export const exercisesData: ExerciseData[] = [
       "Subir demais; joelhos para dentro; inclinar o tronco; não contrair.",
     tips: "Use como finalizador. O burn vai ser intenso - mantenha a posição.",
   },
-  {
+{
     name: "Jump Squat (Agachamento com Salto)",
     slug: "jump-squat",
     muscleGroup: "Pernas",
@@ -1707,7 +1684,7 @@ export const exercisesData: ExerciseData[] = [
       "Aterrissar duro; joelhos para dentro; não amortecer; usar amplitude curta.",
     tips: "Use tênis adequado. Aterre suavemente para proteger joelhos e coluna.",
   },
-  {
+{
     name: "Burpee",
     slug: "burpee",
     muscleGroup: "Full Body",
@@ -1724,7 +1701,7 @@ export const exercisesData: ExerciseData[] = [
       "Pular a flexão; joelhos para dentro; não amortecer o salto; fazer rápido demais.",
     tips: "Ajuste o ritmo conforme seu condicionamento. Foque na técnica antes da velocidade.",
   },
-  {
+{
     name: "Mountain Climber",
     slug: "mountain-climber",
     muscleGroup: "Abdômen",
@@ -1741,7 +1718,7 @@ export const exercisesData: ExerciseData[] = [
       "Elevar o quadril; jogar o quadril para cima; arredondar as costas; pressa sem controle.",
     tips: "Mantenha o quadril baixo e estável. Comece devagar e acelere conforme ganha técnica.",
   },
-  {
+{
     name: "Flexão Diamante",
     slug: "flexao-diamante",
     muscleGroup: "Tríceps",
@@ -1758,7 +1735,7 @@ export const exercisesData: ExerciseData[] = [
       "Elevar o quadril; não descer o suficiente; cotovelos muito abertos; usar impulso.",
     tips: "Se for muito difícil, faça com os joelhos no chão. Foque em manter o diamante.",
   },
-  {
+{
     name: "Flexão Arqueira",
     slug: "flexao-arqueira",
     muscleGroup: "Peito",
@@ -1774,6 +1751,1254 @@ export const exercisesData: ExerciseData[] = [
     commonMistakes:
       "Quadril caído; não estender totalmente o braço; usar impulso; falta de mobilidade.",
     tips: "Exige bastante força e mobilidade. Comece com amplitude menor e vá aumentando.",
+  },
+{
+    name: "Supino Declinado com Halteres",
+    slug: "supino-declinado-halteres",
+    muscleGroup: "Peito",
+    secondaryMuscles: "Tríceps, Deltoide Anterior",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Intermediário",
+    description:
+      "Variação do supino no banco declinado que enfatiza a porção inferior (esternocostal) do peitoral maior.",
+    executionSteps:
+      "1. Ajuste o banco em declínio de 15 a 30 graus.\n2. Segure os halteres e deite-se, posicionando-os acima do peito.\n3. Desça os halteres em arco controlado até a altura do peito inferior.\n4. Empurre de volta à posição inicial contraindo o peito.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Descer rápido demais; arquear a lombar; não controlar a simetria; cotovelos muito abertos.",
+    tips: "Use um banco com suporte para os pés para evitar deslizar. Cuidado ao levantar os halteres do chão.",
+  },
+{
+    name: "Crossover com Polia Baixa",
+    slug: "crossover-baixa",
+    muscleGroup: "Peito",
+    secondaryMuscles: "Deltoide Anterior, Bíceps",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Intermediário",
+    description:
+      "Variação do crossover realizada a partir de polias baixas, com maior ênfase na porção superior do peitoral.",
+    executionSteps:
+      "1. Posicione as polias na altura mais baixa.\n2. Segure as alças e posicione-se no centro.\n3. Em movimento ascendente, cruze as mãos à frente do rosto.\n4. Retorne controladamente à posição inicial.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Usar muito peso; jogar o corpo para frente; não contrair o peito no ápice; descer rápido.",
+    tips: "Incline levemente o tronco à frente para melhor ativação do peitoral superior.",
+  },
+{
+    name: "Crucifixo Declinado com Halteres",
+    slug: "crucifixo-declinado-halteres",
+    muscleGroup: "Peito",
+    secondaryMuscles: "Tríceps",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Intermediário",
+    description:
+      "Variação do crucifixo em banco declinado com foco na porção inferior do peitoral.",
+    executionSteps:
+      "1. Ajuste o banco em declínio de 15 a 30 graus.\n2. Deite-se com halteres acima do peito inferior.\n3. Abra os braços em arco até alongar o peito.\n4. Retorne contraindo a porção inferior do peito.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Descer rápido demais; não controlar a descida; cotovelos muito abertos.",
+    tips: "Use peso moderado. A focagem no peito inferior é o que torna o exercício eficiente.",
+  },
+{
+    name: "Flexão Inclinada",
+    slug: "flexao-inclinada",
+    muscleGroup: "Peito",
+    secondaryMuscles: "Tríceps, Deltoide Anterior",
+    equipment: "Peso do corpo",
+    category: "Força",
+    equipmentType: "Peso do corpo",
+    level: "Iniciante",
+    description:
+      "Variação mais fácil da flexão, com mãos elevadas. Foco na porção inferior do peito.",
+    executionSteps:
+      "1. Apoie as mãos em um banco, cadeira ou superfície elevada.\n2. Posicione o corpo em prancha inclinada.\n3. Desça o peito em direção ao apoio.\n4. Empurre de volta.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Quadril caído; não descer o suficiente; cotovelos abertos.",
+    tips: "Ideal para iniciantes ou como finalizador de treino.",
+  },
+{
+    name: "Flexão Declinada",
+    slug: "flexao-declinada",
+    muscleGroup: "Peito",
+    secondaryMuscles: "Tríceps, Deltoide Anterior",
+    equipment: "Peso do corpo",
+    category: "Força",
+    equipmentType: "Peso do corpo",
+    level: "Intermediário",
+    description:
+      "Variação mais difícil da flexão, com pés elevados. Foco na porção superior do peito e ombros.",
+    executionSteps:
+      "1. Apoie os pés em um banco ou superfície elevada.\n2. Mãos no chão, um pouco mais abertas que os ombros.\n3. Desça o peito em direção ao chão.\n4. Empurre de volta.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Quadril caído; cotovelos abertos; não descer o suficiente.",
+    tips: "Quanto mais alta a superfície dos pés, maior a dificuldade e o foco no ombro.",
+  },
+{
+    name: "Paralelas (Bulgaro)",
+    slug: "paralelas",
+    muscleGroup: "Peito",
+    secondaryMuscles: "Tríceps, Deltoide Anterior",
+    equipment: "Peso do corpo",
+    category: "Força",
+    equipmentType: "Peso do corpo",
+    level: "Intermediário",
+    description:
+      "Exercício em barras paralelas excelente para peito e tríceps. Inclinar o tronco à frente enfatiza o peito.",
+    executionSteps:
+      "1. Suba nas barras paralelas apoiando o peso nos braços estendidos.\n2. Incline levemente o tronco à frente (para foco no peito).\n3. Desça flexionando cotovelos até sentir alongamento no peito.\n4. Empurre de volta à posição inicial.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Não descer o suficiente; balançar o corpo; cotovelos para fora; encolher ombros.",
+    tips: "Para tríceps, mantenha tronco ereto. Para peito, incline o tronco à frente.",
+  },
+{
+    name: "Press de Peito na Máquina",
+    slug: "press-peito-maquina",
+    muscleGroup: "Peito",
+    secondaryMuscles: "Tríceps, Deltoide Anterior",
+    equipment: "Máquina",
+    category: "Hipertrofia",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Exercício guiado em máquina que simula o supino reto. Excelente para iniciantes e finalização.",
+    executionSteps:
+      "1. Ajuste o assento para que as alças fiquem na altura do peito.\n2. Sentado, costas apoiadas, segure as alças.\n3. Empurre as alças para frente contraindo o peito.\n4. Retorne controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Não ajustar a altura; não apoiar bem as costas; usar impulso.",
+    tips: "Útil para iniciantes aprenderem o padrão de movimento e para finalização com burnout.",
+  },
+{
+    name: "Peck Deck (Máquina)",
+    slug: "peck-deck-maquina",
+    muscleGroup: "Peito",
+    secondaryMuscles: "Deltoide Anterior",
+    equipment: "Máquina",
+    category: "Hipertrofia",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Máquina específica para isolamento do peitoral, simulando o movimento do crucifixo com trajetória guiada.",
+    executionSteps:
+      "1. Ajuste o assento para que os cotovelos fiquem na altura do peito.\n2. Apoie os antebraços nas almofadas.\n4. Junte as almofadas à frente do peito contraindo.\n4. Retorne controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Usar muito peso; não ajustar a altura; jogar o corpo para trás.",
+    tips: "Excelente para finalização de treino. Foque na contração no centro.",
+  },
+{
+    name: "Supino com Halteres no Banco Plano",
+    slug: "supino-halteres-plano",
+    muscleGroup: "Peito",
+    secondaryMuscles: "Tríceps, Deltoide Anterior",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Iniciante",
+    description:
+      "Alternativa ao supino reto com halteres, oferecendo maior amplitude e trabalho estabilizador.",
+    executionSteps:
+      "1. Deite-se em banco plano com halteres acima do peito.\n2. Segure os halteres com pegada firme, cotovelos estendidos.\n3. Desça controladamente até a altura do peito.\n4. Empurre de volta contraindo o peito.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Arquear a lombar; descer rápido; não alinhar os halteres.",
+    tips: "Mantenha as escápulas retraídas. Excelente para hipertrofia e simetria.",
+  },
+{
+    name: "Barra Fixa Supinada (Chin-up)",
+    slug: "barra-fixa-supinada",
+    muscleGroup: "Costas",
+    secondaryMuscles: "Bíceps, Antebraço",
+    equipment: "Barra",
+    category: "Força",
+    equipmentType: "Peso do corpo",
+    level: "Intermediário",
+    description:
+      "Variação da barra fixa com pegada supinada. Maior recrutamento de bíceps, ligeiramente mais fácil para iniciantes.",
+    executionSteps:
+      "1. Pendure-se na barra com pegada supinada (palmas para você) na largura dos ombros.\n2. Ative o core.\n3. Puxe o corpo até o queixo passar a barra.\n4. Desça controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Usar impulso; não estender totalmente os braços; jogar o corpo.",
+    tips: "Excelente para iniciantes em barra fixa. Também trabalha bastante o bíceps.",
+  },
+{
+    name: "Puxada na Polia (Pegada Neutra)",
+    slug: "puxada-neutra",
+    muscleGroup: "Costas",
+    secondaryMuscles: "Bíceps, Antebraço",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Iniciante",
+    description:
+      "Variação da puxada frontal com pegada neutra. Mais confortável para ombros e excelente para iniciantes.",
+    executionSteps:
+      "1. Sente-se na máquina de puxada com pegada neutra (palmas uma para a outra).\n2. Trave as coxas sob o suporte.\n3. Puxe a barra até a altura do peito, contraindo as costas.\n4. Retorne controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Puxar com os braços; jogar o corpo para trás; não controlar a subida.",
+    tips: "Foque em puxar com os cotovelos, não com as mãos. Imagine cotovelos para baixo.",
+  },
+{
+    name: "Puxada na Polia (Pegada Triângulo)",
+    slug: "puxada-triangulo",
+    muscleGroup: "Costas",
+    secondaryMuscles: "Bíceps",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Iniciante",
+    description:
+      "Variação da puxada frontal com pegada triângulo (V-bar), maior foco na porção central das costas.",
+    executionSteps:
+      "1. Sente-se na máquina com pegada no triângulo (pegada neutra fechada).\n2. Trave as coxas.\n3. Puxe o triângulo até o peito superior, contraindo as costas.\n4. Retorne controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Puxar com os braços; jogar o corpo; encolher os ombros.",
+    tips: "Excelente para foco no centro das costas. Foque em juntar as escápulas.",
+  },
+{
+    name: "Remada Curvada com Pegada Supinada",
+    slug: "remada-curvada-supinada",
+    muscleGroup: "Costas",
+    secondaryMuscles: "Bíceps, Antebraço",
+    equipment: "Barra",
+    category: "Hipertrofia",
+    equipmentType: "Livre",
+    level: "Intermediário",
+    description:
+      "Variação da remada curvada com pegada supinada. Maior recrutamento de bíceps e porção inferior das costas.",
+    executionSteps:
+      "1. Em pé, segure a barra com pegada supinada na largura dos ombros.\n2. Incline o tronco à frente (~45°), costas retas.\n3. Puxe a barra até a altura do abdômen inferior.\n4. Retorne controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Arredondar a lombar; usar impulso; puxar com os braços.",
+    tips: "Excelente para combinar costas e bíceps. Mantenha o core firme.",
+  },
+{
+    name: "Remada T-Bar",
+    slug: "remada-tbar",
+    muscleGroup: "Costas",
+    secondaryMuscles: "Bíceps, Antebraço, Posteriores",
+    equipment: "Barra",
+    category: "Hipertrofia",
+    equipmentType: "Livre",
+    level: "Intermediário",
+    description:
+      "Remada com barra T (ou barra comum em suporte), permite carga elevada e foco em espessura das costas.",
+    executionSteps:
+      "1. Posicione-se sobre a barra T, com os pés firmes.\n2. Segure as alças, costas retas, joelhos levemente flexionados.\n3. Puxe as alças até o peito inferior, contraindo as costas.\n4. Retorne controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Arredondar a lombar; usar impulso; encolher os ombros.",
+    tips: "Excelente para hipertrofia. Foque em contrair as escápulas no ápice.",
+  },
+{
+    name: "Remada Serrote",
+    slug: "remada-serrote",
+    muscleGroup: "Costas",
+    secondaryMuscles: "Bíceps, Core, Posteriores",
+    equipment: "Barra",
+    category: "Força",
+    equipmentType: "Livre",
+    level: "Avançado",
+    description:
+      "Variação avançada da remada curvada onde a barra toca o chão a cada repetição. Excelente para força e potência.",
+    executionSteps:
+      "1. Segure a barra com pegada pronada na largura dos ombros.\n2. Incline o tronco à frente (~45°), costas retas.\n3. Puxe a barra até o abdômen inferior.\n4. Desça até a barra tocar o chão.\n5. Repita imediatamente.",
+    commonMistakes: "Arredondar a lombar; usar impulso; não tocar o chão entre reps.",
+    tips: "Excelente para força. Mantenha a postura rígida. Use cinto para cargas elevadas.",
+  },
+{
+    name: "Remada Baixa na Polia com Pegada Neutra",
+    slug: "remada-baixa-neutra",
+    muscleGroup: "Costas",
+    secondaryMuscles: "Bíceps",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Iniciante",
+    description:
+      "Variação da remada baixa com pegada neutra (V-bar). Mais confortável para ombros.",
+    executionSteps:
+      "1. Sente-se no banco da polia baixa, pés apoiados.\n2. Segure o triângulo com pegada neutra.\n3. Puxe até o abdômen, contraindo as costas.\n4. Retorne controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Jogar o corpo para trás; encolher os ombros; puxar com os braços.",
+    tips: "Mantenha o tronco estável. Foque em contrair as escápulas.",
+  },
+{
+    name: "Pullover na Polia Alta",
+    slug: "pullover-polia-alta",
+    muscleGroup: "Costas",
+    secondaryMuscles: "Peito, Serrátil, Tríceps",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Intermediário",
+    description:
+      "Pullover realizado com cabo na polia alta. Foca no latíssimo do dorso com tensão constante.",
+    executionSteps:
+      "1. Posicione-se de pé ou sentado de frente para a polia alta.\n2. Segure a barra ou corda com braços estendidos.\n3. Desça a barra em arco até as coxas, contraindo as costas.\n4. Retorne controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Flexionar cotovelos; usar impulso; não controlar a subida.",
+    tips: "Mantenha cotovelos fixos. Excelente para finalização de costas.",
+  },
+{
+    name: "Pull-down na Polia (Pullover)",
+    slug: "pull-down-polia",
+    muscleGroup: "Costas",
+    secondaryMuscles: "Peito, Serrátil",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Intermediário",
+    description:
+      "Exercício de isolamento para latíssimo do dorso, com cabo na polia alta.",
+    executionSteps:
+      "1. Deite-se em banco sob a polia alta ou fique em pé.\n2. Segure a barra com braços estendidos.\n3. Puxe a barra em arco até as coxas.\n4. Retorne controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Flexionar cotovelos; usar impulso; não controlar a subida.",
+    tips: "Excelente para isolamento do latíssimo. Mantenha cotovelos fixos.",
+  },
+{
+    name: "Levantamento Terra Romeno",
+    slug: "terra-romeno",
+    muscleGroup: "Posteriores",
+    secondaryMuscles: "Glúteos, Costas, Antebraço",
+    equipment: "Barra",
+    category: "Hipertrofia",
+    equipmentType: "Livre",
+    level: "Intermediário",
+    description:
+      "Variação do terra com joelhos mais estendidos, foco em posteriores de coxa e glúteos. Menos carga que o terra convencional.",
+    executionSteps:
+      "1. Em pé, segure a barra com pegada pronada na largura dos ombros.\n2. Joelhos levemente flexionados (fixos).\n3. Incline o quadril para trás, descendo a barra rente às coxas.\n4. Vá até sentir alongamento nos posteriores (geralmente meio da canela).\n5. Retorne contraindo glúteos e posteriores. Repita.",
+    commonMistakes: "Arredondar a lombar; flexionar demais os joelhos; descer rápido demais.",
+    tips: "Mantenha a barra rente ao corpo. Excelente para hipertrofia de posteriores.",
+  },
+{
+    name: "Levantamento Terra Sumô",
+    slug: "terra-sumo",
+    muscleGroup: "Pernas",
+    secondaryMuscles: "Glúteos, Posteriores, Costas, Core",
+    equipment: "Barra",
+    category: "Força",
+    equipmentType: "Livre",
+    level: "Avançado",
+    description:
+      "Variação do terra com pés bem abertos e pontas para fora. Maior recrutamento de adutores e quadríceps.",
+    executionSteps:
+      "1. Pés bem abertos, pontas levemente para fora.\n2. Incline e segure a barra no meio, com braços dentro das pernas.\n3. Costas retas, peito alto.\n4. Estenda quadril e joelhos simultaneamente.\n5. Desça controladamente. Repita.",
+    commonMistakes: "Joelhos para dentro; arredondar a lombar; não abrir os pés o suficiente.",
+    tips: "Excelente para quem tem pouca mobilidade no terra convencional.",
+  },
+{
+    name: "Good Morning com Barra",
+    slug: "good-morning-barra",
+    muscleGroup: "Posteriores",
+    secondaryMuscles: "Glúteos, Lombar, Core",
+    equipment: "Barra",
+    category: "Hipertrofia",
+    equipmentType: "Livre",
+    level: "Intermediário",
+    description:
+      "Exercício clássico para posteriores e lombar. A barra é apoiada no trapézio, como no agachamento.",
+    executionSteps:
+      "1. Barra apoiada no trapézio superior, como no agachamento.\n2. Em pé, pés na largura do quadril.\n3. Incline o tronco à frente, empurrando o quadril para trás.\n4. Vá até o tronco ficar quase paralelo ao chão.\n5. Retorne à posição ereta. Repita.",
+    commonMistakes: "Arredondar a lombar; flexionar joelhos demais; usar muito peso.",
+    tips: "Use peso moderado. Excelente para fortalecer posteriores e lombar.",
+  },
+{
+    name: "Mesa Flexora Sentada",
+    slug: "mesa-flexora-sentada",
+    muscleGroup: "Posteriores",
+    secondaryMuscles: "",
+    equipment: "Máquina",
+    category: "Hipertrofia",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Variação da mesa flexora realizada sentada. Foco maior na porção lateral do posterior (cabeça curta).",
+    executionSteps:
+      "1. Sente-se na máquina, costas apoiadas.\n2. Posicione as pernas sob a almofada.\n3. Flexione os joelhos contraindo os posteriores.\n4. Retorne controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Jogar o corpo para trás; não controlar a subida; usar impulso.",
+    tips: "Excelente para finalização. Combine com a versão deitada para completo desenvolvimento.",
+  },
+{
+    name: "Cadeira Flexora Unilateral",
+    slug: "cadeira-flexora-unilateral",
+    muscleGroup: "Posteriores",
+    secondaryMuscles: "",
+    equipment: "Máquina",
+    category: "Hipertrofia",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Versão unilateral da cadeira flexora, ideal para corrigir assimetrias.",
+    executionSteps:
+      "1. Deite-se na cadeira flexora.\n2. Use apenas uma perna por vez.\n3. Flexione o joelho contraindo o posterior.\n4. Retorne controladamente.\n5. Repita e troque de perna.",
+    commonMistakes: "Usar muito peso; não controlar a subida; jogar o quadril.",
+    tips: "Use peso moderado. Excelente para identificar e corrigir assimetrias.",
+  },
+{
+    name: "Agachamento Hack",
+    slug: "agachamento-hack",
+    muscleGroup: "Pernas",
+    secondaryMuscles: "Glúteos",
+    equipment: "Máquina",
+    category: "Hipertrofia",
+    equipmentType: "Máquina",
+    level: "Intermediário",
+    description:
+      "Agachamento na máquina Hack, com carga guiada. Excelente para isolamento de quadríceps.",
+    executionSteps:
+      "1. Posicione-se na máquina, costas apoiadas, ombros sob as almofadas.\n2. Pés na plataforma, pontas levemente para fora.\n3. Libere a segurança.\n4. Desça flexionando joelhos.\n5. Suba contraindo quadríceps. Repita.",
+    commonMistakes: "Joelhos para dentro; não descer o suficiente; arredondar a lombar.",
+    tips: "Excelente para hipertrofia de quadríceps. Use amplitude completa.",
+  },
+{
+    name: "Avanço (Lunge)",
+    slug: "avanco-lunge",
+    muscleGroup: "Pernas",
+    secondaryMuscles: "Glúteos, Core",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Iniciante",
+    description:
+      "Exercício unilateral dinâmico. Excelente para quadríceps, glúteos e equilíbrio.",
+    executionSteps:
+      "1. Em pé, halteres nas mãos (ou sem peso).\n2. Dê um passo à frente e desça flexionando ambos os joelhos.\n3. O joelho de trás quase toca o chão.\n4. Empurre de volta à posição inicial.\n5. Alterne as pernas. Repita.",
+    commonMistakes: "Joelho da frente passar a ponta do pé; joelhos para dentro; tronco inclinado.",
+    tips: "Mantenha o tronco ereto. Excelente para treino funcional.",
+  },
+{
+    name: "Avanço Lateral",
+    slug: "avanco-lateral",
+    muscleGroup: "Pernas",
+    secondaryMuscles: "Glúteos, Adutores",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Iniciante",
+    description:
+      "Variação do avanço para o lado. Maior foco em adutores e glúteo médio.",
+    executionSteps:
+      "1. Em pé, halteres nas mãos.\n2. Dê um passo largo para o lado.\n3. Flexione o joelho do lado do passo, mantendo a outra perna estendida.\n4. Empurre de volta à posição inicial.\n5. Alterne os lados. Repita.",
+    commonMistakes: "Joelho para dentro; não flexionar o suficiente; inclinar o tronco.",
+    tips: "Mantenha o peito alto. Excelente para desenvolvimento lateral das pernas.",
+  },
+{
+    name: "Avanço Reverse",
+    slug: "avanco-reverse",
+    muscleGroup: "Pernas",
+    secondaryMuscles: "Glúteos",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Iniciante",
+    description:
+      "Variação do avanço com passo para trás. Mais confortável para o joelho e maior foco em glúteos.",
+    executionSteps:
+      "1. Em pé, halteres nas mãos.\n2. Dê um passo atrás e desça flexionando ambos os joelhos.\n3. O joelho de trás quase toca o chão.\n4. Empurre de volta à posição inicial.\n5. Alterne as pernas. Repita.",
+    commonMistakes: "Passo muito curto; joelho da frente passar a ponta do pé; inclinar o tronco.",
+    tips: "Excelente para glúteos. Menos impacto no joelho que o lunge tradicional.",
+  },
+{
+    name: "Panturrilha em Pé Unilateral",
+    slug: "panturrilha-pe-unilateral",
+    muscleGroup: "Panturrilhas",
+    secondaryMuscles: "",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Iniciante",
+    description:
+      "Versão unilateral da panturrilha em pé, com halter. Excelente para focar em cada perna.",
+    executionSteps:
+      "1. Em pé sobre um degrau, halter em uma mão.\n2. Suba na ponta do pé, contraindo a panturrilha.\n3. Segure 1 segundo no ápice.\n4. Desça controladamente, alongando no final.\n5. Repita e troque de perna.",
+    commonMistakes: "Não descer o suficiente; usar impulso; não segurar a contração.",
+    tips: "Use um degrau para amplitude completa. Foque no alongamento na descida.",
+  },
+{
+    name: "Hip Thrust com Halteres",
+    slug: "hip-thrust-halteres",
+    muscleGroup: "Glúteos",
+    secondaryMuscles: "Posteriores",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Iniciante",
+    description:
+      "Versão do hip thrust com halter sobre o quadril. Mais simples para iniciantes.",
+    executionSteps:
+      "1. Costas apoiadas em um banco, halter sobre o quadril.\n2. Pés firmes no chão.\n3. Empurre o quadril para cima, contraindo os glúteos.\n4. No ápice, contraia fortemente.\n5. Desça controladamente. Repita.",
+    commonMistakes: "Arquear a lombar; não contrair glúteos; pés muito longe.",
+    tips: "Excelente para iniciantes. Substitui a barra com mais conforto.",
+  },
+{
+    name: "Glúteo na Polia (Coice)",
+    slug: "gluteo-coice-polia",
+    muscleGroup: "Glúteos",
+    secondaryMuscles: "Posteriores",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Iniciante",
+    description:
+      "Coice na polia baixa, excelente para isolamento do glúteo máximo.",
+    executionSteps:
+      "1. Posicione a polia na altura baixa, com alça no tornozelo.\n2. Em pé, apoie-se em algo para equilíbrio.\n3. Estenda a perna para trás, contraindo o glúteo.\n4. Segure 1 segundo no ápice.\n5. Retorne controladamente. Repita e troque de perna.",
+    commonMistakes: "Arquear a lombar; usar impulso; jogar o quadril para frente.",
+    tips: "Use peso moderado. Foque na contração do glúteo.",
+  },
+{
+    name: "Abdução de Quadril na Polia",
+    slug: "abducao-quadril-polia",
+    muscleGroup: "Glúteos",
+    secondaryMuscles: "",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Iniciante",
+    description:
+      "Abdução de quadril na polia baixa, foco no glúteo médio.",
+    executionSteps:
+      "1. Polia baixa com alça no tornozelo.\n2. Em pé de lado para a polia.\n3. Abra a perna para o lado, contraindo o glúteo médio.\n4. Segure 1 segundo no ápice.\n5. Retorne controladamente. Repita e troque de lado.",
+    commonMistakes: "Girar o tronco; usar impulso; inclinar para o lado.",
+    tips: "Use peso moderado. Excelente para estabilidade do quadril.",
+  },
+{
+    name: "Elevação Pélvica (Glute Bridge)",
+    slug: "elevacao-pelvica",
+    muscleGroup: "Glúteos",
+    secondaryMuscles: "Posteriores, Core",
+    equipment: "Peso do corpo",
+    category: "Hipertrofia",
+    equipmentType: "Peso do corpo",
+    level: "Iniciante",
+    description:
+      "Versão do hip thrust no chão, sem equipamento. Excelente para iniciantes e ativação do glúteo.",
+    executionSteps:
+      "1. Deite-se de costas, joelhos flexionados, pés no chão.\n2. Empurre o quadril para cima, contraindo os glúteos.\n3. No ápice, contraia fortemente.\n4. Desça controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Arquear a lombar; não contrair glúteos; pés muito longe do corpo.",
+    tips: "Excelente para ativação antes do treino. Pode ser feito com peso sobre o quadril.",
+  },
+{
+    name: "Coice na Máquina",
+    slug: "coice-maquina",
+    muscleGroup: "Glúteos",
+    secondaryMuscles: "Posteriores",
+    equipment: "Máquina",
+    category: "Hipertrofia",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Máquina específica para coice (extensão de quadril). Excelente para isolamento do glúteo.",
+    executionSteps:
+      "1. Posicione-se na máquina, joelho apoiado, pé na almofada.\n2. Empurre a almofada para trás, contraindo o glúteo.\n3. Segure 1 segundo no ápice.\n4. Retorne controladamente.\n5. Repita e troque de perna.",
+    commonMistakes: "Arquear a lombar; usar impulso; não contrair glúteo.",
+    tips: "Excelente para iniciantes. Trajetória guiada facilita o movimento.",
+  },
+{
+    name: "Agachamento Sumô com Halter",
+    slug: "agachamento-sumo-halter",
+    muscleGroup: "Glúteos",
+    secondaryMuscles: "Quadríceps, Posteriores, Adutores",
+    equipment: "Halter",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Iniciante",
+    description:
+      "Agachamento com pés bem abertos e pontas para fora. Maior foco em glúteos e adutores.",
+    executionSteps:
+      "1. Em pé, pés bem abertos, pontas para fora.\n2. Segure um halter com ambas as mãos, entre as pernas.\n3. Desça flexionando joelhos, mantendo o tronco ereto.\n4. Vá até as coxas ficarem paralelas.\n5. Suba contraindo glúteos. Repita.",
+    commonMistakes: "Joelhos para dentro; inclinar o tronco; não descer o suficiente.",
+    tips: "Excelente para desenvolvimento de glúteos e adutores.",
+  },
+{
+    name: "Step Up",
+    slug: "step-up",
+    muscleGroup: "Glúteos",
+    secondaryMuscles: "Quadríceps, Posteriores",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Iniciante",
+    description:
+      "Subir em um degrau ou banco com halteres. Excelente para glúteos e pernas.",
+    executionSteps:
+      "1. Em pé de frente para um banco ou degrau, halteres nas mãos.\n2. Suba com um pé no banco.\n3. Estenda a perna, contraindo glúteo e quadríceps.\n4. Desça controladamente.\n5. Repita e troque de perna.",
+    commonMistakes: "Empurrar com a perna de trás; não estender totalmente; inclinar o tronco.",
+    tips: "Use altura desafiadora mas segura. Excelente para treino funcional.",
+  },
+{
+    name: "Desenvolvimento na Máquina",
+    slug: "desenvolvimento-maquina",
+    muscleGroup: "Ombros",
+    secondaryMuscles: "Tríceps",
+    equipment: "Máquina",
+    category: "Hipertrofia",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Desenvolvimento guiado em máquina. Mais seguro e excelente para iniciantes.",
+    executionSteps:
+      "1. Sente-se na máquina, costas apoiadas.\n2. Segure as alças na altura dos ombros.\n3. Empurre as alças para cima.\n4. Desça controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Não ajustar a altura; não apoiar bem as costas; usar impulso.",
+    tips: "Excelente para iniciantes e finalização. Trajetória guiada facilita.",
+  },
+{
+    name: "Remada Alta com Halteres",
+    slug: "remada-alta-halteres",
+    muscleGroup: "Ombros",
+    secondaryMuscles: "Trapézio, Bíceps",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Iniciante",
+    description:
+      "Versão com halteres da remada alta. Excelente para deltoide lateral e trapézio.",
+    executionSteps:
+      "1. Em pé, halteres na frente das coxas, palmas para o corpo.\n2. Puxe os halteres verticalmente até a altura dos ombros, cotovelos para cima.\n3. Segure 1 segundo no ápice.\n4. Desça controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Jogar o corpo; cotovelos abaixo dos pulsos; usar pegada muito aberta.",
+    tips: "Mantenha os halteres próximos ao corpo. Cotovelos lideram o movimento.",
+  },
+{
+    name: "Elevação Frontal na Polia",
+    slug: "elevacao-frontal-polia",
+    muscleGroup: "Ombros",
+    secondaryMuscles: "",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Iniciante",
+    description:
+      "Versão na polia da elevação frontal. Tensão constante.",
+    executionSteps:
+      "1. Polia baixa, alça na mão, de costas para a polia.\n2. Em pé, braço estendido à frente da coxa.\n3. Suba o braço até a altura do ombro.\n4. Segure 1 segundo no ápice.\n5. Desça controladamente. Repita e troque de braço.",
+    commonMistakes: "Subir acima do ombro; usar impulso; flexionar o cotovelo.",
+    tips: "Excelente para tensão constante. Use pegada neutra ou pronada.",
+  },
+{
+    name: "Crucifixo Inverso na Polia",
+    slug: "crucifixo-inverso-polia",
+    muscleGroup: "Ombros",
+    secondaryMuscles: "Trapézio",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Intermediário",
+    description:
+      "Versão na polia do crucifixo invertido. Excelente para deltoide posterior.",
+    executionSteps:
+      "1. Posicione duas polias na altura dos ombros.\n2. Segure a alça direita com a mão esquerda e vice-versa.\n3. Estenda os braços para trás, contraindo o deltoide posterior.\n4. Segure 1 segundo no ápice.\n5. Retorne controladamente. Repita.",
+    commonMistakes: "Usar muito peso; não contrair; jogar o corpo.",
+    tips: "Use peso moderado. Excelente para desenvolvimento do deltoide posterior.",
+  },
+{
+    name: "Encolhimento na Máquina",
+    slug: "encolhimento-maquina",
+    muscleGroup: "Ombros",
+    secondaryMuscles: "Trapézio",
+    equipment: "Máquina",
+    category: "Hipertrofia",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Encolhimento de ombros na máquina. Trajetória guiada, mais seguro para cargas elevadas.",
+    executionSteps:
+      "1. Sente-se na máquina, ombros sob as almofadas.\n2. Suba os ombros em direção às orelhas.\n3. Segure 1 segundo no ápice.\n4. Desça controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Usar impulso; girar os ombros; não segurar a contração.",
+    tips: "Excelente para iniciantes. Permite cargas elevadas com segurança.",
+  },
+{
+    name: "Tríceps Francês com Halter",
+    slug: "triceps-frances-halter",
+    muscleGroup: "Tríceps",
+    secondaryMuscles: "",
+    equipment: "Halter",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Intermediário",
+    description:
+      "Variação do tríceps francês com um halter segurado por ambas as mãos. Excelente para alongamento do tríceps.",
+    executionSteps:
+      "1. Deite-se em banco plano, halter acima do peito, segurando por dentro do disco.\n2. Flexione os cotovelos, descendo o halter em arco acima da cabeça.\n3. Vá até sentir alongamento no tríceps.\n4. Estenda os cotovelos, subindo o halter.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Abrir os cotovelos; arquear a lombar; descer rápido demais.",
+    tips: "Mantenha os cotovelos fixos. Excelente para hipertrofia.",
+  },
+{
+    name: "Tríceps Francês Sentado",
+    slug: "triceps-frances-sentado",
+    muscleGroup: "Tríceps",
+    secondaryMuscles: "",
+    equipment: "Halter",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Intermediário",
+    description:
+      "Tríceps francês sentado com halter. Excelente para alongamento e tensão constante.",
+    executionSteps:
+      "1. Sente-se em banco com encosto, halter acima da cabeça com ambas as mãos.\n2. Flexione os cotovelos, descendo o halter atrás da cabeça.\n3. Vá até sentir alongamento no tríceps.\n4. Estenda, subindo o halter.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Abrir os cotovelos; arquear a lombar; jogar os braços.",
+    tips: "Mantenha os cotovelos próximos. Excelente para completo desenvolvimento.",
+  },
+{
+    name: "Tríceps na Polia com Pegada Supinada",
+    slug: "triceps-polia-supinada",
+    muscleGroup: "Tríceps",
+    secondaryMuscles: "",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Iniciante",
+    description:
+      "Variação do tríceps na polia com pegada supinada. Maior recrutamento da cabeça medial.",
+    executionSteps:
+      "1. Polia alta, barra com pegada supinada (palmas para cima).\n2. Em pé, cotovelos junto ao corpo.\n3. Estenda os cotovelos, empurrando a barra para baixo.\n4. Segure 1 segundo no ápice.\n5. Retorne controladamente. Repita.",
+    commonMistakes: "Abrir os cotovelos; jogar o corpo; não controlar a subida.",
+    tips: "Excelente para variação. Combine com a pegada pronada.",
+  },
+{
+    name: "Mergulho em Banco (Bench Dip)",
+    slug: "mergulho-banco",
+    muscleGroup: "Tríceps",
+    secondaryMuscles: "Peito, Deltoide Anterior",
+    equipment: "Peso do corpo",
+    category: "Força",
+    equipmentType: "Peso do corpo",
+    level: "Iniciante",
+    description:
+      "Mergulho apoiado em banco. Excelente para tríceps sem equipamento.",
+    executionSteps:
+      "1. Sente-se em um banco, mãos ao lado do quadril, dedos para frente.\n2. Desloque o quadril para frente do banco.\n3. Desça flexionando os cotovelos.\n4. Vá até 90° no cotovelo.\n5. Empurre de volta. Repita.",
+    commonMistakes: "Descer rápido demais; abrir os cotovelos; jogar os ombros.",
+    tips: "Para dificultar, estenda as pernas ou adicione peso sobre o quadril.",
+  },
+{
+    name: "Tríceps na Máquina",
+    slug: "triceps-maquina",
+    muscleGroup: "Tríceps",
+    secondaryMuscles: "",
+    equipment: "Máquina",
+    category: "Hipertrofia",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Máquina específica para tríceps. Trajetória guiada, excelente para iniciantes e finalização.",
+    executionSteps:
+      "1. Sente-se na máquina, costas apoiadas.\n2. Posicione os braços nas almofadas.\n3. Estenda os cotovelos, contraindo o tríceps.\n4. Segure 1 segundo no ápice.\n5. Retorne controladamente. Repita.",
+    commonMistakes: "Jogar o corpo; não controlar a volta; usar impulso.",
+    tips: "Excelente para iniciantes. Trajetória guiada isola o tríceps.",
+  },
+{
+    name: "Flexão com Mãos Juntas (Diamond Push-up)",
+    slug: "flexao-maos-juntas",
+    muscleGroup: "Tríceps",
+    secondaryMuscles: "Peito, Deltoide Anterior",
+    equipment: "Peso do corpo",
+    category: "Força",
+    equipmentType: "Peso do corpo",
+    level: "Intermediário",
+    description:
+      "Flexão com mãos juntas formando diamante. Excelente para tríceps.",
+    executionSteps:
+      "1. Em posição de flexão, junte as mãos formando um diamante.\n2. Mantenha o corpo reto.\n3. Desça o peito em direção às mãos.\n4. Empurre de volta.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Elevar o quadril; abrir os cotovelos; não descer o suficiente.",
+    tips: "Se for muito difícil, faça com os joelhos no chão.",
+  },
+{
+    name: "Rosca na Polia",
+    slug: "rosca-polia",
+    muscleGroup: "Bíceps",
+    secondaryMuscles: "Antebraço",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Iniciante",
+    description:
+      "Rosca na polia baixa com barra. Tensão constante durante todo o movimento.",
+    executionSteps:
+      "1. Polia baixa, barra com pegada supinada.\n2. Em pé, cotovelos junto ao corpo.\n3. Flexione os cotovelos, subindo a barra.\n4. Segure 1 segundo no ápice.\n5. Desça controladamente. Repita.",
+    commonMistakes: "Jogar o corpo; abrir os cotovelos; descer rápido.",
+    tips: "Excelente para tensão constante. Combine com rosca livre.",
+  },
+{
+    name: "Rosca Martelo na Polia",
+    slug: "rosca-martelo-polia",
+    muscleGroup: "Bíceps",
+    secondaryMuscles: "Antebraço, Braquiorradial",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Iniciante",
+    description:
+      "Rosca martelo na polia com corda. Excelente para braquiorradial.",
+    executionSteps:
+      "1. Polia baixa, corda com pegada neutra.\n2. Em pé, cotovelos junto ao corpo.\n3. Flexione os cotovelos, subindo a corda.\n4. Segure 1 segundo no ápice.\n5. Desça controladamente. Repita.",
+    commonMistakes: "Jogar o corpo; abrir os cotovelos; descer rápido.",
+    tips: "Excelente para braquiorradial e antebraço. Tensão constante.",
+  },
+{
+    name: "Rosca Inversa",
+    slug: "rosca-inversa",
+    muscleGroup: "Bíceps",
+    secondaryMuscles: "Antebraço, Braquiorradial",
+    equipment: "Barra",
+    category: "Hipertrofia",
+    equipmentType: "Livre",
+    level: "Intermediário",
+    description:
+      "Rosca com pegada pronada. Maior recrutamento do braquiorradial.",
+    executionSteps:
+      "1. Em pé, barra com pegada pronada (palmas para baixo).\n2. Cotovelos junto ao corpo.\n3. Flexione os cotovelos, subindo a barra.\n4. Segure 1 segundo no ápice.\n5. Desça controladamente. Repita.",
+    commonMistakes: "Jogar o corpo; usar muito peso; abrir os cotovelos.",
+    tips: "Use menos peso que a rosca supinada. Excelente para braquiorradial.",
+  },
+{
+    name: "Flexão de Pulso com Halter",
+    slug: "flexao-pulso-halter",
+    muscleGroup: "Antebraço",
+    secondaryMuscles: "",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Iniciante",
+    description:
+      "Exercício para flexores do antebraço. Excelente para força de pegada.",
+    executionSteps:
+      "1. Sente-se em banco, antebraço apoiado na coxa.\n2. Halter na mão, palma para cima.\n3. Flexione o pulso, subindo o halter.\n4. Segure 1 segundo no ápice.\n5. Desça controladamente. Repita e troque de mão.",
+    commonMistakes: "Levantar o antebraço; usar muito peso; não controlar a descida.",
+    tips: "Use peso moderado. Excelente para fortalecer a pegada.",
+  },
+{
+    name: "Extensão de Pulso com Halter",
+    slug: "extensao-pulso-halter",
+    muscleGroup: "Antebraço",
+    secondaryMuscles: "",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Iniciante",
+    description:
+      "Exercício para extensores do antebraço. Importante para equilíbrio muscular.",
+    executionSteps:
+      "1. Sente-se em banco, antebraço apoiado na coxa.\n2. Halter na mão, palma para baixo.\n3. Estenda o pulso, subindo o halter.\n4. Segure 1 segundo no ápice.\n5. Desça controladamente. Repita e troque de mão.",
+    commonMistakes: "Levantar o antebraço; usar muito peso; não controlar.",
+    tips: "Use peso moderado. Equilibre com flexão de pulso.",
+  },
+{
+    name: "Encolhimento de Pulso (Wrist Curl Reverso)",
+    slug: "encolhimento-pulso",
+    muscleGroup: "Antebraço",
+    secondaryMuscles: "",
+    equipment: "Barra",
+    category: "Hipertrofia",
+    equipmentType: "Livre",
+    level: "Iniciante",
+    description:
+      "Exercício para antebraço com barra, pegada pronada. Excelente para força de pegada.",
+    executionSteps:
+      "1. Em pé, barra com pegada pronada.\n2. Estenda os braços, deixe a barra rolar para os dedos.\n3. Enrole os dedos e flexione o pulso para cima.\n4. Segure 1 segundo no ápice.\n5. Desça controladamente. Repita.",
+    commonMistakes: "Usar muito peso; flexionar os cotovelos; não controlar.",
+    tips: "Excelente para força de pegada. Use peso moderado.",
+  },
+{
+    name: "Abdominal Infra",
+    slug: "abdominal-infra",
+    muscleGroup: "Abdômen",
+    secondaryMuscles: "",
+    equipment: "Peso do corpo",
+    category: "Hipertrofia",
+    equipmentType: "Peso do corpo",
+    level: "Iniciante",
+    description:
+      "Abdominal para porção inferior do reto abdominal. Excelente para abdômen inferior.",
+    executionSteps:
+      "1. Deite-se de costas, pernas estendidas.\n2. Mãos ao lado do quadril.\n3. Suba as pernas, mantendo-as estendidas.\n4. Segure 1 segundo no ápice.\n5. Desça controladamente. Repita.",
+    commonMistakes: "Flexionar os joelhos; arquear a lombar; usar impulso.",
+    tips: "Mantenha a lombar pressionada no chão. Foque no abdômen inferior.",
+  },
+{
+    name: "Prancha",
+    slug: "prancha",
+    muscleGroup: "Abdômen",
+    secondaryMuscles: "Core, Lombar",
+    equipment: "Peso do corpo",
+    category: "Hipertrofia",
+    equipmentType: "Peso do corpo",
+    level: "Iniciante",
+    description:
+      "Exercício isométrico para core. Excelente para estabilidade e postura.",
+    executionSteps:
+      "1. Em posição de prancha baixa, antebraços no chão.\n2. Cotovelos alinhados com os ombros.\n3. Corpo reto como uma tábua.\n4. Contraia o abdômen e glúteos.\n5. Segure pelo tempo determinado.",
+    commonMistakes: "Quadril elevado ou caído; arredondar as costas; relaxar o core.",
+    tips: "Comece com 20-30 segundos e vá aumentando. Qualidade acima de duração.",
+  },
+{
+    name: "Elevação de Pernas na Barra",
+    slug: "elevacao-pernas-barra",
+    muscleGroup: "Abdômen",
+    secondaryMuscles: "Core, Quadríceps",
+    equipment: "Barra",
+    category: "Força",
+    equipmentType: "Peso do corpo",
+    level: "Avançado",
+    description:
+      "Elevação de pernas pendurado na barra fixa. Excelente para abdômen inferior e core.",
+    executionSteps:
+      "1. Pendure-se na barra fixa com pegada pronada.\n2. Suba as pernas estendidas até a altura do quadril (ou acima).\n3. Segure 1 segundo no ápice.\n4. Desça controladamente.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Balançar o corpo; flexionar os joelhos; usar impulso.",
+    tips: "Comece com joelhos flexionados. Excelente para abdômen avançado.",
+  },
+{
+    name: "Abdominal na bola Suíça",
+    slug: "abdominal-bola-suica",
+    muscleGroup: "Abdômen",
+    secondaryMuscles: "Core",
+    equipment: "Bola",
+    category: "Hipertrofia",
+    equipmentType: "Peso do corpo",
+    level: "Iniciante",
+    description:
+      "Abdominal na bola suíça, com maior amplitude e ativação de estabilizadores.",
+    executionSteps:
+      "1. Deite-se com a lombar apoiada na bola suíça.\n2. Pés firmes no chão.\n3. Mãos atrás da cabeça.\n4. Contraia o abdômen, subindo o tronco.\n5. Desça controladamente, alongando na bola. Repita.",
+    commonMistakes: "Puxar a cabeça; usar impulso; não usar a amplitude da bola.",
+    tips: "Excelente para amplitude completa. Ativa estabilizadores.",
+  },
+{
+    name: "Corrida na Esteira",
+    slug: "corrida-esteira",
+    muscleGroup: "Full Body",
+    secondaryMuscles: "Pernas, Core",
+    equipment: "Máquina",
+    category: "Cardio",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Corrida na esteira, excelente para cardio e queima calórica.",
+    executionSteps:
+      "1. Suba na esteira com cuidado.\n2. Ajuste a velocidade inicial baixa.\n3. Aumente gradualmente para a velocidade desejada.\n4. Mantenha postura ereta, olhar à frente.\n5. Corra pelo tempo determinado.",
+    commonMistakes: "Inclinar muito à frente; segurar no painel; passada muito longa.",
+    tips: "Use tênis adequado. Aqueça antes e desaqueça após.",
+  },
+{
+    name: "Bicicleta Ergométrica",
+    slug: "bicicleta-ergometrica",
+    muscleGroup: "Pernas",
+    secondaryMuscles: "Core",
+    equipment: "Máquina",
+    category: "Cardio",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Bicicleta ergométrica, excelente para cardio de baixo impacto.",
+    executionSteps:
+      "1. Ajuste o assento para a altura do quadril.\n2. Sente-se com costas eretas.\n3. Ajuste a resistência.\n4. Pedale continuamente.\n5. Continue pelo tempo determinado.",
+    commonMistakes: "Assento muito baxo; joelhos flexionados demais; relaxar o core.",
+    tips: "Excelente para iniciantes e recuperação. Baixo impacto.",
+  },
+{
+    name: "Elíptico",
+    slug: "eliptico",
+    muscleGroup: "Full Body",
+    secondaryMuscles: "Pernas, Ombros, Core",
+    equipment: "Máquina",
+    category: "Cardio",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Treinador elíptico, excelente para cardio de baixo impacto trabalhando braços e pernas.",
+    executionSteps:
+      "1. Suba no elíptico, segure nas alças.\n2. Ajuste a resistência.\n3. Movimente pernas e braços alternadamente.\n4. Mantenha postura ereta.\n5. Continue pelo tempo determinado.",
+    commonMistakes: "Inclinar muito à frente; usar só as pernas; olhar para baixo.",
+    tips: "Excelente para cardio completo. Baixo impacto nas articulações.",
+  },
+{
+    name: "Remo Ergômetro",
+    slug: "remo-ergometro",
+    muscleGroup: "Full Body",
+    secondaryMuscles: "Costas, Pernas, Core, Ombros",
+    equipment: "Máquina",
+    category: "Cardio",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Máquina de remo, excelente para cardio e trabalho completo do corpo.",
+    executionSteps:
+      "1. Sente-se no remo, pés nas alças.\n2. Segure a alça, joelhos flexionados.\n3. Estenda as pernas, depois puxe a alça até o peito.\n4. Retorne na ordem inversa (braços, tronco, pernas).\n5. Continue pelo tempo determinado.",
+    commonMistakes: "Puxar com os braços primeiro; arredondar as costas; não usar as pernas.",
+    tips: "Aprenda a técnica correta. Excelente para cardio completo.",
+  },
+{
+    name: "Pular Corda",
+    slug: "pular-corda",
+    muscleGroup: "Full Body",
+    secondaryMuscles: "Pernas, Ombros, Core",
+    equipment: "Corda",
+    category: "Cardio",
+    equipmentType: "Peso do corpo",
+    level: "Iniciante",
+    description:
+      "Pular corda, excelente para cardio, coordenação e queima calórica.",
+    executionSteps:
+      "1. Segure a corda pelas extremidades.\n2. Comece com a corda atrás dos pés.\n3. Balance a corda por cima da cabeça.\n4. Salte quando a corda passar sob os pés.\n5. Continue pelo tempo determinado.",
+    commonMistakes: "Saltar muito alto; usar os braços para girar; sem amortecimento.",
+    tips: "Use tênis adequado. Comece devagar e aumente a velocidade.",
+  },
+{
+    name: "Burpee com Salto",
+    slug: "burpee-salto",
+    muscleGroup: "Full Body",
+    secondaryMuscles: "Peito, Pernas, Core, Tríceps",
+    equipment: "Peso do corpo",
+    category: "Cardio",
+    equipmentType: "Peso do corpo",
+    level: "Intermediário",
+    description:
+      "Burpee tradicional com salto no final. Excelente para condicionamento.",
+    executionSteps:
+      "1. Em pé, pés na largura dos ombros.\n2. Agache e coloque as mãos no chão.\n3. Jogue os pés para trás em posição de flexão.\n4. Faça uma flexão.\n5. Traga os pés de volta para as mãos.\n6. Salte para cima com os braços estendidos. Repita.",
+    commonMistakes: "Pular a flexão; joelhos para dentro; não amortecer o salto.",
+    tips: "Ajuste o ritmo conforme seu condicionamento.",
+  },
+{
+    name: "Battle Rope (Corda Naval)",
+    slug: "battle-rope",
+    muscleGroup: "Full Body",
+    secondaryMuscles: "Ombros, Core, Costas",
+    equipment: "Corda",
+    category: "Cardio",
+    equipmentType: "Peso do corpo",
+    level: "Intermediário",
+    description:
+      "Treino com corda naval, excelente para cardio e potência de ombros e core.",
+    executionSteps:
+      "1. Segure as extremidades da corda, uma em cada mão.\n2. Posicione-se em agachamento parcial.\n3. Movimente os braços alternadamente, criando ondas na corda.\n4. Mantenha o core firme.\n5. Continue pelo tempo determinado.",
+    commonMistakes: "Usar só os braços; arredondar as costas; relaxar o core.",
+    tips: "Use peso corporal para gerar potência. Excelente para HIIT.",
+  },
+{
+    name: "Box Jump",
+    slug: "box-jump",
+    muscleGroup: "Pernas",
+    secondaryMuscles: "Glúteos, Core",
+    equipment: "Box",
+    category: "Força",
+    equipmentType: "Peso do corpo",
+    level: "Intermediário",
+    description:
+      "Salto em caixa. Excelente para potência de pernas e cardio.",
+    executionSteps:
+      "1. Em pé de frente para o box.\n2. Agache parcialmente.\n3. Salte para o box, aterrissando com ambos os pés.\n4. Estenda totalmente no topo.\n5. Desça cuidadosamente. Repita.",
+    commonMistakes: "Aterrissar duro; joelhos para dentro; usar box muito alto.",
+    tips: "Use tênis adequado. Comece com altura baixa.",
+  },
+{
+    name: "Wall Ball",
+    slug: "wall-ball",
+    muscleGroup: "Full Body",
+    secondaryMuscles: "Pernas, Ombros, Core",
+    equipment: "Bola",
+    category: "Cardio",
+    equipmentType: "Peso do corpo",
+    level: "Intermediário",
+    description:
+      "Exercício com bola medicinal contra a parede. Excelente para condicionamento.",
+    executionSteps:
+      "1. Em pé de frente para uma parede, bola medicinal no peito.\n2. Agache até paralelo.\n3. Suba, projetando a bola contra a parede.\n4. Pegue a bola no retorno.\n5. Continue o movimento. Repita.",
+    commonMistakes: "Não agachar o suficiente; jogar a bola muito baixo; relaxar o core.",
+    tips: "Use peso adequado. Excelente para HIIT.",
+  },
+{
+    name: "Prancha com Toque no Ombro",
+    slug: "prancha-toque-ombro",
+    muscleGroup: "Abdômen",
+    secondaryMuscles: "Ombros, Core",
+    equipment: "Peso do corpo",
+    category: "Hipertrofia",
+    equipmentType: "Peso do corpo",
+    level: "Intermediário",
+    description:
+      "Prancha dinâmica com toque no ombro. Excelente para core e estabilidade.",
+    executionSteps:
+      "1. Em posição de prancha alta, mãos no chão.\n2. Toque o ombro direito com a mão esquerda.\n3. Retorne a mão ao chão.\n4. Toque o ombro esquerdo com a mão direita.\n5. Continue alternando. Repita.",
+    commonMistakes: "Balançar o quadril; elevar o quadril; relaxar o core.",
+    tips: "Mantenha o quadril estável. Excelente para core.",
+  },
+{
+    name: "Cadeira Flexora em Pé",
+    slug: "cadeira-flexora-pe",
+    muscleGroup: "Posteriores",
+    secondaryMuscles: "",
+    equipment: "Máquina",
+    category: "Hipertrofia",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Variação da cadeira flexora realizada em pé. Excelente para isolamento do posterior.",
+    executionSteps:
+      "1. Em pé na máquina, uma perna por vez.\n2. Posicione a almofada no tornozelo.\n3. Flexione o joelho, contraindo o posterior.\n4. Segure 1 segundo no ápice.\n5. Desça controladamente. Repita e troque de perna.",
+    commonMistakes: "Jogar o corpo; usar impulso; não contrair.",
+    tips: "Excelente para trabalho unilateral. Use peso moderado.",
+  },
+{
+    name: "Agachamento Pistol",
+    slug: "agachamento-pistol",
+    muscleGroup: "Pernas",
+    secondaryMuscles: "Glúteos, Core",
+    equipment: "Peso do corpo",
+    category: "Força",
+    equipmentType: "Peso do corpo",
+    level: "Avançado",
+    description:
+      "Agachamento unilateral avançado com uma perna estendida à frente. Excelente para força e equilíbrio.",
+    executionSteps:
+      "1. Em pé sobre uma perna, outra estendida à frente.\n2. Estenda os braços à frente para equilíbrio.\n3. Desça flexionando o joelho de apoio.\n4. Vá até quase tocar o chão com o quadril.\n5. Suba contraindo quadríceps. Repita e troque de perna.",
+    commonMistakes: "Joelho para dentro; não estender a perna; cair para o lado.",
+    tips: "Exige muita força e equilíbrio. Use apoio no início.",
+  },
+{
+    name: "Sissy Squat",
+    slug: "sissy-squat",
+    muscleGroup: "Pernas",
+    secondaryMuscles: "Core",
+    equipment: "Máquina",
+    category: "Força",
+    equipmentType: "Máquina",
+    level: "Avançado",
+    description:
+      "Agachamento que enfatiza o quadríceps, com joelhos avançando bastante. Excelente para isolamento.",
+    executionSteps:
+      "1. Posicione-se na máquina Sissy, pés travados.\n2. Mantenha o corpo ereto.\n3. Incline o tronco para trás, flexionando os joelhos.\n4. Vá até sentir alongamento no quadríceps.\n5. Suba contraindo o quadríceps. Repita.",
+    commonMistakes: "Arredondar as costas; descer rápido demais; não contrair.",
+    tips: "Exige técnica. Comece sem peso para aprender.",
+  },
+{
+    name: "Agachamento com Pulsão (Jump Squat)",
+    slug: "agachamento-pulsao",
+    muscleGroup: "Pernas",
+    secondaryMuscles: "Glúteos",
+    equipment: "Peso do corpo",
+    category: "Cardio",
+    equipmentType: "Peso do corpo",
+    level: "Intermediário",
+    description:
+      "Agachamento pliométrico com salto. Excelente para potência e cardio.",
+    executionSteps:
+      "1. Em pé, pés na largura dos ombros.\n2. Agache até paralelo.\n3. Exploda para cima saltando.\n4. Aterre suavemente flexionando os joelhos.\n5. Imediatamente agache novamente. Repita.",
+    commonMistakes: "Aterrissar duro; joelhos para dentro; não amortecer.",
+    tips: "Use tênis adequado. Excelente para atletas e HIIT.",
+  },
+{
+    name: "Thruster",
+    slug: "thruster",
+    muscleGroup: "Full Body",
+    secondaryMuscles: "Pernas, Ombros, Tríceps, Core",
+    equipment: "Halteres",
+    category: "Força",
+    equipmentType: "Halteres",
+    level: "Intermediário",
+    description:
+      "Exercício composto que combina agachamento e desenvolvimento. Excelente para condicionamento.",
+    executionSteps:
+      "1. Halteres nos ombros, em pé.\n2. Agache até paralelo.\n3. Suba, empurrando os halteres para cima (desenvolvimento).\n4. Desça os halteres aos ombros.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Não usar as pernas; arquear a lombar; não estender totalmente.",
+    tips: "Excelente para CrossFit e condicionamento. Use peso moderado.",
+  },
+{
+    name: "Turkish Get-up",
+    slug: "turkish-get-up",
+    muscleGroup: "Full Body",
+    secondaryMuscles: "Core, Ombros, Pernas",
+    equipment: "Kettlebell",
+    category: "Força",
+    equipmentType: "Livre",
+    level: "Avançado",
+    description:
+      "Exercício funcional avançado que envolve levantar-se do chão com peso. Excelente para core e coordenação.",
+    executionSteps:
+      "1. Deite-se, kettlebell em uma mão estendida para cima.\n2. Apoie-se no cotovelo oposto.\n3. Levante o tronco, apoie a mão no chão.\n4. Levante o quadril, posicione o joelho.\n5. Levante-se em posição de afundo, depois em pé.\n6. Desça na ordem inversa. Repita.",
+    commonMistakes: "Mover rápido demais; tirar o olho do peso; arredondar as costas.",
+    tips: "Comece sem peso para aprender a técnica. Excelente para core.",
+  },
+{
+    name: "Clean and Press",
+    slug: "clean-and-press",
+    muscleGroup: "Full Body",
+    secondaryMuscles: "Pernas, Costas, Ombros, Tríceps",
+    equipment: "Barra",
+    category: "Força",
+    equipmentType: "Livre",
+    level: "Avançado",
+    description:
+      "Exercício olímpico que combina levantamento (clean) e desenvolvimento (press). Excelente para potência total.",
+    executionSteps:
+      "1. Barra no chão, pegada na largura dos ombros.\n2. Puxe a barra, explodindo com as pernas.\n3. Pegue a barra nos ombros (rack position).\n4. Empurre a barra para cima (desenvolvimento).\n5. Desça controladamente. Repita.",
+    commonMistakes: "Arredondar a lombar; não usar as pernas; jogar a barra.",
+    tips: "Exige técnica. Aprenda com profissional. Excelente para potência.",
+  },
+{
+    name: "Snatch (Arranco)",
+    slug: "snatch",
+    muscleGroup: "Full Body",
+    secondaryMuscles: "Pernas, Costas, Ombros",
+    equipment: "Barra",
+    category: "Força",
+    equipmentType: "Livre",
+    level: "Avançado",
+    description:
+      "Exercício olímpico avançado que leva a barra do chão ao topo em um movimento. Excelente para potência.",
+    executionSteps:
+      "1. Barra no chão, pegada bem aberta.\n2. Puxe a barra, explodindo com as pernas.\n3. Em um movimento, pegue a barra estendida acima da cabeça.\n4. Agache sob a barra.\n5. Levante-se com a barra estendida. Repita.",
+    commonMistakes: "Arredondar a lombar; usar os braços; não agachar sob a barra.",
+    tips: "Exige muita técnica. Aprenda com profissional. Excelente para potência.",
+  },
+{
+    name: "Supino Fechado com Barra",
+    slug: "supino-fechado-barra",
+    muscleGroup: "Tríceps",
+    secondaryMuscles: "Peito, Deltoide Anterior",
+    equipment: "Barra",
+    category: "Hipertrofia",
+    equipmentType: "Livre",
+    level: "Intermediário",
+    description:
+      "Variação do supino com pegada fechada. Maior foco no tríceps.",
+    executionSteps:
+      "1. Deite-se em banco plano, barra com pegada na largura dos ombros.\n2. Segure a barra, cotovelos junto ao corpo.\n3. Desça a barra até o peito inferior.\n4. Empurre de volta, mantendo cotovelos fechados.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Abrir os cotovelos; arquear a lombar; usar muito peso.",
+    tips: "Use pegada na largura dos ombros. Excelente para tríceps.",
+  },
+{
+    name: "Supino com Pegada Neutra",
+    slug: "supino-pegada-neutra",
+    muscleGroup: "Peito",
+    secondaryMuscles: "Tríceps, Deltoide Anterior",
+    equipment: "Barra",
+    category: "Hipertrofia",
+    equipmentType: "Livre",
+    level: "Intermediário",
+    description:
+      "Supino com pegada neutra (usando barra multipression). Mais confortável para ombros.",
+    executionSteps:
+      "1. Deite-se em banco plano, barra com pegada neutra.\n2. Segure a barra na largura dos ombros.\n3. Desça a barra até o peito.\n4. Empurre de volta.\n5. Repita pelo número de repetições.",
+    commonMistakes: "Abrir os cotovelos; arquear a lombar; usar muito peso.",
+    tips: "Excelente para quem tem desconforto nos ombros com pegada pronada.",
+  },
+{
+    name: "Abdominal Oblíquo com Halter",
+    slug: "abdominal-obliquo-halter",
+    muscleGroup: "Abdômen",
+    secondaryMuscles: "Oblíquos",
+    equipment: "Halteres",
+    category: "Hipertrofia",
+    equipmentType: "Halteres",
+    level: "Intermediário",
+    description:
+      "Abdominal lateral com halter. Excelente para oblíquos.",
+    executionSteps:
+      "1. Em pé, halter em uma mão.\n2. Incline o tronco para o lado oposto ao halter.\n3. Volte contraindo os oblíquos do lado do halter.\n4. Continue pelo número de repetições.\n5. Troque de lado.",
+    commonMistakes: "Inclinar à frente ou para trás; usar muito peso; movimentar o quadril.",
+    tips: "Use peso moderado. Foque na contração lateral.",
+  },
+{
+    name: "Woodchopper na Polia",
+    slug: "woodchopper-polia",
+    muscleGroup: "Abdômen",
+    secondaryMuscles: "Oblíquos, Core",
+    equipment: "Cabo",
+    category: "Hipertrofia",
+    equipmentType: "Cabo",
+    level: "Intermediário",
+    description:
+      "Movimento de 'lenhador' na polia. Excelente para oblíquos e core.",
+    executionSteps:
+      "1. Posicione a polia alta, alça na mão.\n2. Em pé de lado para a polia.\n3. Puxe a alça em diagonal para baixo, do lado oposto.\n4. Rotacione o tronco, contraindo os oblíquos.\n5. Retorne controladamente. Repita e troque de lado.",
+    commonMistakes: "Usar os braços; não rotacionar; jogar o corpo.",
+    tips: "Use peso moderado. Foque na rotação do tronco.",
   },
 ];
 

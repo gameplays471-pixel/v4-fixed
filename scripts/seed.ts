@@ -1,21 +1,9 @@
 // Seed do banco de dados
 import { db } from "../src/lib/db";
 import { exercisesData } from "../src/lib/exercises-data";
-import { readFileSync, existsSync } from "fs";
-
-type ImageMap = Record<string, { imageUrl: string | null; gifUrl: string | null }>;
 
 async function main() {
   console.log("🌱 Iniciando seed...");
-
-  // Carrega cache de imagens (se existir)
-  let imageMap: ImageMap = {};
-  if (existsSync("/home/z/my-project/scripts/exercise-images.json")) {
-    imageMap = JSON.parse(
-      readFileSync("/home/z/my-project/scripts/exercise-images.json", "utf-8")
-    );
-    console.log(`📸 Cache de imagens: ${Object.keys(imageMap).length} exercícios`);
-  }
 
   // Limpar dados existentes (cuidado: apaga tudo!)
   console.log("🧹 Limpando dados existentes...");
@@ -46,7 +34,6 @@ async function main() {
   // Criar exercícios
   console.log(`📚 Inserindo ${exercisesData.length} exercícios...`);
   for (const ex of exercisesData) {
-    const cached = imageMap[ex.slug];
     await db.exercise.create({
       data: {
         name: ex.name,
@@ -61,9 +48,6 @@ async function main() {
         executionSteps: ex.executionSteps ?? null,
         commonMistakes: ex.commonMistakes ?? null,
         tips: ex.tips ?? null,
-        imageUrl: ex.imageUrl ?? cached?.imageUrl ?? null,
-        gifUrl: ex.gifUrl ?? cached?.gifUrl ?? null,
-        videoUrl: ex.videoUrl ?? null,
       },
     });
   }
