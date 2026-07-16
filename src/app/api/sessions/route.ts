@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 // Listar sessões do usuário
 export async function GET(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = await getCurrentUser(req);
     if (!user) {
       return NextResponse.json({ sessions: [] });
     }
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 // Criar nova sessão (finalizar treino)
 export async function POST(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = await getCurrentUser(req);
     if (!user) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }

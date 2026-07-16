@@ -11,6 +11,7 @@ import { ActiveWorkoutView } from "@/components/views/active-workout";
 import { HistoryView } from "@/components/views/history";
 import { StatsView } from "@/components/views/stats";
 import { ProfileView } from "@/components/views/profile";
+import { getToken, setToken } from "@/lib/api";
 
 export default function Home() {
   const view = useAppStore((s) => s.view);
@@ -18,12 +19,17 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/auth/me")
+    // Verifica sessão: usa Bearer token (se houver) + cookie fallback no servidor
+    const token = getToken();
+    fetch("/api/auth/me", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then((r) => r.json())
       .then((data) => {
         setUser(data.user);
         setLoading(false);
         if (!data.user) {
+          setToken(null);
           useAppStore.getState().setView("auth");
         } else {
           // Auto-login como demo se não houver view definida
@@ -35,9 +41,16 @@ export default function Home() {
       .catch(() => setLoading(false));
   }, []);
 
-  const handleAuth = (u: unknown) => {
+  const handleAuth = (u: unknown, token?: string) => {
+    if (token) setToken(token);
     setUser(u);
     useAppStore.getState().setView("dashboard");
+  };
+
+  const handleLogout = () => {
+    setToken(null);
+    setUser(null);
+    useAppStore.getState().setView("auth");
   };
 
   if (loading) {
@@ -59,7 +72,7 @@ export default function Home() {
     <div className="min-h-screen bg-background flex">
       {/* Sidebar desktop */}
       <div className="hidden md:flex w-64 shrink-0 border-r border-border bg-sidebar">
-        <Sidebar user={user} onLogout={() => setUser(null)} />
+        <Sidebar user={user} onLogout={handleLogout} />
       </div>
 
       {/* Conteúdo principal */}

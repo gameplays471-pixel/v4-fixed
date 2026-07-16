@@ -28,6 +28,8 @@ type Exercise = {
   equipment: string | null;
   equipmentType: string | null;
   level: string;
+  imageUrl: string | null;
+  gifUrl: string | null;
 };
 
 type WorkoutExercise = {
@@ -572,8 +574,23 @@ function ExercisePicker({
                 onClick={() => onPick(ex)}
                 className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors text-left"
               >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
-                  {ex.name.charAt(0)}
+                <div className="w-10 h-10 rounded-lg overflow-hidden bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0 relative">
+                  {ex.imageUrl || ex.gifUrl ? (
+                    <>
+                      <img
+                        src={ex.gifUrl || ex.imageUrl || ""}
+                        alt={ex.name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                      <span className="relative z-0">{ex.name.charAt(0)}</span>
+                    </>
+                  ) : (
+                    <span>{ex.name.charAt(0)}</span>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{ex.name}</p>

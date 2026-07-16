@@ -22,6 +22,8 @@ type Exercise = {
   equipmentType: string | null;
   level: string;
   description: string | null;
+  imageUrl: string | null;
+  gifUrl: string | null;
 };
 
 type Favorite = {
@@ -204,8 +206,24 @@ export function LibraryView() {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex gap-3 min-w-0 flex-1">
-                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-bold shrink-0">
-                            {ex.name.charAt(0)}
+                          <div className="w-14 h-14 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-bold shrink-0 relative">
+                            {ex.imageUrl || ex.gifUrl ? (
+                              <>
+                                <img
+                                  src={ex.gifUrl || ex.imageUrl || ""}
+                                  alt={ex.name}
+                                  className="absolute inset-0 w-full h-full object-cover"
+                                  loading="lazy"
+                                  onError={(e) => {
+                                    // fallback para inicial do nome
+                                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                                  }}
+                                />
+                                <span className="relative z-0">{ex.name.charAt(0)}</span>
+                              </>
+                            ) : (
+                              <span>{ex.name.charAt(0)}</span>
+                            )}
                           </div>
                           <div className="min-w-0 flex-1">
                             <h3 className="font-semibold text-sm group-hover:text-primary transition-colors line-clamp-1">{ex.name}</h3>

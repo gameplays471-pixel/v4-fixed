@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 interface AuthScreenProps {
-  onAuth: (user: unknown) => void;
+  onAuth: (user: unknown, token?: string) => void;
 }
 
 export function AuthScreen({ onAuth }: AuthScreenProps) {
@@ -24,7 +24,7 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
     try {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
       const body = mode === "login" ? { email, password } : { email, password, name };
-      
+
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -39,7 +39,8 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
       }
 
       toast.success(mode === "login" ? "Bem-vindo de volta!" : "Conta criada com sucesso!");
-      onAuth(data);
+      // Passa o token para ser armazenado em localStorage
+      onAuth(data, data.token);
     } catch (err) {
       console.error(err);
       toast.error("Erro de conexão");
@@ -58,7 +59,7 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
       });
       const data = await res.json();
       if (res.ok) {
-        onAuth(data);
+        onAuth(data, data.token);
       } else {
         toast.error(data.error);
       }

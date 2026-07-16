@@ -1,11 +1,13 @@
-// Sistema de autenticação simples usando cookies HTTP-only
+// Sistema de autenticação híbrido: Bearer token (header) + cookie fallback
 // Demo: usa email/senha simples sem bcrypt (apenas para fins de demonstração)
 
 import { db } from "@/lib/db";
 import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 import crypto from "crypto";
 
 export const SESSION_COOKIE = "hevy_session";
+export const TOKEN_LOCALSTORAGE_KEY = "hevy_token";
 const SESSION_EXPIRY_DAYS = 30;
 
 // Hash simples para demo (não usar em produção)
@@ -26,7 +28,7 @@ export async function createSession(userId: string): Promise<string> {
 export async function setSessionCookie(token: string) {
   const expires = new Date();
   expires.setDate(expires.getDate() + SESSION_EXPIRY_DAYS);
-  
+
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
@@ -42,16 +44,30 @@ export async function clearSessionCookie() {
   cookieStore.delete(SESSION_COOKIE);
 }
 
-export async function getCurrentUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  
-  if (!token) return null;
-  
+/**
+ * Extrai o userId do token (formato: userId.timestamp.random)
+ */
+function extractUserIdFromToken(token: string): string | null {
   const userId = token.split(".")[0];
-  if (!userId) return null;
-  
-  const user = await db.user.findUnique({
+  return userId || null;
+}
+
+type SelectedUser = {
+  id: string;
+  email: string;
+  name: string;
+  bio: string | null;
+  weight: number | null;
+  height: number | null;
+  sex: string | null;
+  birthDate: Date | null;
+  goal: string | null;
+  avatarUrl: string | null;
+  createdAt: Date;
+};
+
+async function lookupUser(userId: string): Promise<SelectedUser | null> {
+  return db.user.findUnique({
     where: { id: userId },
     select: {
       id: true,
@@ -67,12 +83,63 @@ export async function getCurrentUser() {
       createdAt: true,
     },
   });
-  
-  return user;
 }
 
-export async function requireUser() {
-  const user = await getCurrentUser();
+/**
+ * Obtém o usuário atual a partir do Bearer token (header Authorization)
+ * ou do cookie de sessão. Suporte híbrido para máxima compatibilidade
+ * (especialmente em cenários cross-origin como preview URLs).
+ *
+ * Aceita opcionalmente um NextRequest para ler headers diretamente
+ * (mais confiável que next/headers em alguns contextos).
+ */
+export async function getCurrentUser(req?: NextRequest): Promise<SelectedUser | null> {
+  let token: string | null = null;
+
+  // 1. Tentar via header Authorization: Bearer <token> no request direto
+  if (req) {
+    const authHeader =
+      req.headers.get("authorization") || req.headers.get("Authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.slice(7).trim();
+    }
+  }
+
+  // 2. Tentar via next/headers (server components, etc.)
+  if (!token) {
+    try {
+      const { headers } = await import("next/headers");
+      const headerStore = await headers();
+      const authHeader =
+        headerStore.get("authorization") || headerStore.get("Authorization");
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.slice(7).trim();
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // 3. Fallback para cookie
+  if (!token) {
+    try {
+      const cookieStore = await cookies();
+      token = cookieStore.get(SESSION_COOKIE)?.value || null;
+    } catch {
+      // ignore
+    }
+  }
+
+  if (!token) return null;
+
+  const userId = extractUserIdFromToken(token);
+  if (!userId) return null;
+
+  return lookupUser(userId);
+}
+
+export async function requireUser(req?: NextRequest) {
+  const user = await getCurrentUser(req);
   if (!user) {
     throw new Error("UNAUTHORIZED");
   }

@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
       id: user.id,
       email: user.email,
       name: user.name,
+      token, // token também no body para localStorage (suporte cross-origin)
     });
   } catch (e) {
     console.error("Login error:", e);

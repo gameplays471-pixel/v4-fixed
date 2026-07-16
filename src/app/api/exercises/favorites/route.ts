@@ -3,9 +3,9 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
 // Listar favoritos
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = await getCurrentUser(req);
     if (!user) {
       return NextResponse.json({ favorites: [] });
     }
@@ -26,7 +26,7 @@ export async function GET() {
 // Adicionar/remover favorito (toggle)
 export async function POST(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = await getCurrentUser(req);
     if (!user) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }

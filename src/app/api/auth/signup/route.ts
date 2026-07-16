@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       id: user.id,
       email: user.email,
       name: user.name,
+      token,
     });
   } catch (e) {
     console.error("Signup error:", e);

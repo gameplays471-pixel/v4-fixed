@@ -9,9 +9,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { apiGet } from "@/lib/api";
-import { X, Heart, Dumbbell, ListChecks, AlertCircle, Lightbulb } from "lucide-react";
+import { Heart, Dumbbell, ListChecks, AlertCircle, Lightbulb, ImageIcon, Film } from "lucide-react";
 
 type Exercise = {
   id: string;
@@ -26,6 +25,9 @@ type Exercise = {
   executionSteps: string | null;
   commonMistakes: string | null;
   tips: string | null;
+  imageUrl: string | null;
+  gifUrl: string | null;
+  videoUrl: string | null;
 };
 
 interface ExerciseDetailProps {
@@ -38,12 +40,22 @@ interface ExerciseDetailProps {
 export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClose }: ExerciseDetailProps) {
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showGif, setShowGif] = useState(true);
+  const [imgError, setImgError] = useState(false);
+  const [gifError, setGifError] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
+    setImgError(false);
+    setGifError(false);
+    setShowGif(true);
     apiGet<{ exercise: Exercise }>(`/api/exercises/${exerciseId}`)
       .then((data) => setExercise(data.exercise))
       .finally(() => setLoading(false));
   }, [exerciseId]);
+
+  const hasGif = !!exercise?.gifUrl && !gifError;
+  const hasImg = !!exercise?.imageUrl && !imgError;
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -82,11 +94,64 @@ export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClo
           </div>
         ) : exercise ? (
           <div className="space-y-5">
-            {/* Mídia placeholder (sem GIF real) */}
-            <div className="aspect-video rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent flex flex-col items-center justify-center gap-2 border border-border">
-              <Dumbbell className="w-12 h-12 text-primary/60" />
-              <p className="text-xs text-muted-foreground">GIF/Imagem ilustrativa</p>
-            </div>
+            {/* Mídia: GIF优先, fallback para imagem, fallback para placeholder */}
+            {(hasGif || hasImg) && (
+              <div className="space-y-2">
+                {/* Toggle entre GIF e imagem, se ambos existirem */}
+                {hasGif && hasImg && (
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={() => setShowGif(true)}
+                      className={`flex items-center gap-1 text-xs px-2 py-1 rounded-md transition-colors ${
+                        showGif ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"
+                      }`}
+                    >
+                      <Film className="w-3 h-3" />
+                      GIF
+                    </button>
+                    <button
+                      onClick={() => setShowGif(false)}
+                      className={`flex items-center gap-1 text-xs px-2 py-1 rounded-md transition-colors ${
+                        !showGif ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"
+                      }`}
+                    >
+                      <ImageIcon className="w-3 h-3" />
+                      Imagem
+                    </button>
+                  </div>
+                )}
+
+                <div className="aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-border flex items-center justify-center">
+                  {hasGif && showGif ? (
+                    <img
+                      src={exercise.gifUrl!}
+                      alt={`GIF de ${exercise.name}`}
+                      className="w-full h-full object-contain"
+                      onError={() => setGifError(true)}
+                      loading="lazy"
+                    />
+                  ) : hasImg ? (
+                    <img
+                      src={exercise.imageUrl!}
+                      alt={`Imagem de ${exercise.name}`}
+                      className="w-full h-full object-contain"
+                      onError={() => setImgError(true)}
+                      loading="lazy"
+                    />
+                  ) : null}
+                </div>
+                <p className="text-[10px] text-muted-foreground text-center">
+                  {hasGif && showGif ? "Animação (GIF) — fonte pública" : "Imagem ilustrativa — fonte pública (Creative Commons)"}
+                </p>
+              </div>
+            )}
+
+            {!hasGif && !hasImg && (
+              <div className="aspect-video rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent flex flex-col items-center justify-center gap-2 border border-border">
+                <Dumbbell className="w-12 h-12 text-primary/60" />
+                <p className="text-xs text-muted-foreground">Imagem não disponível</p>
+              </div>
+            )}
 
             {/* Descrição */}
             {exercise.description && (
