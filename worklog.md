@@ -86,3 +86,28 @@ Stage Summary:
 - **Base massiva de exercícios**: 180 exercícios cobrindo praticamente TODOS os exercícios de academia do Brasil, organizados por grupo muscular, com descrição, execução passo a passo, erros comuns e dicas.
 - **Arquivos principais modificados**: `src/app/api/sessions/route.ts`, `prisma/schema.prisma`, `src/lib/exercises-data.ts`, `src/components/exercise-detail.tsx`, `src/components/views/library.tsx`, `src/components/views/workouts.tsx`, `scripts/seed.ts`, `next.config.ts`, `scripts/test-e2e.ts`.
 - **Arquivos removidos**: `scripts/fetch-exercise-images.ts`, `scripts/fetch-exercise-gifs.ts`, `scripts/exercise-images.json`.
+
+---
+Task ID: feat-last-set-history
+Agent: main
+Task: Mostrar os valores do último treino como "background" para cada exercício (no mesmo treino ou em outro treino que contenha o mesmo exercício).
+
+Work Log:
+- Criado novo endpoint `GET /api/sessions/last-sets?exerciseIds=id1,id2,...` em `src/app/api/sessions/last-sets/route.ts`:
+  - Para cada `exerciseId`, encontra a sessão mais recente do usuário que o contém (via `session: { userId }`) e retorna todos os sets daquele exercício dentro daquela sessão, preservando a ordem.
+  - Busca é por `exerciseId`, não por `workoutId` — então o histórico aparece mesmo quando o exercício está em outro treino.
+  - Retorna `{ lastSets: { [exerciseId]: [{weight, reps}, ...] } }`.
+
+- Modificado `src/components/views/active-workout.tsx`:
+  - Adicionado estado `lastSetsMap: Record<string, Array<{weight, reps}>>`.
+  - Após carregar o treino, busca em paralelo os últimos sets de todos os `exerciseId` do treino.
+  - Novo helper `formatLastSets(exerciseId)` retorna string compacta: `"20kg × 10 · 20kg × 8"`.
+  - Adicionado badge "Última vez: ..." com ícone `History` no header de cada exercício (somente se houver histórico).
+  - Placeholders dos inputs de KG e REPS agora mostram os valores anteriores (ex.: `placeholder="50"` em vez de `placeholder="0"`), com cor `text-primary/40` para destacar que é histórico, não valor atual.
+  - Placeholders são posicionais: série 1 mostra peso/reps da série 1 do último treino, série 2 da série 2, etc.
+
+Stage Summary:
+- Endpoint `GET /api/sessions/last-sets` funcionando (testado com Supino Reto → retornou 4 sets: 50kg×8, 52.5kg×7, 55kg×6, 57.5kg×6).
+- UI atualizada: badge "Última vez" no header do exercício + placeholders nos inputs mostrando peso/reps por série da última sessão.
+- Histórico é cross-workout: se o usuário fez Supino Reto no Treino A, e o Treino B também tem Supino Reto, ao iniciar B verá o histórico de A.
+- Dev log confirma compilação OK e chamada ao endpoint em 200.

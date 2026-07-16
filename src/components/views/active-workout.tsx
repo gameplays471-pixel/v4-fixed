@@ -24,6 +24,7 @@ import {
   Dumbbell,
   Clock,
   Flame,
+  History,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -68,6 +69,10 @@ export function ActiveWorkoutView() {
   // Sets state: Map<exerciseId, SetState[]>
   const [setsMap, setSetsMap] = useState<Record<string, SetState[]>>({});
 
+  // Últimos sets registrados para cada exerciseId (histórico do usuário)
+  // Usado para mostrar como placeholder "última vez" nos inputs.
+  const [lastSetsMap, setLastSetsMap] = useState<Record<string, Array<{ weight: number; reps: number }>>>({});
+
   // Timer state
   const [restTimer, setRestTimer] = useState<{ active: boolean; remaining: number; total: number; paused: boolean }>({
     active: false,
@@ -78,14 +83,14 @@ export function ActiveWorkoutView() {
   const [soundOn, setSoundOn] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Carregar treino
+  // Carregar treino + últimos sets do histórico
   useEffect(() => {
     if (!activeWorkoutId) {
       setView("workouts");
       return;
     }
     apiGet<{ workout: Workout }>(`/api/workouts/${activeWorkoutId}`)
-      .then((data) => {
+      .then(async (data) => {
         setWorkout(data.workout);
         // Inicializar sets
         const initial: Record<string, SetState[]> = {};
@@ -97,6 +102,20 @@ export function ActiveWorkoutView() {
           }));
         }
         setSetsMap(initial);
+
+        // Buscar últimos sets de cada exercício do histórico do usuário
+        // (trazer mesmo se o exercício está em outro treino)
+        const exerciseIds = data.workout.exercises.map((e) => e.exerciseId);
+        if (exerciseIds.length > 0) {
+          try {
+            const lastData = await apiGet<{ lastSets: Record<string, Array<{ weight: number; reps: number }>> }>(
+              `/api/sessions/last-sets?exerciseIds=${encodeURIComponent(exerciseIds.join(","))}`
+            );
+            setLastSetsMap(lastData.lastSets || {});
+          } catch (e) {
+            console.error("Erro ao buscar últimos sets:", e);
+          }
+        }
       })
       .finally(() => setLoading(false));
   }, [activeWorkoutId, setView]);
@@ -190,6 +209,13 @@ export function ActiveWorkoutView() {
       ...setsMap,
       [exerciseId]: [...sets, { weight: lastSet?.weight || "", reps: lastSet?.reps || "10", completed: false }],
     });
+  };
+
+  // Formata resumo compacto do último treino: "20kg × 10, 20kg × 8"
+  const formatLastSets = (exerciseId: string): string | null => {
+    const last = lastSetsMap[exerciseId];
+    if (!last || last.length === 0) return null;
+    return last.map((s) => `${s.weight}kg × ${s.reps}`).join(" · ");
   };
 
   const removeSet = (exerciseId: string, setIdx: number) => {
@@ -427,6 +453,12 @@ export function ActiveWorkoutView() {
                       <p className="text-xs text-muted-foreground">
                         {ex.exercise.muscleGroup} · {sets.length} séries · descanso {ex.restSeconds}s
                       </p>
+                      {formatLastSets(ex.exerciseId) && (
+                        <p className="text-[11px] text-primary/80 flex items-center gap-1 mt-0.5 font-medium">
+                          <History className="w-3 h-3 shrink-0" />
+                          <span className="truncate">Última vez: {formatLastSets(ex.exerciseId)}</span>
+                        </p>
+                      )}
                     </div>
                     {completedCount > 0 && completedCount === sets.length && (
                       <Badge className="bg-primary/15 text-primary hover:bg-primary/20">
@@ -458,7 +490,12 @@ export function ActiveWorkoutView() {
 
                         {/* Sets */}
                         <div className="space-y-1.5">
-                          {sets.map((set, setIdx) => (
+                          {sets.map((set, setIdx) => {
+                            const lastForExercise = lastSetsMap[ex.exerciseId];
+                            const lastSet = lastForExercise?.[setIdx];
+                            const weightPlaceholder = lastSet ? String(lastSet.weight) : "0";
+                            const repsPlaceholder = lastSet ? String(lastSet.reps) : "0";
+                            return (
                             <div
                               key={setIdx}
                               className={`grid grid-cols-[2rem_1fr_1fr_2.5rem] gap-2 items-center p-1 rounded-lg transition-colors ${
@@ -471,18 +508,18 @@ export function ActiveWorkoutView() {
                               <Input
                                 type="number"
                                 step="0.5"
-                                placeholder="0"
+                                placeholder={weightPlaceholder}
                                 value={set.weight}
                                 onChange={(e) => updateSet(ex.id, setIdx, "weight", e.target.value)}
-                                className={`h-10 text-center font-medium ${set.completed ? "bg-background" : ""}`}
+                                className={`h-10 text-center font-medium placeholder:text-primary/40 ${set.completed ? "bg-background" : ""}`}
                                 disabled={set.completed}
                               />
                               <Input
                                 type="number"
-                                placeholder="0"
+                                placeholder={repsPlaceholder}
                                 value={set.reps}
                                 onChange={(e) => updateSet(ex.id, setIdx, "reps", e.target.value)}
-                                className={`h-10 text-center font-medium ${set.completed ? "bg-background" : ""}`}
+                                className={`h-10 text-center font-medium placeholder:text-primary/40 ${set.completed ? "bg-background" : ""}`}
                                 disabled={set.completed}
                               />
                               <div className="flex gap-0.5">
@@ -506,7 +543,8 @@ export function ActiveWorkoutView() {
                                 </Button>
                               </div>
                             </div>
-                          ))}
+                            );
+                          })}
                         </div>
 
                         {/* Adicionar set */}
