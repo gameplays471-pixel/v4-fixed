@@ -1,0 +1,250 @@
+id,sessionId,exerciseId,exerciseName,setNumber,weight,reps,rpe,rir,restSeconds,completedAt,isPR
+cmrntv11t005qmmwxq593rge9,cmrntv11t005ommwx1bdhwwg3,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,1,50,8,,,120,2026-07-16T18:13:31.794Z,false
+cmrntv11u005smmwxr9v73swq,cmrntv11t005ommwx1bdhwwg3,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,2,52.5,7,,,120,2026-07-16T18:13:31.794Z,false
+cmrntv11v005ummwx89nssk5n,cmrntv11t005ommwx1bdhwwg3,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,3,55,6,,,120,2026-07-16T18:13:31.795Z,false
+cmrntv11v005wmmwxsgl97h4g,cmrntv11t005ommwx1bdhwwg3,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,4,57.5,6,,,120,2026-07-16T18:13:31.795Z,false
+cmrntv11v005ymmwxqtyigtxq,cmrntv11t005ommwx1bdhwwg3,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,1,50,10,,,90,2026-07-16T18:13:31.796Z,false
+cmrntv11w0060mmwxwavs2ij0,cmrntv11t005ommwx1bdhwwg3,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,2,52.5,9,,,90,2026-07-16T18:13:31.796Z,false
+cmrntv11x0062mmwxlakv4t27,cmrntv11t005ommwx1bdhwwg3,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,3,55,8,,,90,2026-07-16T18:13:31.797Z,false
+cmrntv11x0064mmwx126i1u08,cmrntv11t005ommwx1bdhwwg3,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,4,57.5,7,,,90,2026-07-16T18:13:31.797Z,false
+cmrntv11x0066mmwxrk97kftd,cmrntv11t005ommwx1bdhwwg3,cmrntv0xt0005mmwxvwh01jmc,Crucifixo com Halteres,1,50,12,,,60,2026-07-16T18:13:31.798Z,false
+cmrntv11y0068mmwx9oosx9rg,cmrntv11t005ommwx1bdhwwg3,cmrntv0xt0005mmwxvwh01jmc,Crucifixo com Halteres,2,52.5,11,,,60,2026-07-16T18:13:31.798Z,false
+cmrntv11y006ammwxez0st500,cmrntv11t005ommwx1bdhwwg3,cmrntv0xt0005mmwxvwh01jmc,Crucifixo com Halteres,3,55,10,,,60,2026-07-16T18:13:31.799Z,false
+cmrntv11z006cmmwx0lygrdh9,cmrntv11t005ommwx1bdhwwg3,cmrntv0xt0006mmwx1itg8tw9,Crossover na Polia,1,50,15,,,60,2026-07-16T18:13:31.799Z,false
+cmrntv11z006emmwx8x73eb3r,cmrntv11t005ommwx1bdhwwg3,cmrntv0xt0006mmwx1itg8tw9,Crossover na Polia,2,52.5,14,,,60,2026-07-16T18:13:31.799Z,false
+cmrntv11z006gmmwx8fdw2cqj,cmrntv11t005ommwx1bdhwwg3,cmrntv0xt0006mmwx1itg8tw9,Crossover na Polia,3,55,13,,,60,2026-07-16T18:13:31.800Z,false
+cmrntv120006immwx0eujf78v,cmrntv11t005ommwx1bdhwwg3,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,1,30,10,,,60,2026-07-16T18:13:31.800Z,false
+cmrntv120006kmmwxsw8amn6d,cmrntv11t005ommwx1bdhwwg3,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,2,32.5,9,,,60,2026-07-16T18:13:31.801Z,false
+cmrntv120006mmmwxq6t20knm,cmrntv11t005ommwx1bdhwwg3,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,3,35,8,,,60,2026-07-16T18:13:31.801Z,false
+cmrntv121006ommwxijbl3n5h,cmrntv11t005ommwx1bdhwwg3,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,4,37.5,7,,,60,2026-07-16T18:13:31.801Z,false
+cmrntv122006qmmwxy7hfx6y2,cmrntv11t005ommwx1bdhwwg3,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,1,30,12,,,60,2026-07-16T18:13:31.802Z,false
+cmrntv122006smmwx0a83ehq5,cmrntv11t005ommwx1bdhwwg3,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,2,32.5,11,,,60,2026-07-16T18:13:31.803Z,false
+cmrntv123006ummwxmre1d87u,cmrntv11t005ommwx1bdhwwg3,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,3,35,10,,,60,2026-07-16T18:13:31.803Z,false
+cmrntv123006ymmwxj2hdndh5,cmrntv123006wmmwx7h0qu7v2,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,1,30,10,,,90,2026-07-16T18:13:31.804Z,false
+cmrntv1240070mmwxtytk5l06,cmrntv123006wmmwx7h0qu7v2,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,2,32.5,9,,,90,2026-07-16T18:13:31.804Z,false
+cmrntv1240072mmwx9w1l53xd,cmrntv123006wmmwx7h0qu7v2,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,3,35,8,,,90,2026-07-16T18:13:31.805Z,false
+cmrntv1240074mmwxq5lp5sp8,cmrntv123006wmmwx7h0qu7v2,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,4,37.5,7,,,90,2026-07-16T18:13:31.805Z,false
+cmrntv1250076mmwxgai1g07u,cmrntv123006wmmwx7h0qu7v2,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,1,30,8,,,120,2026-07-16T18:13:31.805Z,false
+cmrntv1250078mmwx2lhnat18,cmrntv123006wmmwx7h0qu7v2,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,2,32.5,7,,,120,2026-07-16T18:13:31.806Z,false
+cmrntv126007ammwxxevx8lij,cmrntv123006wmmwx7h0qu7v2,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,3,35,6,,,120,2026-07-16T18:13:31.806Z,false
+cmrntv126007cmmwx6clfv4y9,cmrntv123006wmmwx7h0qu7v2,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,4,37.5,6,,,120,2026-07-16T18:13:31.807Z,false
+cmrntv127007emmwxcchpydrg,cmrntv123006wmmwx7h0qu7v2,cmrntv0xx000cmmwxgz6jg0kc,Remada Baixa na Polia,1,30,12,,,90,2026-07-16T18:13:31.807Z,false
+cmrntv127007gmmwxp5kfruc8,cmrntv123006wmmwx7h0qu7v2,cmrntv0xx000cmmwxgz6jg0kc,Remada Baixa na Polia,2,32.5,11,,,90,2026-07-16T18:13:31.807Z,false
+cmrntv127007immwxfle3a8ws,cmrntv123006wmmwx7h0qu7v2,cmrntv0xx000cmmwxgz6jg0kc,Remada Baixa na Polia,3,35,10,,,90,2026-07-16T18:13:31.808Z,false
+cmrntv128007kmmwxj8zemach,cmrntv123006wmmwx7h0qu7v2,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,1,30,10,,,60,2026-07-16T18:13:31.808Z,false
+cmrntv128007mmmwxmzfk8b64,cmrntv123006wmmwx7h0qu7v2,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,2,32.5,9,,,60,2026-07-16T18:13:31.809Z,false
+cmrntv129007ommwxalobfpim,cmrntv123006wmmwx7h0qu7v2,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,3,35,8,,,60,2026-07-16T18:13:31.809Z,false
+cmrntv129007qmmwx8lc5ckd1,cmrntv123006wmmwx7h0qu7v2,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,4,37.5,7,,,60,2026-07-16T18:13:31.810Z,false
+cmrntv129007smmwx9w7i0afl,cmrntv123006wmmwx7h0qu7v2,cmrntv0ye001cmmwxskt72158,Rosca Martelo,1,30,12,,,60,2026-07-16T18:13:31.810Z,false
+cmrntv12a007ummwx54mfy20n,cmrntv123006wmmwx7h0qu7v2,cmrntv0ye001cmmwxskt72158,Rosca Martelo,2,32.5,11,,,60,2026-07-16T18:13:31.810Z,false
+cmrntv12b007wmmwxto0qkl2q,cmrntv123006wmmwx7h0qu7v2,cmrntv0ye001cmmwxskt72158,Rosca Martelo,3,35,10,,,60,2026-07-16T18:13:31.811Z,false
+cmrntv12c0080mmwxcm8l2rqe,cmrntv12b007ymmwx2qq5be9x,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,1,80,8,,,180,2026-07-16T18:13:31.812Z,false
+cmrntv12c0082mmwxvzh349tw,cmrntv12b007ymmwx2qq5be9x,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,2,82.5,7,,,180,2026-07-16T18:13:31.813Z,false
+cmrntv12d0084mmwx4kr4bcjg,cmrntv12b007ymmwx2qq5be9x,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,3,85,6,,,180,2026-07-16T18:13:31.814Z,false
+cmrntv12e0086mmwxv8ucml95,cmrntv12b007ymmwx2qq5be9x,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,4,87.5,6,,,180,2026-07-16T18:13:31.815Z,false
+cmrntv12f0088mmwx9jre6l7s,cmrntv12b007ymmwx2qq5be9x,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,1,80,10,,,120,2026-07-16T18:13:31.815Z,false
+cmrntv12f008ammwxs389qpqe,cmrntv12b007ymmwx2qq5be9x,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,2,82.5,9,,,120,2026-07-16T18:13:31.816Z,false
+cmrntv12g008cmmwx2ebxayeq,cmrntv12b007ymmwx2qq5be9x,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,3,85,8,,,120,2026-07-16T18:13:31.816Z,false
+cmrntv12g008emmwxxn20nxtg,cmrntv12b007ymmwx2qq5be9x,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,4,87.5,7,,,120,2026-07-16T18:13:31.816Z,false
+cmrntv12h008gmmwxxt2qp2zp,cmrntv12b007ymmwx2qq5be9x,cmrntv0y0000jmmwxzedqw3f6,Cadeira Extensora,1,80,12,,,60,2026-07-16T18:13:31.817Z,false
+cmrntv12h008immwxs58wlhrz,cmrntv12b007ymmwx2qq5be9x,cmrntv0y0000jmmwxzedqw3f6,Cadeira Extensora,2,82.5,11,,,60,2026-07-16T18:13:31.818Z,false
+cmrntv12i008kmmwxm8ymvzge,cmrntv12b007ymmwx2qq5be9x,cmrntv0y0000jmmwxzedqw3f6,Cadeira Extensora,3,85,10,,,60,2026-07-16T18:13:31.818Z,false
+cmrntv12i008mmmwxltenr3xu,cmrntv12b007ymmwx2qq5be9x,cmrntv0y0000kmmwxai1upnb2,Mesa Flexora,1,80,12,,,60,2026-07-16T18:13:31.818Z,false
+cmrntv12i008ommwxu3pc17qt,cmrntv12b007ymmwx2qq5be9x,cmrntv0y0000kmmwxai1upnb2,Mesa Flexora,2,82.5,11,,,60,2026-07-16T18:13:31.819Z,false
+cmrntv12j008qmmwxsxl7h01y,cmrntv12b007ymmwx2qq5be9x,cmrntv0y0000kmmwxai1upnb2,Mesa Flexora,3,85,10,,,60,2026-07-16T18:13:31.819Z,false
+cmrntv12j008smmwx7nagw6mf,cmrntv12b007ymmwx2qq5be9x,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,1,30,15,,,45,2026-07-16T18:13:31.820Z,false
+cmrntv12k008ummwxx9lwhuzz,cmrntv12b007ymmwx2qq5be9x,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,2,32.5,14,,,45,2026-07-16T18:13:31.820Z,false
+cmrntv12k008wmmwxkstwxlz4,cmrntv12b007ymmwx2qq5be9x,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,3,35,13,,,45,2026-07-16T18:13:31.820Z,false
+cmrntv12k008ymmwx0d1p3d5q,cmrntv12b007ymmwx2qq5be9x,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,4,37.5,12,,,45,2026-07-16T18:13:31.821Z,false
+cmrntv12m0092mmwx39mrm4s1,cmrntv12l0090mmwxf50ivwnb,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,1,50,8,,,120,2026-07-16T18:13:31.822Z,false
+cmrntv12m0094mmwxx47w2bx3,cmrntv12l0090mmwxf50ivwnb,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,2,52.5,7,,,120,2026-07-16T18:13:31.823Z,false
+cmrntv12m0096mmwx2662kd49,cmrntv12l0090mmwxf50ivwnb,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,3,55,6,,,120,2026-07-16T18:13:31.823Z,false
+cmrntv12n0098mmwx5cki9eyb,cmrntv12l0090mmwxf50ivwnb,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,4,57.5,6,,,120,2026-07-16T18:13:31.823Z,false
+cmrntv12o009ammwxlkjyik5m,cmrntv12l0090mmwxf50ivwnb,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,1,50,10,,,90,2026-07-16T18:13:31.825Z,false
+cmrntv12p009cmmwx2xww0gqc,cmrntv12l0090mmwxf50ivwnb,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,2,52.5,9,,,90,2026-07-16T18:13:31.825Z,false
+cmrntv12p009emmwxjjynrdzk,cmrntv12l0090mmwxf50ivwnb,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,3,55,8,,,90,2026-07-16T18:13:31.825Z,false
+cmrntv12p009gmmwxpmp30guw,cmrntv12l0090mmwxf50ivwnb,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,4,57.5,7,,,90,2026-07-16T18:13:31.826Z,false
+cmrntv12q009immwxcsiingvi,cmrntv12l0090mmwxf50ivwnb,cmrntv0xt0005mmwxvwh01jmc,Crucifixo com Halteres,1,50,12,,,60,2026-07-16T18:13:31.826Z,false
+cmrntv12r009kmmwx08h9lp35,cmrntv12l0090mmwxf50ivwnb,cmrntv0xt0005mmwxvwh01jmc,Crucifixo com Halteres,2,52.5,11,,,60,2026-07-16T18:13:31.827Z,false
+cmrntv12r009mmmwx0fnbcmfv,cmrntv12l0090mmwxf50ivwnb,cmrntv0xt0005mmwxvwh01jmc,Crucifixo com Halteres,3,55,10,,,60,2026-07-16T18:13:31.827Z,false
+cmrntv12r009ommwxyqkinjxk,cmrntv12l0090mmwxf50ivwnb,cmrntv0xt0006mmwx1itg8tw9,Crossover na Polia,1,50,15,,,60,2026-07-16T18:13:31.828Z,false
+cmrntv12s009qmmwxov1okvok,cmrntv12l0090mmwxf50ivwnb,cmrntv0xt0006mmwx1itg8tw9,Crossover na Polia,2,52.5,14,,,60,2026-07-16T18:13:31.828Z,false
+cmrntv12s009smmwxoewi5qww,cmrntv12l0090mmwxf50ivwnb,cmrntv0xt0006mmwx1itg8tw9,Crossover na Polia,3,55,13,,,60,2026-07-16T18:13:31.829Z,false
+cmrntv12t009ummwxjq7ze65l,cmrntv12l0090mmwxf50ivwnb,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,1,30,10,,,60,2026-07-16T18:13:31.829Z,false
+cmrntv12t009wmmwxya6uyct8,cmrntv12l0090mmwxf50ivwnb,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,2,32.5,9,,,60,2026-07-16T18:13:31.829Z,false
+cmrntv12t009ymmwx9hknxp0i,cmrntv12l0090mmwxf50ivwnb,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,3,35,8,,,60,2026-07-16T18:13:31.830Z,false
+cmrntv12u00a0mmwx6lvjowkr,cmrntv12l0090mmwxf50ivwnb,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,4,37.5,7,,,60,2026-07-16T18:13:31.831Z,false
+cmrntv12v00a2mmwxabdo74a0,cmrntv12l0090mmwxf50ivwnb,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,1,30,12,,,60,2026-07-16T18:13:31.831Z,false
+cmrntv12v00a4mmwxg0v03jub,cmrntv12l0090mmwxf50ivwnb,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,2,32.5,11,,,60,2026-07-16T18:13:31.831Z,false
+cmrntv12v00a6mmwxzkmf0i2e,cmrntv12l0090mmwxf50ivwnb,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,3,35,10,,,60,2026-07-16T18:13:31.832Z,false
+cmrntv12w00aammwxldwe35n3,cmrntv12w00a8mmwxcfa520r2,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,1,30,10,,,90,2026-07-16T18:13:31.833Z,false
+cmrntv12x00acmmwxn4vpgbyt,cmrntv12w00a8mmwxcfa520r2,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,2,32.5,9,,,90,2026-07-16T18:13:31.833Z,false
+cmrntv12x00aemmwx2t9ymz7r,cmrntv12w00a8mmwxcfa520r2,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,3,35,8,,,90,2026-07-16T18:13:31.833Z,false
+cmrntv12x00agmmwxmzpeuiv0,cmrntv12w00a8mmwxcfa520r2,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,4,37.5,7,,,90,2026-07-16T18:13:31.834Z,false
+cmrntv12y00aimmwxm6shru9c,cmrntv12w00a8mmwxcfa520r2,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,1,30,8,,,120,2026-07-16T18:13:31.835Z,false
+cmrntv12z00akmmwxtr41fmps,cmrntv12w00a8mmwxcfa520r2,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,2,32.5,7,,,120,2026-07-16T18:13:31.835Z,false
+cmrntv12z00ammmwxz0ki002y,cmrntv12w00a8mmwxcfa520r2,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,3,35,6,,,120,2026-07-16T18:13:31.835Z,false
+cmrntv12z00aommwxzbc5zbz8,cmrntv12w00a8mmwxcfa520r2,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,4,37.5,6,,,120,2026-07-16T18:13:31.836Z,false
+cmrntv13000aqmmwx1nd32xg7,cmrntv12w00a8mmwxcfa520r2,cmrntv0xx000cmmwxgz6jg0kc,Remada Baixa na Polia,1,30,12,,,90,2026-07-16T18:13:31.836Z,false
+cmrntv13000asmmwxld0qto4x,cmrntv12w00a8mmwxcfa520r2,cmrntv0xx000cmmwxgz6jg0kc,Remada Baixa na Polia,2,32.5,11,,,90,2026-07-16T18:13:31.837Z,false
+cmrntv13100aummwxzlxksqvb,cmrntv12w00a8mmwxcfa520r2,cmrntv0xx000cmmwxgz6jg0kc,Remada Baixa na Polia,3,35,10,,,90,2026-07-16T18:13:31.837Z,false
+cmrntv13100awmmwxk3hgbl1j,cmrntv12w00a8mmwxcfa520r2,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,1,30,10,,,60,2026-07-16T18:13:31.837Z,false
+cmrntv13100aymmwxflk6yr3i,cmrntv12w00a8mmwxcfa520r2,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,2,32.5,9,,,60,2026-07-16T18:13:31.838Z,false
+cmrntv13200b0mmwxqr3efb44,cmrntv12w00a8mmwxcfa520r2,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,3,35,8,,,60,2026-07-16T18:13:31.839Z,false
+cmrntv13300b2mmwxxiovi0ie,cmrntv12w00a8mmwxcfa520r2,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,4,37.5,7,,,60,2026-07-16T18:13:31.839Z,false
+cmrntv13300b4mmwxjq6l6jrm,cmrntv12w00a8mmwxcfa520r2,cmrntv0ye001cmmwxskt72158,Rosca Martelo,1,30,12,,,60,2026-07-16T18:13:31.839Z,false
+cmrntv13300b6mmwxgafgl8tj,cmrntv12w00a8mmwxcfa520r2,cmrntv0ye001cmmwxskt72158,Rosca Martelo,2,32.5,11,,,60,2026-07-16T18:13:31.840Z,false
+cmrntv13400b8mmwxxvdtmcwg,cmrntv12w00a8mmwxcfa520r2,cmrntv0ye001cmmwxskt72158,Rosca Martelo,3,35,10,,,60,2026-07-16T18:13:31.840Z,false
+cmrntv13500bcmmwxvzjcy36b,cmrntv13400bammwxtbmy6ow4,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,1,80,8,,,180,2026-07-16T18:13:31.841Z,false
+cmrntv13500bemmwxoiregnqi,cmrntv13400bammwxtbmy6ow4,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,2,82.5,7,,,180,2026-07-16T18:13:31.841Z,false
+cmrntv13500bgmmwx3pcwk2ld,cmrntv13400bammwxtbmy6ow4,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,3,85,6,,,180,2026-07-16T18:13:31.842Z,false
+cmrntv13600bimmwxtirdzcfl,cmrntv13400bammwxtbmy6ow4,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,4,87.5,6,,,180,2026-07-16T18:13:31.842Z,false
+cmrntv13600bkmmwxb34t1v6m,cmrntv13400bammwxtbmy6ow4,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,1,80,10,,,120,2026-07-16T18:13:31.843Z,false
+cmrntv13600bmmmwxqnnc85wx,cmrntv13400bammwxtbmy6ow4,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,2,82.5,9,,,120,2026-07-16T18:13:31.843Z,false
+cmrntv13700bommwxiod68zx9,cmrntv13400bammwxtbmy6ow4,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,3,85,8,,,120,2026-07-16T18:13:31.843Z,false
+cmrntv13800bqmmwxb7a2miha,cmrntv13400bammwxtbmy6ow4,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,4,87.5,7,,,120,2026-07-16T18:13:31.844Z,false
+cmrntv13900bsmmwx3alqt7ar,cmrntv13400bammwxtbmy6ow4,cmrntv0y0000jmmwxzedqw3f6,Cadeira Extensora,1,80,12,,,60,2026-07-16T18:13:31.845Z,false
+cmrntv13900bummwxguql2k8s,cmrntv13400bammwxtbmy6ow4,cmrntv0y0000jmmwxzedqw3f6,Cadeira Extensora,2,82.5,11,,,60,2026-07-16T18:13:31.845Z,false
+cmrntv13a00bwmmwx518fnbd6,cmrntv13400bammwxtbmy6ow4,cmrntv0y0000jmmwxzedqw3f6,Cadeira Extensora,3,85,10,,,60,2026-07-16T18:13:31.846Z,false
+cmrntv13a00bymmwxwdr1w29z,cmrntv13400bammwxtbmy6ow4,cmrntv0y0000kmmwxai1upnb2,Mesa Flexora,1,80,12,,,60,2026-07-16T18:13:31.847Z,false
+cmrntv13b00c0mmwxn425x8hp,cmrntv13400bammwxtbmy6ow4,cmrntv0y0000kmmwxai1upnb2,Mesa Flexora,2,82.5,11,,,60,2026-07-16T18:13:31.847Z,false
+cmrntv13b00c2mmwxfjbo8lg5,cmrntv13400bammwxtbmy6ow4,cmrntv0y0000kmmwxai1upnb2,Mesa Flexora,3,85,10,,,60,2026-07-16T18:13:31.848Z,false
+cmrntv13c00c4mmwxzqwlenon,cmrntv13400bammwxtbmy6ow4,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,1,30,15,,,45,2026-07-16T18:13:31.848Z,false
+cmrntv13c00c6mmwxd89cx0sy,cmrntv13400bammwxtbmy6ow4,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,2,32.5,14,,,45,2026-07-16T18:13:31.848Z,false
+cmrntv13c00c8mmwxgikfijwz,cmrntv13400bammwxtbmy6ow4,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,3,35,13,,,45,2026-07-16T18:13:31.849Z,false
+cmrntv13d00cammwxh2kt7vhc,cmrntv13400bammwxtbmy6ow4,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,4,37.5,12,,,45,2026-07-16T18:13:31.849Z,false
+cmrntv13e00cemmwxun4aj3ii,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,1,50,8,,,120,2026-07-16T18:13:31.850Z,false
+cmrntv13e00cgmmwxpymb48ng,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,2,52.5,7,,,120,2026-07-16T18:13:31.851Z,false
+cmrntv13f00cimmwxub2xwtjn,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,3,55,6,,,120,2026-07-16T18:13:31.851Z,false
+cmrntv13f00ckmmwxxz8cdlou,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,4,57.5,6,,,120,2026-07-16T18:13:31.852Z,false
+cmrntv13g00cmmmwx9ifaauv3,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,1,50,10,,,90,2026-07-16T18:13:31.852Z,false
+cmrntv13g00commwxa0jwzmqm,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,2,52.5,9,,,90,2026-07-16T18:13:31.853Z,false
+cmrntv13h00cqmmwxp5yjots3,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,3,55,8,,,90,2026-07-16T18:13:31.853Z,false
+cmrntv13h00csmmwx2cg9eqxp,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,4,57.5,7,,,90,2026-07-16T18:13:31.854Z,false
+cmrntv13i00cummwx55q57aee,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xt0005mmwxvwh01jmc,Crucifixo com Halteres,1,50,12,,,60,2026-07-16T18:13:31.854Z,false
+cmrntv13i00cwmmwxva1w0a5e,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xt0005mmwxvwh01jmc,Crucifixo com Halteres,2,52.5,11,,,60,2026-07-16T18:13:31.854Z,false
+cmrntv13i00cymmwx7mjrb2fr,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xt0005mmwxvwh01jmc,Crucifixo com Halteres,3,55,10,,,60,2026-07-16T18:13:31.855Z,false
+cmrntv13j00d0mmwxmwxbc5ga,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xt0006mmwx1itg8tw9,Crossover na Polia,1,50,15,,,60,2026-07-16T18:13:31.855Z,false
+cmrntv13j00d2mmwx9jo6fjzf,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xt0006mmwx1itg8tw9,Crossover na Polia,2,52.5,14,,,60,2026-07-16T18:13:31.856Z,false
+cmrntv13k00d4mmwx0b9a8i9x,cmrntv13d00ccmmwxr3hdtoki,cmrntv0xt0006mmwx1itg8tw9,Crossover na Polia,3,55,13,,,60,2026-07-16T18:13:31.856Z,false
+cmrntv13k00d6mmwx9es6wvju,cmrntv13d00ccmmwxr3hdtoki,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,1,30,10,,,60,2026-07-16T18:13:31.857Z,false
+cmrntv13l00d8mmwxupyblbx9,cmrntv13d00ccmmwxr3hdtoki,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,2,32.5,9,,,60,2026-07-16T18:13:31.857Z,false
+cmrntv13l00dammwx0zj9pr5g,cmrntv13d00ccmmwxr3hdtoki,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,3,35,8,,,60,2026-07-16T18:13:31.858Z,false
+cmrntv13m00dcmmwxv0hyvmh4,cmrntv13d00ccmmwxr3hdtoki,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,4,37.5,7,,,60,2026-07-16T18:13:31.858Z,false
+cmrntv13m00demmwxa23jvhik,cmrntv13d00ccmmwxr3hdtoki,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,1,30,12,,,60,2026-07-16T18:13:31.859Z,false
+cmrntv13m00dgmmwxndyvgr92,cmrntv13d00ccmmwxr3hdtoki,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,2,32.5,11,,,60,2026-07-16T18:13:31.859Z,false
+cmrntv13n00dimmwxy0zigagl,cmrntv13d00ccmmwxr3hdtoki,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,3,35,10,,,60,2026-07-16T18:13:31.859Z,false
+cmrntv13o00dmmmwx183uoxbc,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,1,30,10,,,90,2026-07-16T18:13:31.860Z,false
+cmrntv13o00dommwxr980jbxh,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,2,32.5,9,,,90,2026-07-16T18:13:31.861Z,false
+cmrntv13p00dqmmwxhmwy6g0c,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,3,35,8,,,90,2026-07-16T18:13:31.861Z,false
+cmrntv13p00dsmmwxz5u91kra,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,4,37.5,7,,,90,2026-07-16T18:13:31.861Z,false
+cmrntv13q00dummwxapqma535,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,1,30,8,,,120,2026-07-16T18:13:31.862Z,false
+cmrntv13q00dwmmwx2scnemm2,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,2,32.5,7,,,120,2026-07-16T18:13:31.862Z,false
+cmrntv13r00dymmwx5jle31qi,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,3,35,6,,,120,2026-07-16T18:13:31.863Z,false
+cmrntv13r00e0mmwxmoqg3bb7,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,4,37.5,6,,,120,2026-07-16T18:13:31.864Z,false
+cmrntv13s00e2mmwxk8m2di36,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0xx000cmmwxgz6jg0kc,Remada Baixa na Polia,1,30,12,,,90,2026-07-16T18:13:31.864Z,false
+cmrntv13s00e4mmwxbdl73khe,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0xx000cmmwxgz6jg0kc,Remada Baixa na Polia,2,32.5,11,,,90,2026-07-16T18:13:31.864Z,false
+cmrntv13s00e6mmwxwl0zj3r9,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0xx000cmmwxgz6jg0kc,Remada Baixa na Polia,3,35,10,,,90,2026-07-16T18:13:31.865Z,false
+cmrntv13t00e8mmwx2mx4zrvw,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,1,30,10,,,60,2026-07-16T18:13:31.865Z,false
+cmrntv14j00eammwx9pfr56mc,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,2,32.5,9,,,60,2026-07-16T18:13:31.891Z,false
+cmrntv14j00ecmmwxt1k42kc8,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,3,35,8,,,60,2026-07-16T18:13:31.892Z,false
+cmrntv14k00eemmwxm1084y9n,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,4,37.5,7,,,60,2026-07-16T18:13:31.892Z,false
+cmrntv14k00egmmwxw3oa62o4,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0ye001cmmwxskt72158,Rosca Martelo,1,30,12,,,60,2026-07-16T18:13:31.892Z,false
+cmrntv14k00eimmwxa49jlnrx,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0ye001cmmwxskt72158,Rosca Martelo,2,32.5,11,,,60,2026-07-16T18:13:31.893Z,false
+cmrntv14l00ekmmwxlkpa3ner,cmrntv13n00dkmmwx3vb2ymdx,cmrntv0ye001cmmwxskt72158,Rosca Martelo,3,35,10,,,60,2026-07-16T18:13:31.893Z,false
+cmrntv14m00eommwx5vxsb8ps,cmrntv14l00emmmwx5gt7cia6,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,1,80,8,,,180,2026-07-16T18:13:31.894Z,false
+cmrntv14m00eqmmwxz8ayj1hl,cmrntv14l00emmmwx5gt7cia6,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,2,82.5,7,,,180,2026-07-16T18:13:31.894Z,false
+cmrntv14m00esmmwx87a2l5xu,cmrntv14l00emmmwx5gt7cia6,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,3,85,6,,,180,2026-07-16T18:13:31.895Z,false
+cmrntv14n00eummwxusvw7ox8,cmrntv14l00emmmwx5gt7cia6,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,4,87.5,6,,,180,2026-07-16T18:13:31.895Z,false
+cmrntv14n00ewmmwx5vfqx5vx,cmrntv14l00emmmwx5gt7cia6,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,1,80,10,,,120,2026-07-16T18:13:31.896Z,false
+cmrntv14o00eymmwxd77uegwd,cmrntv14l00emmmwx5gt7cia6,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,2,82.5,9,,,120,2026-07-16T18:13:31.896Z,false
+cmrntv14o00f0mmwxi4f8x4e8,cmrntv14l00emmmwx5gt7cia6,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,3,85,8,,,120,2026-07-16T18:13:31.896Z,false
+cmrntv14p00f2mmwxbk2e35l4,cmrntv14l00emmmwx5gt7cia6,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,4,87.5,7,,,120,2026-07-16T18:13:31.897Z,false
+cmrntv14p00f4mmwxy7rl9dig,cmrntv14l00emmmwx5gt7cia6,cmrntv0y0000jmmwxzedqw3f6,Cadeira Extensora,1,80,12,,,60,2026-07-16T18:13:31.898Z,false
+cmrntv14q00f6mmwxm8v09wd4,cmrntv14l00emmmwx5gt7cia6,cmrntv0y0000jmmwxzedqw3f6,Cadeira Extensora,2,82.5,11,,,60,2026-07-16T18:13:31.898Z,false
+cmrntv14q00f8mmwxmc8sa3u1,cmrntv14l00emmmwx5gt7cia6,cmrntv0y0000jmmwxzedqw3f6,Cadeira Extensora,3,85,10,,,60,2026-07-16T18:13:31.899Z,false
+cmrntv14r00fammwxhztvgm71,cmrntv14l00emmmwx5gt7cia6,cmrntv0y0000kmmwxai1upnb2,Mesa Flexora,1,80,12,,,60,2026-07-16T18:13:31.899Z,false
+cmrntv14s00fcmmwx2n2gkoqz,cmrntv14l00emmmwx5gt7cia6,cmrntv0y0000kmmwxai1upnb2,Mesa Flexora,2,82.5,11,,,60,2026-07-16T18:13:31.900Z,false
+cmrntv14s00femmwx6lia3gog,cmrntv14l00emmmwx5gt7cia6,cmrntv0y0000kmmwxai1upnb2,Mesa Flexora,3,85,10,,,60,2026-07-16T18:13:31.900Z,false
+cmrntv14s00fgmmwx7nsa5g97,cmrntv14l00emmmwx5gt7cia6,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,1,30,15,,,45,2026-07-16T18:13:31.901Z,false
+cmrntv14t00fimmwx3ijfp66s,cmrntv14l00emmmwx5gt7cia6,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,2,32.5,14,,,45,2026-07-16T18:13:31.901Z,false
+cmrntv14t00fkmmwxvqlzikxt,cmrntv14l00emmmwx5gt7cia6,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,3,35,13,,,45,2026-07-16T18:13:31.902Z,false
+cmrntv14u00fmmmwxes89qwfk,cmrntv14l00emmmwx5gt7cia6,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,4,37.5,12,,,45,2026-07-16T18:13:31.902Z,false
+cmrntv14u00fqmmwxdpd687i1,cmrntv14u00fommwxjoz00ulz,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,1,50,8,,,120,2026-07-16T18:13:31.903Z,false
+cmrntv14v00fsmmwxuurm785r,cmrntv14u00fommwxjoz00ulz,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,2,52.5,7,,,120,2026-07-16T18:13:31.903Z,false
+cmrntv14v00fummwx62yocsdj,cmrntv14u00fommwxjoz00ulz,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,3,55,6,,,120,2026-07-16T18:13:31.904Z,false
+cmrntv14v00fwmmwx1glqu3cp,cmrntv14u00fommwxjoz00ulz,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,4,57.5,6,,,120,2026-07-16T18:13:31.904Z,false
+cmrntv14w00fymmwxneb93edo,cmrntv14u00fommwxjoz00ulz,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,1,50,10,,,90,2026-07-16T18:13:31.904Z,false
+cmrntv14x00g0mmwxtv7g6fs8,cmrntv14u00fommwxjoz00ulz,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,2,52.5,9,,,90,2026-07-16T18:13:31.905Z,false
+cmrntv14x00g2mmwxqc5rq6z9,cmrntv14u00fommwxjoz00ulz,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,3,55,8,,,90,2026-07-16T18:13:31.906Z,false
+cmrntv14y00g4mmwxn8yo3wel,cmrntv14u00fommwxjoz00ulz,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,4,57.5,7,,,90,2026-07-16T18:13:31.906Z,false
+cmrntv14y00g6mmwxv38ubjc9,cmrntv14u00fommwxjoz00ulz,cmrntv0xt0005mmwxvwh01jmc,Crucifixo com Halteres,1,50,12,,,60,2026-07-16T18:13:31.906Z,false
+cmrntv14y00g8mmwxd37k5yvg,cmrntv14u00fommwxjoz00ulz,cmrntv0xt0005mmwxvwh01jmc,Crucifixo com Halteres,2,52.5,11,,,60,2026-07-16T18:13:31.907Z,false
+cmrntv14z00gammwxfqt331ei,cmrntv14u00fommwxjoz00ulz,cmrntv0xt0005mmwxvwh01jmc,Crucifixo com Halteres,3,55,10,,,60,2026-07-16T18:13:31.908Z,false
+cmrntv15000gcmmwxekalkj9h,cmrntv14u00fommwxjoz00ulz,cmrntv0xt0006mmwx1itg8tw9,Crossover na Polia,1,50,15,,,60,2026-07-16T18:13:31.909Z,false
+cmrntv15100gemmwxtwqhty2r,cmrntv14u00fommwxjoz00ulz,cmrntv0xt0006mmwx1itg8tw9,Crossover na Polia,2,52.5,14,,,60,2026-07-16T18:13:31.909Z,false
+cmrntv15100ggmmwxq1vdr9fr,cmrntv14u00fommwxjoz00ulz,cmrntv0xt0006mmwx1itg8tw9,Crossover na Polia,3,55,13,,,60,2026-07-16T18:13:31.910Z,false
+cmrntv15200gimmwxwohnuceo,cmrntv14u00fommwxjoz00ulz,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,1,30,10,,,60,2026-07-16T18:13:31.910Z,false
+cmrntv15200gkmmwxgsf3cplx,cmrntv14u00fommwxjoz00ulz,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,2,32.5,9,,,60,2026-07-16T18:13:31.910Z,false
+cmrntv15200gmmmwxut8lenvu,cmrntv14u00fommwxjoz00ulz,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,3,35,8,,,60,2026-07-16T18:13:31.911Z,false
+cmrntv15300gommwx8hen1lgd,cmrntv14u00fommwxjoz00ulz,cmrntv0ya0014mmwxrvxu8rcy,Tríceps Pulley,4,37.5,7,,,60,2026-07-16T18:13:31.912Z,false
+cmrntv15400gqmmwx7qft9iq0,cmrntv14u00fommwxjoz00ulz,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,1,30,12,,,60,2026-07-16T18:13:31.912Z,false
+cmrntv15500gsmmwxro75y4lc,cmrntv14u00fommwxjoz00ulz,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,2,32.5,11,,,60,2026-07-16T18:13:31.913Z,false
+cmrntv15500gummwxgxqy4vsv,cmrntv14u00fommwxjoz00ulz,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,3,35,10,,,60,2026-07-16T18:13:31.914Z,false
+cmrntv15600gymmwxad70cy0u,cmrntv15600gwmmwx66t64co7,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,1,30,10,,,90,2026-07-16T18:13:31.914Z,false
+cmrntv15600h0mmwxfbds17bn,cmrntv15600gwmmwx66t64co7,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,2,32.5,9,,,90,2026-07-16T18:13:31.915Z,false
+cmrntv15700h2mmwxvfvtqp36,cmrntv15600gwmmwx66t64co7,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,3,35,8,,,90,2026-07-16T18:13:31.915Z,false
+cmrntv15700h4mmwxrk8vlydj,cmrntv15600gwmmwx66t64co7,cmrntv0xv0009mmwxr0asux9q,Puxada Frontal,4,37.5,7,,,90,2026-07-16T18:13:31.916Z,false
+cmrntv15800h6mmwxn9sky2rd,cmrntv15600gwmmwx66t64co7,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,1,30,8,,,120,2026-07-16T18:13:31.916Z,false
+cmrntv15800h8mmwxrcb2ep1g,cmrntv15600gwmmwx66t64co7,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,2,32.5,7,,,120,2026-07-16T18:13:31.917Z,false
+cmrntv15900hammwxbc47pfc9,cmrntv15600gwmmwx66t64co7,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,3,35,6,,,120,2026-07-16T18:13:31.917Z,false
+cmrntv15900hcmmwx9q5zwq82,cmrntv15600gwmmwx66t64co7,cmrntv0xw000bmmwxr3tidyzs,Remada Curvada com Barra,4,37.5,6,,,120,2026-07-16T18:13:31.918Z,false
+cmrntv15a00hemmwxo43h8usv,cmrntv15600gwmmwx66t64co7,cmrntv0xx000cmmwxgz6jg0kc,Remada Baixa na Polia,1,30,12,,,90,2026-07-16T18:13:31.918Z,false
+cmrntv15a00hgmmwxysj1y2o9,cmrntv15600gwmmwx66t64co7,cmrntv0xx000cmmwxgz6jg0kc,Remada Baixa na Polia,2,32.5,11,,,90,2026-07-16T18:13:31.919Z,false
+cmrntv15b00himmwx0xwlvglh,cmrntv15600gwmmwx66t64co7,cmrntv0xx000cmmwxgz6jg0kc,Remada Baixa na Polia,3,35,10,,,90,2026-07-16T18:13:31.919Z,false
+cmrntv15c00hkmmwxtgn710l3,cmrntv15600gwmmwx66t64co7,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,1,30,10,,,60,2026-07-16T18:13:31.920Z,false
+cmrntv15c00hmmmwxt4qpx3mc,cmrntv15600gwmmwx66t64co7,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,2,32.5,9,,,60,2026-07-16T18:13:31.921Z,false
+cmrntv15d00hommwx9r7rvp5j,cmrntv15600gwmmwx66t64co7,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,3,35,8,,,60,2026-07-16T18:13:31.921Z,false
+cmrntv15d00hqmmwxp52dj76u,cmrntv15600gwmmwx66t64co7,cmrntv0yd0019mmwxa6arro91,Rosca Direta com Barra,4,37.5,7,,,60,2026-07-16T18:13:31.922Z,false
+cmrntv15d00hsmmwxn5bn2vkt,cmrntv15600gwmmwx66t64co7,cmrntv0ye001cmmwxskt72158,Rosca Martelo,1,30,12,,,60,2026-07-16T18:13:31.922Z,false
+cmrntv15e00hummwx4vrj9ux2,cmrntv15600gwmmwx66t64co7,cmrntv0ye001cmmwxskt72158,Rosca Martelo,2,32.5,11,,,60,2026-07-16T18:13:31.922Z,false
+cmrntv15e00hwmmwxijqffoee,cmrntv15600gwmmwx66t64co7,cmrntv0ye001cmmwxskt72158,Rosca Martelo,3,35,10,,,60,2026-07-16T18:13:31.923Z,false
+cmrntv15g00i0mmwxqu7prnxx,cmrntv15f00hymmwx8d4sgw5g,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,1,80,8,,,180,2026-07-16T18:13:31.924Z,false
+cmrntv15g00i2mmwxdvz6q0z6,cmrntv15f00hymmwx8d4sgw5g,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,2,82.5,7,,,180,2026-07-16T18:13:31.924Z,false
+cmrntv15g00i4mmwxxfjc6o1s,cmrntv15f00hymmwx8d4sgw5g,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,3,85,6,,,180,2026-07-16T18:13:31.925Z,false
+cmrntv15h00i6mmwxbyforxa0,cmrntv15f00hymmwx8d4sgw5g,cmrntv0xz000hmmwxd7bl0w8s,Agachamento Livre com Barra,4,87.5,6,,,180,2026-07-16T18:13:31.926Z,false
+cmrntv15i00i8mmwx87l57if1,cmrntv15f00hymmwx8d4sgw5g,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,1,80,10,,,120,2026-07-16T18:13:31.926Z,false
+cmrntv15i00iammwx3f27qr4l,cmrntv15f00hymmwx8d4sgw5g,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,2,82.5,9,,,120,2026-07-16T18:13:31.926Z,false
+cmrntv15i00icmmwxly6v48xz,cmrntv15f00hymmwx8d4sgw5g,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,3,85,8,,,120,2026-07-16T18:13:31.927Z,false
+cmrntv15j00iemmwxaxr0hfl0,cmrntv15f00hymmwx8d4sgw5g,cmrntv0xz000immwx2bd9vdpb,Leg Press 45°,4,87.5,7,,,120,2026-07-16T18:13:31.927Z,false
+cmrntv15j00igmmwx6y3yrstl,cmrntv15f00hymmwx8d4sgw5g,cmrntv0y0000jmmwxzedqw3f6,Cadeira Extensora,1,80,12,,,60,2026-07-16T18:13:31.928Z,false
+cmrntv15k00iimmwxnlt7vbv2,cmrntv15f00hymmwx8d4sgw5g,cmrntv0y0000jmmwxzedqw3f6,Cadeira Extensora,2,82.5,11,,,60,2026-07-16T18:13:31.928Z,false
+cmrntv15k00ikmmwxcc3o4l4t,cmrntv15f00hymmwx8d4sgw5g,cmrntv0y0000jmmwxzedqw3f6,Cadeira Extensora,3,85,10,,,60,2026-07-16T18:13:31.929Z,false
+cmrntv15l00immmwxasc7w5xv,cmrntv15f00hymmwx8d4sgw5g,cmrntv0y0000kmmwxai1upnb2,Mesa Flexora,1,80,12,,,60,2026-07-16T18:13:31.929Z,false
+cmrntv15l00iommwxbjh9waws,cmrntv15f00hymmwx8d4sgw5g,cmrntv0y0000kmmwxai1upnb2,Mesa Flexora,2,82.5,11,,,60,2026-07-16T18:13:31.930Z,false
+cmrntv15m00iqmmwxq4z2g42k,cmrntv15f00hymmwx8d4sgw5g,cmrntv0y0000kmmwxai1upnb2,Mesa Flexora,3,85,10,,,60,2026-07-16T18:13:31.930Z,false
+cmrntv15m00ismmwx6sjtjmi5,cmrntv15f00hymmwx8d4sgw5g,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,1,30,15,,,45,2026-07-16T18:13:31.931Z,false
+cmrntv15n00iummwx99qutt5e,cmrntv15f00hymmwx8d4sgw5g,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,2,32.5,14,,,45,2026-07-16T18:13:31.931Z,false
+cmrntv15n00iwmmwx7hvl01jm,cmrntv15f00hymmwx8d4sgw5g,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,3,35,13,,,45,2026-07-16T18:13:31.931Z,false
+cmrntv15n00iymmwx80ctozou,cmrntv15f00hymmwx8d4sgw5g,cmrntv0y2000pmmwxr54ju9ag,Panturrilha em Pé,4,37.5,12,,,45,2026-07-16T18:13:31.932Z,false
+cmrntwol6000dmm1p9h1pd79n,cmrntwol6000bmm1pm5zelwk7,cmrntv0yh001jmmwxp803qgs6,Abdominal Bicicleta,1,50,10,,,90,2026-07-16T18:14:48.954Z,true
+cmrntwol6000emm1p80zmm6lx,cmrntwol6000bmm1pm5zelwk7,cmrntv0yh001jmmwxp803qgs6,Abdominal Bicicleta,2,55,8,,,90,2026-07-16T18:14:48.954Z,true
+cmrntwol6000fmm1ptxouh1p2,cmrntwol6000bmm1pm5zelwk7,cmrntv0za0026mmwx6esqtiy7,Agachamento Frontal,3,30,12,,,60,2026-07-16T18:14:48.954Z,true
+cmrntwol6000gmm1px4nfay0t,cmrntwol6000bmm1pm5zelwk7,cmrntv0z3001smmwxhzgm2zx6,Avanço (Step-up),4,20,15,,,45,2026-07-16T18:14:48.954Z,true
+cmrntwomu000kmm1pm8zhvlb1,cmrntwomu000imm1pklbcqi2l,cmrntv0za0026mmwx6esqtiy7,Agachamento Frontal,1,35,12,,,60,2026-07-16T18:14:49.014Z,true
+cmrntwomu000lmm1p1gg9vkhf,cmrntwomu000imm1pklbcqi2l,cmrntv0z3001smmwxhzgm2zx6,Avanço (Step-up),2,25,15,,,45,2026-07-16T18:14:49.014Z,true
+cmrnugtfu000cmmk403q0omk1,cmrnugtfu000ammk4fc8tmjh5,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,1,30,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000dmmk4pim2fttx,cmrnugtfu000ammk4fc8tmjh5,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,2,40,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000emmk4mx8ump48,cmrnugtfu000ammk4fc8tmjh5,cmrntv0xp0001mmwxek9gfye2,Supino Reto com Barra,3,50,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000fmmk46ycgnp4d,cmrnugtfu000ammk4fc8tmjh5,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,4,20,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000gmmk4cagw2wr3,cmrnugtfu000ammk4fc8tmjh5,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,5,30,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000hmmk42wdc6ww0,cmrnugtfu000ammk4fc8tmjh5,cmrntv0xs0004mmwx2234134z,Supino Inclinado com Halteres,6,50,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000immk42lq9dha0,cmrnugtfu000ammk4fc8tmjh5,cmrntv0z70020mmwxfv2k2w2v,Peck Deck (Máquina),7,40,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000jmmk48ocmxtvk,cmrnugtfu000ammk4fc8tmjh5,cmrntv0z70020mmwxfv2k2w2v,Peck Deck (Máquina),8,50,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000kmmk415gnlf0u,cmrnugtfu000ammk4fc8tmjh5,cmrntv0z70020mmwxfv2k2w2v,Peck Deck (Máquina),9,60,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000lmmk4s7te93qq,cmrnugtfu000ammk4fc8tmjh5,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,10,70,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000mmmk4t8gdv0v6,cmrnugtfu000ammk4fc8tmjh5,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,11,80,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000nmmk450o8rsbf,cmrnugtfu000ammk4fc8tmjh5,cmrntv0yb0015mmwxz9m24aqm,Tríceps Corda,12,90,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000ommk4f4risjiy,cmrnugtfu000ammk4fc8tmjh5,cmrntv0yc0016mmwxftmvn9ao,Tríceps Francês,13,40,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000pmmk474w5kig0,cmrnugtfu000ammk4fc8tmjh5,cmrntv0yc0016mmwxftmvn9ao,Tríceps Francês,14,30,10,,,90,2026-07-16T18:30:28.362Z,true
+cmrnugtfu000qmmk4qhahibgy,cmrnugtfu000ammk4fc8tmjh5,cmrntv0yc0016mmwxftmvn9ao,Tríceps Francês,15,20,10,,,90,2026-07-16T18:30:28.362Z,true

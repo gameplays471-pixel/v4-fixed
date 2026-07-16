@@ -111,3 +111,38 @@ Stage Summary:
 - UI atualizada: badge "Última vez" no header do exercício + placeholders nos inputs mostrando peso/reps por série da última sessão.
 - Histórico é cross-workout: se o usuário fez Supino Reto no Treino A, e o Treino B também tem Supino Reto, ao iniciar B verá o histórico de A.
 - Dev log confirma compilação OK e chamada ao endpoint em 200.
+
+---
+Task ID: migrate-supabase-csv-export
+Agent: main
+Task: Migrar banco de SQLite para Supabase PostgreSQL. Após seed interrompido (64/180 exercícios), estratégia alterada para export via CSV e import manual no dashboard do Supabase.
+
+Work Log:
+- Schema Prisma trocado de `sqlite` para `postgresql` com `directUrl` apontando para session-mode pooler (necessário para migrations).
+- `.env` atualizado com duas URLs do Supabase:
+  - `DATABASE_URL` → pooler transacional (aws-1-us-west-2:6543?pgbouncer=true) — runtime
+  - `DIRECT_URL` → pooler sessão (aws-1-us-west-2:5432) — migrations
+  - Usuário: `postgres.coyaqzvmpcdhxwtoowye` (formato exigido pelo pooler)
+- `prisma db push` executado com sucesso: 6 tabelas criadas no schema `public` do Supabase.
+- Seed interrompido após 64/180 exercícios (slow insertion, ~5s/exercise via pooler transacional).
+- Script `scripts/clear-supabase.ts` executado: limpou os 64 exercícios + 1 user parciais para estado clean.
+- Script `scripts/export-all-csv.ts` criado usando `bun:sqlite` (better-sqlite3 não suportado pelo Bun).
+- 7 CSVs exportados para `/home/z/my-project/download/`:
+  - User.csv (2 linhas, 0.5 KB)
+  - Exercise.csv (180 linhas, 118.2 KB) — principal
+  - Workout.csv (2 linhas, 0.4 KB) — apenas 2 treinos (terceiro foi deletado em teste anterior)
+  - WorkoutExercise.csv (11 linhas, 1.0 KB)
+  - WorkoutSession.csv (15 linhas, 2.2 KB)
+  - SessionSet.csv (249 linhas, 34.7 KB)
+  - Favorite.csv (0 linhas)
+- CSVs incluem id (cuid) para preservar integridade referencial entre tabelas.
+- Datas normalizadas para ISO 8601, booleanos isPR convertidos para "true"/"false".
+
+Stage Summary:
+- Schema Prisma: provider=`postgresql`, com `directUrl`. Pronto para Supabase.
+- `.env`: URLs do pooler IPv4 do Supabase configuradas (aws-1-us-west-2).
+- Tabelas criadas no Supabase via `prisma db push`.
+- Supabase em estado clean (0 registros em todas as tabelas).
+- 7 CSVs prontos para import manual via Supabase Dashboard → Table Editor → "Import data from CSV".
+- Ordem de import respeitando FKs: User → Exercise → Workout → WorkoutExercise → WorkoutSession → SessionSet → Favorite.
+- Dev server ainda rodando com SQLite local (não reiniciado com Supabase ainda — aguardando import).
