@@ -218,3 +218,26 @@ Stage Summary:
   - DATABASE_URL (com pgbouncer=true)
   - DIRECT_URL (sem pgbouncer)
 - Dev server no sandbox continua funcionando normalmente com as mesmas URLs.
+
+---
+Task ID: fix-picker-closing-editor
+Agent: main
+Task: Corrigir bug onde, ao adicionar um exercício no popup do seletor, o editor de treino inteiro fechava — impossibilitando criar treinos.
+
+Work Log:
+- Causa raiz identificada em `src/components/views/workouts.tsx`:
+  - O `WorkoutEditor` renderiza dois `<Dialog>` do Radix como **siblings** no fragment: o dialog do editor (sempre aberto) e o dialog do `ExercisePicker` (aberto ao clicar em "Adicionar").
+  - Quando o usuário clica num exercício dentro do picker, o Radix dispara `pointerDownOutside` no dialog do EDITOR, porque o clique caiu num nó DOM que não é descendente do `DialogContent` do editor (o picker está num portal separado, mesmo que visualmente sobreposto).
+  - O handler `onOpenChange` do editor chamava `onClose()` incondicionalmente → editor inteiro desmontava → exercício nunca era commitado no estado → usuário não conseguia criar treino.
+
+- Fix aplicado no `DialogContent` do editor:
+  - Adicionados handlers `onInteractOutside`, `onPointerDownOutside` e `onEscapeKeyDown` que chamam `e.preventDefault()` quando `showExercisePicker === true`.
+  - Resultado: cliques dentro do picker (e ESC) não fecham mais o editor. O picker continua fechando normalmente via `setShowExercisePicker(false)` em `addExercise`.
+  - Quando o picker não está aberto, o editor continua com comportamento padrão (clique fora fecha).
+
+- Verificação: `bunx tsc --noEmit` não reporta erros em `workouts.tsx`.
+
+Stage Summary:
+- Arquivo modificado: `src/components/views/workouts.tsx` (apenas o `DialogContent` do `WorkoutEditor`, ~25 linhas adicionadas).
+- Comportamento esperado agora: clicar em "Adicionar" abre o picker; clicar num exercício adiciona ele à lista e fecha apenas o picker; o editor permanece aberto com o exercício já na lista, permitindo salvar o treino.
+- Nenhum impacto em outras telas — bug era local ao `WorkoutEditor`.

@@ -338,7 +338,30 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
   return (
     <>
       <Dialog open onOpenChange={() => onClose()}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className="max-w-2xl max-h-[90vh] overflow-y-auto"
+          onInteractOutside={(e) => {
+            // Quando o seletor de exercícios está aberto, NÃO deixar o editor
+            // fechar em resposta a cliques "fora" — o Radix entende o clique
+            // dentro do picker como "fora" do editor (são siblings no DOM),
+            // o que fecharia ambos os dialogs e perderia o exercício.
+            if (showExercisePicker) {
+              e.preventDefault();
+            }
+          }}
+          onPointerDownOutside={(e) => {
+            if (showExercisePicker) {
+              e.preventDefault();
+            }
+          }}
+          onEscapeKeyDown={(e) => {
+            // Mesma lógica para ESC: se o picker estiver aberto, deixar ele
+            // capturar o ESC em vez de fechar o editor.
+            if (showExercisePicker) {
+              e.preventDefault();
+            }
+          }}
+        >
           <DialogHeader>
             <DialogTitle>{workoutId ? "Editar treino" : "Criar treino"}</DialogTitle>
           </DialogHeader>
