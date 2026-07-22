@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical } from "lucide-react";
 import { motion } from "framer-motion";
 import { muscleGroups } from "@/lib/exercises-data";
+import { ExerciseThumb } from "@/components/exercise-media";
 
 type Exercise = {
   id: string;
@@ -28,6 +29,7 @@ type Exercise = {
   equipment: string | null;
   equipmentType: string | null;
   level: string;
+  images: string[];
 };
 
 type WorkoutExercise = {
@@ -335,33 +337,35 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
     );
   }
 
+  // Importante (correção do bug mobile): o seletor de exercícios NÃO é mais
+  // um <Dialog> separado. Dois <Dialog> do Radix empilhados usam portais
+  // independentes; no toque (mobile), o clique dentro do segundo dialog é
+  // interpretado como "fora" do primeiro, fechando o editor e perdendo o
+  // treino. Agora existe um único Dialog cujo conteúdo interno alterna
+  // entre o formulário do treino e o seletor de exercícios.
   return (
     <>
-      <Dialog open onOpenChange={() => onClose()}>
-        <DialogContent
-          className="max-w-2xl max-h-[90vh] overflow-y-auto"
-          onInteractOutside={(e) => {
-            // Quando o seletor de exercícios está aberto, NÃO deixar o editor
-            // fechar em resposta a cliques "fora" — o Radix entende o clique
-            // dentro do picker como "fora" do editor (são siblings no DOM),
-            // o que fecharia ambos os dialogs e perderia o exercício.
-            if (showExercisePicker) {
-              e.preventDefault();
-            }
-          }}
-          onPointerDownOutside={(e) => {
-            if (showExercisePicker) {
-              e.preventDefault();
-            }
-          }}
-          onEscapeKeyDown={(e) => {
-            // Mesma lógica para ESC: se o picker estiver aberto, deixar ele
-            // capturar o ESC em vez de fechar o editor.
-            if (showExercisePicker) {
-              e.preventDefault();
-            }
-          }}
-        >
+      <Dialog
+        open
+        onOpenChange={(open) => {
+          if (open) return;
+          // Se o seletor estiver aberto, fechar apenas ele (voltar ao formulário).
+          if (showExercisePicker) {
+            setShowExercisePicker(false);
+            return;
+          }
+          onClose();
+        }}
+      >
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {showExercisePicker ? (
+            <ExercisePickerContent
+              onPick={addExercise}
+              onBack={() => setShowExercisePicker(false)}
+              excludeIds={exercises.map((e) => e.exerciseId)}
+            />
+          ) : (
+          <>
           <DialogHeader>
             <DialogTitle>{workoutId ? "Editar treino" : "Criar treino"}</DialogTitle>
           </DialogHeader>
@@ -435,7 +439,8 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
                   {exercises.map((ex, idx) => (
                     <div key={ex.id} className="bg-card rounded-lg p-3 border border-border">
                       <div className="flex items-center gap-2 mb-2">
-                        <GripVertical className="w-4 h-4 text-muted-foreground" />
+                        <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <ExerciseThumb images={ex.exercise.images} name={ex.exercise.name} className="w-9 h-9 rounded-md" />
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm truncate">{ex.exercise.name}</p>
                           <p className="text-xs text-muted-foreground">{ex.exercise.muscleGroup}</p>
@@ -513,101 +518,125 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
               {saving ? "Salvando..." : workoutId ? "Salvar alterações" : "Criar treino"}
             </Button>
           </DialogFooter>
+          </>
+          )}
         </DialogContent>
       </Dialog>
-
-      {showExercisePicker && (
-        <ExercisePicker
-          onPick={addExercise}
-          onClose={() => setShowExercisePicker(false)}
-          excludeIds={exercises.map((e) => e.exerciseId)}
-        />
-      )}
     </>
   );
 }
 
 // ============== SELETOR DE EXERCÍCIOS ==============
-function ExercisePicker({
+// Renderizado DENTRO do mesmo <Dialog> do editor de treino (ver acima).
+// Não é mais um <Dialog> próprio — isso evita o bug em que, no celular,
+// tocar num exercício era interpretado como clique "fora" do editor.
+function ExercisePickerContent({
   onPick,
-  onClose,
+  onBack,
   excludeIds,
 }: {
   onPick: (ex: Exercise) => void;
-  onClose: () => void;
+  onBack: () => void;
   excludeIds: string[];
 }) {
   const [search, setSearch] = useState("");
-  const [filterMuscle, setFilterMuscle] = useState("");
+  const [filterMuscles, setFilterMuscles] = useState<string[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const params = new URLSearchParams();
     if (search) params.set("search", search);
-    if (filterMuscle) params.set("muscleGroup", filterMuscle);
+    if (filterMuscles.length > 0) params.set("muscleGroup", filterMuscles.join(","));
     apiGet<{ exercises: Exercise[] }>(`/api/exercises?${params.toString()}`)
       .then((d) => setExercises(d.exercises))
       .finally(() => setLoading(false));
-  }, [search, filterMuscle]);
+  }, [search, filterMuscles]);
+
+  const toggleMuscle = (m: string) => {
+    setFilterMuscles((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]));
+  };
 
   const filtered = exercises.filter((e) => !excludeIds.includes(e.id));
 
   return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Adicionar exercício</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar exercício..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-              autoFocus
-            />
-          </div>
-          <select
-            value={filterMuscle}
-            onChange={(e) => setFilterMuscle(e.target.value)}
-            className="w-full h-9 px-3 rounded-md bg-card border border-border text-sm"
+    <div className="flex flex-col max-h-[80vh]">
+      <DialogHeader>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 -ml-2"
+            onClick={onBack}
           >
-            <option value="">Todos os músculos</option>
-            {muscleGroups.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
+            <ChevronRight className="w-4 h-4 rotate-180" />
+          </Button>
+          <DialogTitle>Adicionar exercício</DialogTitle>
         </div>
+      </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto -mx-2 px-2 space-y-1 mt-2">
-          {loading ? (
-            <div className="text-center py-8 text-sm text-muted-foreground">Carregando...</div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-8 text-sm text-muted-foreground">Nenhum exercício encontrado</div>
-          ) : (
-            filtered.map((ex) => (
-              <button
-                key={ex.id}
-                onClick={() => onPick(ex)}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors text-left"
-              >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
-                  {ex.name.charAt(0)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{ex.name}</p>
-                  <p className="text-xs text-muted-foreground">{ex.muscleGroup} · {ex.equipment}</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              </button>
-            ))
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar exercício (sem acento, minúsculo tudo bem)..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+            autoFocus
+          />
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {muscleGroups.map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => toggleMuscle(m)}
+              className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                filterMuscles.includes(m)
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-muted-foreground border-border hover:bg-accent"
+              }`}
+            >
+              {m}
+            </button>
+          ))}
+          {filterMuscles.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setFilterMuscles([])}
+              className="px-2.5 py-1 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-2"
+            >
+              Limpar
+            </button>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+
+      <div className="flex-1 overflow-y-auto -mx-2 px-2 space-y-1 mt-2">
+        {loading ? (
+          <div className="text-center py-8 text-sm text-muted-foreground">Carregando...</div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-8 text-sm text-muted-foreground">Nenhum exercício encontrado</div>
+        ) : (
+          filtered.map((ex) => (
+            <button
+              key={ex.id}
+              type="button"
+              onClick={() => onPick(ex)}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 active:bg-accent transition-colors text-left"
+            >
+              <ExerciseThumb images={ex.images} name={ex.name} className="w-10 h-10 rounded-lg" />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm truncate">{ex.name}</p>
+                <p className="text-xs text-muted-foreground">{ex.muscleGroup} · {ex.equipment}</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </button>
+          ))
+        )}
+      </div>
+    </div>
   );
 }

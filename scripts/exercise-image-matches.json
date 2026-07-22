@@ -1,0 +1,2144 @@
+[
+  {
+    "slug": "supino-reto-barra",
+    "nome": "Supino Reto com Barra",
+    "hintUsado": "Barbell Bench Press",
+    "match": "Barbell Guillotine Bench Press",
+    "score": 0.75,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Guillotine_Bench_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Guillotine_Bench_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "supino-reto-halteres",
+    "nome": "Supino Reto com Halteres",
+    "hintUsado": "Dumbbell Bench Press",
+    "match": "Dumbbell Bench Press",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "supino-inclinado-barra",
+    "nome": "Supino Inclinado com Barra",
+    "hintUsado": "Incline Barbell Bench Press",
+    "match": "Barbell Guillotine Bench Press",
+    "score": 0.75,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Guillotine_Bench_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Guillotine_Bench_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "supino-inclinado-halteres",
+    "nome": "Supino Inclinado com Halteres",
+    "hintUsado": "Incline Dumbbell Press",
+    "match": "Incline Dumbbell Press",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "crucifixo-halteres",
+    "nome": "Crucifixo com Halteres",
+    "hintUsado": "Dumbbell Flyes",
+    "match": "Dumbbell Flyes",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Flyes/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Flyes/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "crossover-polia",
+    "nome": "Crossover na Polia",
+    "hintUsado": "Cable Crossover",
+    "match": "Cable Crossover",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "flexao-braco",
+    "nome": "Flexão de Braço",
+    "hintUsado": "Pushups",
+    "match": "Pushups",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pushups/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "paralelas-mergulho",
+    "nome": "Paralelas (Mergulho)",
+    "hintUsado": "Dips - Triceps Version",
+    "match": "Dips - Triceps Version",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Triceps_Version/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Triceps_Version/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "puxada-frontal",
+    "nome": "Puxada Frontal",
+    "hintUsado": "Front Lat Pulldown",
+    "match": "Close-Grip Front Lat Pulldown",
+    "score": 0.6,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Close-Grip_Front_Lat_Pulldown/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Close-Grip_Front_Lat_Pulldown/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "barra-fixa",
+    "nome": "Barra Fixa",
+    "hintUsado": "Pullups",
+    "match": "Pullups",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Pullups/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remada-curvada-barra",
+    "nome": "Remada Curvada com Barra",
+    "hintUsado": "Bent Over Barbell Row",
+    "match": "Bent Over Barbell Row",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent_Over_Barbell_Row/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remada-baixa-polia",
+    "nome": "Remada Baixa na Polia",
+    "hintUsado": "Seated Cable Row",
+    "match": "Cable Seated Crunch",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Crunch/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Crunch/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remada-halter-serrote",
+    "nome": "Remada com Halter (Serrote)",
+    "hintUsado": "One-Arm Dumbbell Row",
+    "match": "One-Arm Dumbbell Row",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "levantamento-terra",
+    "nome": "Levantamento Terra",
+    "hintUsado": "Barbell Deadlift",
+    "match": "Barbell Deadlift",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Deadlift/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "pullover-halter",
+    "nome": "Pullover com Halter",
+    "hintUsado": "Dumbbell Pullover",
+    "match": "Bent-Arm Dumbbell Pullover",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent-Arm_Dumbbell_Pullover/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent-Arm_Dumbbell_Pullover/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "face-pull",
+    "nome": "Face Pull",
+    "hintUsado": "Face Pull",
+    "match": "Face Pull",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Face_Pull/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Face_Pull/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "agachamento-livre-barra",
+    "nome": "Agachamento Livre com Barra",
+    "hintUsado": "Barbell Squat",
+    "match": "Barbell Squat",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "leg-press-45",
+    "nome": "Leg Press 45°",
+    "hintUsado": "Leg Press",
+    "match": "Leg Press",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "cadeira-extensora",
+    "nome": "Cadeira Extensora",
+    "hintUsado": "Leg Extensions",
+    "match": "Leg Extensions",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Extensions/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Extensions/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "mesa-flexora",
+    "nome": "Mesa Flexora",
+    "hintUsado": "Lying Leg Curls",
+    "match": "Lying Leg Curls",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Leg_Curls/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Leg_Curls/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "cadeira-flexora-sentada",
+    "nome": "Cadeira Flexora Sentada",
+    "hintUsado": "Seated Leg Curl",
+    "match": "Seated Leg Curl",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Leg_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Leg_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "stiff-barra",
+    "nome": "Stiff com Barra",
+    "hintUsado": "Stiff-Legged Deadlift",
+    "match": "Stiff-Legged Barbell Deadlift",
+    "score": 0.75,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Stiff-Legged_Barbell_Deadlift/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Stiff-Legged_Barbell_Deadlift/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "rdl-romanian-deadlift",
+    "nome": "RDL (Romanian Deadlift)",
+    "hintUsado": "Romanian Deadlift",
+    "match": "Romanian Deadlift",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "afundo-lunge",
+    "nome": "Afundo (Lunge)",
+    "hintUsado": "Dumbbell Lunges",
+    "match": "Dumbbell Lunges",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Lunges/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Lunges/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "panturrilha-pe",
+    "nome": "Panturrilha em Pé",
+    "hintUsado": "Standing Calf Raises",
+    "match": "Standing Calf Raises",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Calf_Raises/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Calf_Raises/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "panturrilha-sentada",
+    "nome": "Panturrilha Sentada",
+    "hintUsado": "Seated Calf Raise",
+    "match": "Seated Calf Raise",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Calf_Raise/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Calf_Raise/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "agachamento-bulgaro",
+    "nome": "Agachamento Búlgaro",
+    "hintUsado": "Bulgarian Split Squat",
+    "match": "Suspended Split Squat",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Suspended_Split_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Suspended_Split_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "hack-machine",
+    "nome": "Hack Machine",
+    "hintUsado": "Hack Squat",
+    "match": "Hack Squat",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hack_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hack_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "agachamento-smith",
+    "nome": "Agachamento Livre no Smith",
+    "hintUsado": "Smith Machine Squat",
+    "match": "Smith Machine Squat",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Smith_Machine_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "cadeira-abdutora",
+    "nome": "Cadeira Abdutora",
+    "hintUsado": "Hip Abductor",
+    "match": "Thigh Abductor",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Thigh_Abductor/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Thigh_Abductor/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "cadeira-adutora",
+    "nome": "Cadeira Adutora",
+    "hintUsado": "Hip Adductor",
+    "match": "Adductor",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Adductor/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Adductor/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "elevacao-pelvica-hip-thrust",
+    "nome": "Elevação Pélvica (Hip Thrust)",
+    "hintUsado": "Barbell Hip Thrust",
+    "match": "Barbell Hip Thrust",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "gluteo-cabo-coice",
+    "nome": "Glúteo no Cabo (Coice)",
+    "hintUsado": "Cable Kickback",
+    "match": "Cable Crossover",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "desenvolvimento-militar-barra",
+    "nome": "Desenvolvimento Militar com Barra",
+    "hintUsado": "Military Press",
+    "match": "Standing Military Press",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Military_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Military_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "desenvolvimento-halteres",
+    "nome": "Desenvolvimento com Halteres",
+    "hintUsado": "Dumbbell Shoulder Press",
+    "match": "Dumbbell Shoulder Press",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Shoulder_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Shoulder_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "elevacao-lateral-halteres",
+    "nome": "Elevação Lateral com Halteres",
+    "hintUsado": "Side Lateral Raise",
+    "match": "Side Lateral Raise",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Side_Lateral_Raise/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Side_Lateral_Raise/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "elevacao-frontal-halteres",
+    "nome": "Elevação Frontal com Halteres",
+    "hintUsado": "Front Dumbbell Raise",
+    "match": "Front Dumbbell Raise",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Dumbbell_Raise/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Dumbbell_Raise/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "crucifixo-inverso-peck-reverse",
+    "nome": "Crucifixo Inverso (Peck Reverse)",
+    "hintUsado": "Reverse Machine Flyes",
+    "match": "Reverse Machine Flyes",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Machine_Flyes/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Machine_Flyes/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "encolhimento-halteres",
+    "nome": "Encolhimento com Halteres",
+    "hintUsado": "Dumbbell Shrug",
+    "match": "Dumbbell Shrug",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Shrug/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Shrug/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "triceps-pulley",
+    "nome": "Tríceps Pulley",
+    "hintUsado": "Triceps Pushdown",
+    "match": "Triceps Pushdown",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Triceps_Pushdown/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Triceps_Pushdown/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "triceps-corda",
+    "nome": "Tríceps Corda",
+    "hintUsado": "Cable Rope Pushdown",
+    "match": "Cable Incline Pushdown",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Incline_Pushdown/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Incline_Pushdown/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "triceps-frances",
+    "nome": "Tríceps Francês",
+    "hintUsado": "Lying Triceps Extension",
+    "match": "Cable Lying Triceps Extension",
+    "score": 0.75,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Lying_Triceps_Extension/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Lying_Triceps_Extension/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "triceps-banco",
+    "nome": "Tríceps Banco",
+    "hintUsado": "Bench Dip",
+    "match": "Weighted Bench Dip",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Weighted_Bench_Dip/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Weighted_Bench_Dip/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "mergulho-bancos",
+    "nome": "Mergulho entre Bancos",
+    "hintUsado": "Bench Dip",
+    "match": "Weighted Bench Dip",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Weighted_Bench_Dip/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Weighted_Bench_Dip/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "rosca-direta-barra",
+    "nome": "Rosca Direta com Barra",
+    "hintUsado": "Barbell Curl",
+    "match": "Barbell Curl",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "rosca-direta-halteres",
+    "nome": "Rosca Direta com Halteres",
+    "hintUsado": "Dumbbell Curl",
+    "match": "Dumbbell Bicep Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bicep_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bicep_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "rosca-alternada",
+    "nome": "Rosca Alternada",
+    "hintUsado": "Alternate Dumbbell Curl",
+    "match": "Alternate Incline Dumbbell Curl",
+    "score": 0.75,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Alternate_Incline_Dumbbell_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Alternate_Incline_Dumbbell_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "rosca-martelo",
+    "nome": "Rosca Martelo",
+    "hintUsado": "Hammer Curl",
+    "match": "Alternate Hammer Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Alternate_Hammer_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Alternate_Hammer_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "rosca-scott",
+    "nome": "Rosca Scott",
+    "hintUsado": "Preacher Curl",
+    "match": "Preacher Curl",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Preacher_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Preacher_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "rosca-concentrada",
+    "nome": "Rosca Concentrada",
+    "hintUsado": "Concentration Curl",
+    "match": "Standing Concentration Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Concentration_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Concentration_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "prancha-plank",
+    "nome": "Prancha (Plank)",
+    "hintUsado": "Plank",
+    "match": "Plank",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Plank/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Plank/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "abdominal-supra",
+    "nome": "Abdominal Supra",
+    "hintUsado": "Crunches",
+    "match": "Crunches",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Crunches/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Crunches/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "infra-banca",
+    "nome": "Infra na Banca",
+    "hintUsado": "Flat Bench Lying Leg Raise",
+    "match": "Flat Bench Lying Leg Raise",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Flat_Bench_Lying_Leg_Raise/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Flat_Bench_Lying_Leg_Raise/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "prancha-lateral",
+    "nome": "Prancha Lateral",
+    "hintUsado": "Side Plank",
+    "match": "Push Up to Side Plank",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Push_Up_to_Side_Plank/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Push_Up_to_Side_Plank/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "abdominal-bicicleta",
+    "nome": "Abdominal Bicicleta",
+    "hintUsado": "Bicycle Crunch",
+    "match": "Ab Crunch Machine",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Crunch_Machine/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Crunch_Machine/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "hanging-leg-raise",
+    "nome": "Hanging Leg Raise",
+    "hintUsado": "Hanging Leg Raise",
+    "match": "Hanging Leg Raise",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hanging_Leg_Raise/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hanging_Leg_Raise/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "encolhimento-barra",
+    "nome": "Encolhimento com Barra",
+    "hintUsado": "Barbell Shrug",
+    "match": "Barbell Shrug",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shrug/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shrug/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remada-alta-barra",
+    "nome": "Remada Alta com Barra",
+    "hintUsado": "Upright Row",
+    "match": "Upright Barbell Row",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Upright_Barbell_Row/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Upright_Barbell_Row/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "punho-barra",
+    "nome": "Punho com Barra",
+    "hintUsado": "Wrist Curl",
+    "match": "Cable Wrist Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Wrist_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Wrist_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "punho-invertido",
+    "nome": "Punho Invertido",
+    "hintUsado": "Reverse Wrist Curl",
+    "match": "Cable Wrist Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Wrist_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Wrist_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "hip-thrust-barra",
+    "nome": "Hip Thrust com Barra",
+    "hintUsado": "Barbell Hip Thrust",
+    "match": "Barbell Hip Thrust",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "agachamento-goblet",
+    "nome": "Agachamento Goblet",
+    "hintUsado": "Goblet Squat",
+    "match": "Goblet Squat",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Goblet_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Goblet_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "stiff-halteres",
+    "nome": "Stiff com Halteres",
+    "hintUsado": "Dumbbell Stiff Legged Deadlift",
+    "match": "Stiff-Legged Dumbbell Deadlift",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Stiff-Legged_Dumbbell_Deadlift/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Stiff-Legged_Dumbbell_Deadlift/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "avanco-step-up",
+    "nome": "Avanço (Step-up)",
+    "hintUsado": "Step-up",
+    "match": "Step Mill",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Step_Mill/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Step_Mill/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "sumo-squat-halter",
+    "nome": "Sumo Squat com Halter",
+    "hintUsado": "Dumbbell Squat",
+    "match": "Dumbbell Squat",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "good-morning",
+    "nome": "Good Morning",
+    "hintUsado": "Good Morning",
+    "match": "Good Morning",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Good_Morning/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Good_Morning/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "cadeira-adutora-cabo",
+    "nome": "Cadeira Adutora no Cabo",
+    "hintUsado": "Cable Hip Adduction",
+    "match": "Cable Hip Adduction",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Hip_Adduction/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Hip_Adduction/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remada-kettlebell",
+    "nome": "Wall Ball (Remada Face Pull com Kettlebell)",
+    "hintUsado": "Wall Ball (Remada Face Pull com Kettlebell)",
+    "match": "Exercise Ball Pull-In",
+    "score": 0.29,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Exercise_Ball_Pull-In/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Exercise_Ball_Pull-In/1.jpg"
+    ],
+    "aprovado": false
+  },
+  {
+    "slug": "kettlebell-swing",
+    "nome": "Kettlebell Swing",
+    "hintUsado": "Kettlebell Swing",
+    "match": "Kettlebell Figure 8",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_Figure_8/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_Figure_8/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "supino-declinado-barra",
+    "nome": "Supino Declinado com Barra",
+    "hintUsado": "Decline Barbell Bench Press",
+    "match": "Decline Barbell Bench Press",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Barbell_Bench_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Barbell_Bench_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "crucifixo-inclinado-halteres",
+    "nome": "Crucifixo Inclinado com Halteres",
+    "hintUsado": "Incline Dumbbell Flyes",
+    "match": "Incline Dumbbell Flyes",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Flyes/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Flyes/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "peck-deck",
+    "nome": "Peck Deck (Máquina)",
+    "hintUsado": "Pec Deck",
+    "match": null,
+    "score": 0,
+    "images": [],
+    "aprovado": false
+  },
+  {
+    "slug": "elevacao-lateral-polia",
+    "nome": "Elevação Lateral na Polia",
+    "hintUsado": "Cable Lateral Raise",
+    "match": "Cable Seated Lateral Raise",
+    "score": 0.75,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Lateral_Raise/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Lateral_Raise/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "desenvolvimento-arnold",
+    "nome": "Desenvolvimento Arnold",
+    "hintUsado": "Arnold Press",
+    "match": "Arnold Dumbbell Press",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Arnold_Dumbbell_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Arnold_Dumbbell_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remada-unilateral-halter",
+    "nome": "Remada Unilateral com Halter",
+    "hintUsado": "One-Arm Dumbbell Row",
+    "match": "One-Arm Dumbbell Row",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "pulldown-pulley",
+    "nome": "Pulldown com Pulley",
+    "hintUsado": "Straight Arm Pulldown",
+    "match": "Straight-Arm Pulldown",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Straight-Arm_Pulldown/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Straight-Arm_Pulldown/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "levantamento-terra-sumo",
+    "nome": "Levantamento Terra Sumô",
+    "hintUsado": "Sumo Deadlift",
+    "match": "Sumo Deadlift",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Sumo_Deadlift/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Sumo_Deadlift/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "agachamento-frontal",
+    "nome": "Agachamento Frontal",
+    "hintUsado": "Front Squat",
+    "match": "Front Barbell Squat",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Barbell_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Barbell_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "cadeira-extensora-unilateral",
+    "nome": "Cadeira Extensora Unilateral",
+    "hintUsado": "Leg Extensions",
+    "match": "Leg Extensions",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Extensions/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Extensions/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "leg-press-90",
+    "nome": "Leg Press 90° (Vertical)",
+    "hintUsado": "Leg Press",
+    "match": "Leg Press",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "panturrilha-leg-press",
+    "nome": "Panturrilha no Leg Press",
+    "hintUsado": "Leg Press Calf Raise",
+    "match": "Calf Press On The Leg Press Machine",
+    "score": 0.6,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Calf_Press_On_The_Leg_Press_Machine/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Calf_Press_On_The_Leg_Press_Machine/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "elevacao-pelvica-unilateral",
+    "nome": "Elevação Pélvica Unilateral",
+    "hintUsado": "Single Leg Glute Bridge",
+    "match": "Single Leg Glute Bridge",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Single_Leg_Glute_Bridge/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Single_Leg_Glute_Bridge/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "coice-gluteo-solo",
+    "nome": "Coice de Glúteo no Solo",
+    "hintUsado": "Donkey Kicks",
+    "match": "Flutter Kicks",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Flutter_Kicks/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Flutter_Kicks/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "triceps-testa-halteres",
+    "nome": "Tríceps Testa com Halteres",
+    "hintUsado": "Lying Dumbbell Triceps Extension",
+    "match": "Cable Lying Triceps Extension",
+    "score": 0.75,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Lying_Triceps_Extension/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Lying_Triceps_Extension/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "triceps-coice",
+    "nome": "Tríceps Coice",
+    "hintUsado": "Triceps Kickback",
+    "match": "Glute Kickback",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Kickback/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Kickback/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "rosca-21",
+    "nome": "Rosca 21",
+    "hintUsado": "Rosca 21",
+    "match": null,
+    "score": 0,
+    "images": [],
+    "aprovado": false
+  },
+  {
+    "slug": "rosca-direta-polia",
+    "nome": "Rosca Direta na Polia",
+    "hintUsado": "Cable Curl",
+    "match": "Cable Preacher Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Preacher_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Preacher_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "rosca-punho-polia",
+    "nome": "Rosca Punho na Polia",
+    "hintUsado": "Cable Wrist Curl",
+    "match": "Cable Wrist Curl",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Wrist_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Wrist_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "abdominal-polia",
+    "nome": "Abdominal na Polia (Crunch)",
+    "hintUsado": "Cable Crunch",
+    "match": "Cable Crunch",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crunch/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crunch/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "abdominal-infra-barra",
+    "nome": "Abdominal Infra na Barra",
+    "hintUsado": "Hanging Leg Raise",
+    "match": "Hanging Leg Raise",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hanging_Leg_Raise/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hanging_Leg_Raise/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "hollow-body",
+    "nome": "Hollow Body (Corpo Oco)",
+    "hintUsado": "Hollow Body (Corpo Oco)",
+    "match": "Body-Up",
+    "score": 0.25,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Body-Up/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Body-Up/1.jpg"
+    ],
+    "aprovado": false
+  },
+  {
+    "slug": "russian-twist",
+    "nome": "Russian Twist",
+    "hintUsado": "Russian Twist",
+    "match": "Russian Twist",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Russian_Twist/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Russian_Twist/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remada-t-bar",
+    "nome": "Remada Cavalinho (T-Bar)",
+    "hintUsado": "T-Bar Row",
+    "match": "Lying T-Bar Row",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_T-Bar_Row/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_T-Bar_Row/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "terra-romeno-barra",
+    "nome": "Levantamento Terra Romeno com Barra",
+    "hintUsado": "Romanian Deadlift",
+    "match": "Romanian Deadlift",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "cadeira-flexora-deitada",
+    "nome": "Cadeira Flexora Deitada",
+    "hintUsado": "Lying Leg Curl",
+    "match": "Ball Leg Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ball_Leg_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ball_Leg_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "good-morning-halteres",
+    "nome": "Good Morning com Halteres",
+    "hintUsado": "Dumbbell Good Morning",
+    "match": "Band Good Morning",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Band_Good_Morning/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Band_Good_Morning/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "agachamento-pulsatorio",
+    "nome": "Agachamento Pulsatório",
+    "hintUsado": "Agachamento Pulsatório",
+    "match": null,
+    "score": 0,
+    "images": [],
+    "aprovado": false
+  },
+  {
+    "slug": "jump-squat",
+    "nome": "Jump Squat (Agachamento com Salto)",
+    "hintUsado": "Jump Squat",
+    "match": "Freehand Jump Squat",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Freehand_Jump_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Freehand_Jump_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "burpee",
+    "nome": "Burpee",
+    "hintUsado": "Burpee",
+    "match": null,
+    "score": 0,
+    "images": [],
+    "aprovado": false
+  },
+  {
+    "slug": "mountain-climber",
+    "nome": "Mountain Climber",
+    "hintUsado": "Mountain Climber",
+    "match": "Mountain Climbers",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Mountain_Climbers/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Mountain_Climbers/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "flexao-diamante",
+    "nome": "Flexão Diamante",
+    "hintUsado": "Diamond Push Up",
+    "match": "Clock Push-Up",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Clock_Push-Up/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Clock_Push-Up/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "flexao-arqueira",
+    "nome": "Flexão Arqueira",
+    "hintUsado": "Archer Push Up",
+    "match": "Clock Push-Up",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Clock_Push-Up/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Clock_Push-Up/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "supino-declinado-halteres",
+    "nome": "Supino Declinado com Halteres",
+    "hintUsado": "Decline Dumbbell Bench Press",
+    "match": "Decline Dumbbell Bench Press",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Dumbbell_Bench_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Dumbbell_Bench_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "crossover-baixa",
+    "nome": "Crossover com Polia Baixa",
+    "hintUsado": "Cable Crossover",
+    "match": "Cable Crossover",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "crucifixo-declinado-halteres",
+    "nome": "Crucifixo Declinado com Halteres",
+    "hintUsado": "Decline Dumbbell Flyes",
+    "match": "Decline Dumbbell Flyes",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Dumbbell_Flyes/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Dumbbell_Flyes/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "flexao-inclinada",
+    "nome": "Flexão Inclinada",
+    "hintUsado": "Incline Push Up",
+    "match": "Incline Push-Up",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Push-Up/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Push-Up/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "flexao-declinada",
+    "nome": "Flexão Declinada",
+    "hintUsado": "Decline Push Up",
+    "match": "Decline Push-Up",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Push-Up/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Push-Up/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "paralelas",
+    "nome": "Paralelas (Bulgaro)",
+    "hintUsado": "Dips - Triceps Version",
+    "match": "Dips - Triceps Version",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Triceps_Version/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Triceps_Version/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "press-peito-maquina",
+    "nome": "Press de Peito na Máquina",
+    "hintUsado": "Machine Bench Press",
+    "match": "Machine Bench Press",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Bench_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Bench_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "peck-deck-maquina",
+    "nome": "Peck Deck (Máquina)",
+    "hintUsado": "Pec Deck",
+    "match": null,
+    "score": 0,
+    "images": [],
+    "aprovado": false
+  },
+  {
+    "slug": "supino-halteres-plano",
+    "nome": "Supino com Halteres no Banco Plano",
+    "hintUsado": "Flat Bench Dumbbell Press",
+    "match": "Decline Dumbbell Bench Press",
+    "score": 0.75,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Dumbbell_Bench_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Dumbbell_Bench_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "barra-fixa-supinada",
+    "nome": "Barra Fixa Supinada (Chin-up)",
+    "hintUsado": "Chin-Up",
+    "match": "Chin-Up",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Chin-Up/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Chin-Up/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "puxada-neutra",
+    "nome": "Puxada na Polia (Pegada Neutra)",
+    "hintUsado": "Close Grip Front Lat Pulldown",
+    "match": "Close-Grip Front Lat Pulldown",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Close-Grip_Front_Lat_Pulldown/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Close-Grip_Front_Lat_Pulldown/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "puxada-triangulo",
+    "nome": "Puxada na Polia (Pegada Triângulo)",
+    "hintUsado": "Triangle Bar Lat Pulldown",
+    "match": "One Arm Lat Pulldown",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One_Arm_Lat_Pulldown/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One_Arm_Lat_Pulldown/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remada-curvada-supinada",
+    "nome": "Remada Curvada com Pegada Supinada",
+    "hintUsado": "Reverse Grip Bent-Over Rows",
+    "match": "Reverse Grip Bent-Over Rows",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Grip_Bent-Over_Rows/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Grip_Bent-Over_Rows/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remada-tbar",
+    "nome": "Remada T-Bar",
+    "hintUsado": "T-Bar Row",
+    "match": "Lying T-Bar Row",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_T-Bar_Row/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_T-Bar_Row/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remada-serrote",
+    "nome": "Remada Serrote",
+    "hintUsado": "One-Arm Dumbbell Row",
+    "match": "One-Arm Dumbbell Row",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Dumbbell_Row/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remada-baixa-neutra",
+    "nome": "Remada Baixa na Polia com Pegada Neutra",
+    "hintUsado": "Seated Cable Row",
+    "match": "Cable Seated Crunch",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Crunch/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Seated_Crunch/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "pullover-polia-alta",
+    "nome": "Pullover na Polia Alta",
+    "hintUsado": "Straight Arm Pulldown",
+    "match": "Straight-Arm Pulldown",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Straight-Arm_Pulldown/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Straight-Arm_Pulldown/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "pull-down-polia",
+    "nome": "Pull-down na Polia (Pullover)",
+    "hintUsado": "Lat Pulldown",
+    "match": "One Arm Lat Pulldown",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One_Arm_Lat_Pulldown/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One_Arm_Lat_Pulldown/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "terra-romeno",
+    "nome": "Levantamento Terra Romeno",
+    "hintUsado": "Romanian Deadlift",
+    "match": "Romanian Deadlift",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "terra-sumo",
+    "nome": "Levantamento Terra Sumô",
+    "hintUsado": "Sumo Deadlift",
+    "match": "Sumo Deadlift",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Sumo_Deadlift/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Sumo_Deadlift/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "good-morning-barra",
+    "nome": "Good Morning com Barra",
+    "hintUsado": "Good Morning",
+    "match": "Good Morning",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Good_Morning/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Good_Morning/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "mesa-flexora-sentada",
+    "nome": "Mesa Flexora Sentada",
+    "hintUsado": "Seated Leg Curl",
+    "match": "Seated Leg Curl",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Leg_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Leg_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "cadeira-flexora-unilateral",
+    "nome": "Cadeira Flexora Unilateral",
+    "hintUsado": "Leg Curl",
+    "match": "Ball Leg Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ball_Leg_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ball_Leg_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "agachamento-hack",
+    "nome": "Agachamento Hack",
+    "hintUsado": "Hack Squat",
+    "match": "Hack Squat",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hack_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hack_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "avanco-lunge",
+    "nome": "Avanço (Lunge)",
+    "hintUsado": "Dumbbell Lunges",
+    "match": "Dumbbell Lunges",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Lunges/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Lunges/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "avanco-lateral",
+    "nome": "Avanço Lateral",
+    "hintUsado": "Lateral Lunge",
+    "match": "Barbell Lunge",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Lunge/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Lunge/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "avanco-reverse",
+    "nome": "Avanço Reverse",
+    "hintUsado": "Reverse Lunge",
+    "match": "Crossover Reverse Lunge",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Crossover_Reverse_Lunge/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Crossover_Reverse_Lunge/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "panturrilha-pe-unilateral",
+    "nome": "Panturrilha em Pé Unilateral",
+    "hintUsado": "Standing Calf Raise",
+    "match": "Rocking Standing Calf Raise",
+    "score": 0.75,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Rocking_Standing_Calf_Raise/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Rocking_Standing_Calf_Raise/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "hip-thrust-halteres",
+    "nome": "Hip Thrust com Halteres",
+    "hintUsado": "Dumbbell Hip Thrust",
+    "match": "Barbell Hip Thrust",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Hip_Thrust/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "gluteo-coice-polia",
+    "nome": "Glúteo na Polia (Coice)",
+    "hintUsado": "Cable Kickback",
+    "match": "Cable Crossover",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "abducao-quadril-polia",
+    "nome": "Abdução de Quadril na Polia",
+    "hintUsado": "Cable Hip Abduction",
+    "match": "Cable Hip Adduction",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Hip_Adduction/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Hip_Adduction/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "elevacao-pelvica",
+    "nome": "Elevação Pélvica (Glute Bridge)",
+    "hintUsado": "Glute Bridge",
+    "match": "Barbell Glute Bridge",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Glute_Bridge/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Glute_Bridge/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "coice-maquina",
+    "nome": "Coice na Máquina",
+    "hintUsado": "Glute Kickback Machine",
+    "match": "Glute Kickback",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Kickback/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Kickback/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "agachamento-sumo-halter",
+    "nome": "Agachamento Sumô com Halter",
+    "hintUsado": "Dumbbell Squat",
+    "match": "Dumbbell Squat",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "step-up",
+    "nome": "Step Up",
+    "hintUsado": "Step-up",
+    "match": "Step Mill",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Step_Mill/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Step_Mill/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "desenvolvimento-maquina",
+    "nome": "Desenvolvimento na Máquina",
+    "hintUsado": "Machine Shoulder Press",
+    "match": "Machine Shoulder (Military) Press",
+    "score": 0.75,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Shoulder_Military_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Shoulder_Military_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remada-alta-halteres",
+    "nome": "Remada Alta com Halteres",
+    "hintUsado": "Dumbbell Upright Row",
+    "match": "Standing Dumbbell Upright Row",
+    "score": 0.75,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Dumbbell_Upright_Row/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Dumbbell_Upright_Row/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "elevacao-frontal-polia",
+    "nome": "Elevação Frontal na Polia",
+    "hintUsado": "Cable Front Raise",
+    "match": "Front Cable Raise",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Cable_Raise/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Cable_Raise/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "crucifixo-inverso-polia",
+    "nome": "Crucifixo Inverso na Polia",
+    "hintUsado": "Cable Reverse Flyes",
+    "match": "Cable Reverse Crunch",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Reverse_Crunch/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Reverse_Crunch/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "encolhimento-maquina",
+    "nome": "Encolhimento na Máquina",
+    "hintUsado": "Machine Shrug",
+    "match": "Ab Crunch Machine",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Crunch_Machine/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Crunch_Machine/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "triceps-frances-halter",
+    "nome": "Tríceps Francês com Halter",
+    "hintUsado": "Standing Dumbbell Triceps Extension",
+    "match": "Standing Dumbbell Triceps Extension",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Dumbbell_Triceps_Extension/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Dumbbell_Triceps_Extension/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "triceps-frances-sentado",
+    "nome": "Tríceps Francês Sentado",
+    "hintUsado": "Seated Triceps Press",
+    "match": "Seated Triceps Press",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Triceps_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Triceps_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "triceps-polia-supinada",
+    "nome": "Tríceps na Polia com Pegada Supinada",
+    "hintUsado": "Reverse Grip Triceps Pushdown",
+    "match": "Reverse Grip Triceps Pushdown",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Grip_Triceps_Pushdown/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Grip_Triceps_Pushdown/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "mergulho-banco",
+    "nome": "Mergulho em Banco (Bench Dip)",
+    "hintUsado": "Bench Dip",
+    "match": "Weighted Bench Dip",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Weighted_Bench_Dip/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Weighted_Bench_Dip/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "triceps-maquina",
+    "nome": "Tríceps na Máquina",
+    "hintUsado": "Machine Triceps Extension",
+    "match": "Machine Triceps Extension",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Triceps_Extension/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Triceps_Extension/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "flexao-maos-juntas",
+    "nome": "Flexão com Mãos Juntas (Diamond Push-up)",
+    "hintUsado": "Diamond Push Up",
+    "match": "Clock Push-Up",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Clock_Push-Up/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Clock_Push-Up/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "rosca-polia",
+    "nome": "Rosca na Polia",
+    "hintUsado": "Cable Curl",
+    "match": "Cable Preacher Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Preacher_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Preacher_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "rosca-martelo-polia",
+    "nome": "Rosca Martelo na Polia",
+    "hintUsado": "Cable Hammer Curl",
+    "match": "Alternate Hammer Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Alternate_Hammer_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Alternate_Hammer_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "rosca-inversa",
+    "nome": "Rosca Inversa",
+    "hintUsado": "Reverse Barbell Curl",
+    "match": "Reverse Barbell Curl",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Barbell_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Reverse_Barbell_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "flexao-pulso-halter",
+    "nome": "Flexão de Pulso com Halter",
+    "hintUsado": "Wrist Curl",
+    "match": "Cable Wrist Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Wrist_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Wrist_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "extensao-pulso-halter",
+    "nome": "Extensão de Pulso com Halter",
+    "hintUsado": "Reverse Wrist Curl",
+    "match": "Cable Wrist Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Wrist_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Wrist_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "encolhimento-pulso",
+    "nome": "Encolhimento de Pulso (Wrist Curl Reverso)",
+    "hintUsado": "Reverse Wrist Curl",
+    "match": "Cable Wrist Curl",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Wrist_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Wrist_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "abdominal-infra",
+    "nome": "Abdominal Infra",
+    "hintUsado": "Leg Raise",
+    "match": "Hanging Leg Raise",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hanging_Leg_Raise/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hanging_Leg_Raise/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "prancha",
+    "nome": "Prancha",
+    "hintUsado": "Plank",
+    "match": "Plank",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Plank/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Plank/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "elevacao-pernas-barra",
+    "nome": "Elevação de Pernas na Barra",
+    "hintUsado": "Hanging Leg Raise",
+    "match": "Hanging Leg Raise",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hanging_Leg_Raise/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hanging_Leg_Raise/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "abdominal-bola-suica",
+    "nome": "Abdominal na bola Suíça",
+    "hintUsado": "Swiss Ball Crunch",
+    "match": "Exercise Ball Crunch",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Exercise_Ball_Crunch/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Exercise_Ball_Crunch/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "corrida-esteira",
+    "nome": "Corrida na Esteira",
+    "hintUsado": "Running, Treadmill",
+    "match": "Running, Treadmill",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Running_Treadmill/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Running_Treadmill/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "bicicleta-ergometrica",
+    "nome": "Bicicleta Ergométrica",
+    "hintUsado": "Cycling, Stationary",
+    "match": "Bicycling, Stationary",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bicycling_Stationary/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bicycling_Stationary/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "eliptico",
+    "nome": "Elíptico",
+    "hintUsado": "Elliptical Trainer",
+    "match": "Elliptical Trainer",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Elliptical_Trainer/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Elliptical_Trainer/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "remo-ergometro",
+    "nome": "Remo Ergômetro",
+    "hintUsado": "Rowing, Stationary",
+    "match": "Rowing, Stationary",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Rowing_Stationary/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Rowing_Stationary/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "pular-corda",
+    "nome": "Pular Corda",
+    "hintUsado": "Jump Rope",
+    "match": "Bench Jump",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bench_Jump/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bench_Jump/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "burpee-salto",
+    "nome": "Burpee com Salto",
+    "hintUsado": "Burpee",
+    "match": null,
+    "score": 0,
+    "images": [],
+    "aprovado": false
+  },
+  {
+    "slug": "battle-rope",
+    "nome": "Battle Rope (Corda Naval)",
+    "hintUsado": "Battle Ropes",
+    "match": "Battling Ropes",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Battling_Ropes/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Battling_Ropes/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "box-jump",
+    "nome": "Box Jump",
+    "hintUsado": "Box Jump",
+    "match": "Front Box Jump",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Box_Jump/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Front_Box_Jump/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "wall-ball",
+    "nome": "Wall Ball",
+    "hintUsado": "Wall Ball",
+    "match": "Hug A Ball",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hug_A_Ball/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hug_A_Ball/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "prancha-toque-ombro",
+    "nome": "Prancha com Toque no Ombro",
+    "hintUsado": "Plank Shoulder Tap",
+    "match": "Barbell Shoulder Press",
+    "score": 0.33,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shoulder_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Shoulder_Press/1.jpg"
+    ],
+    "aprovado": false
+  },
+  {
+    "slug": "cadeira-flexora-pe",
+    "nome": "Cadeira Flexora em Pé",
+    "hintUsado": "Standing Leg Curl",
+    "match": "Standing Leg Curl",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Leg_Curl/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Leg_Curl/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "agachamento-pistol",
+    "nome": "Agachamento Pistol",
+    "hintUsado": "Pistol Squat",
+    "match": "Kettlebell Pistol Squat",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_Pistol_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_Pistol_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "sissy-squat",
+    "nome": "Sissy Squat",
+    "hintUsado": "Sissy Squat",
+    "match": "Weighted Sissy Squat",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Weighted_Sissy_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Weighted_Sissy_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "agachamento-pulsao",
+    "nome": "Agachamento com Pulsão (Jump Squat)",
+    "hintUsado": "Jump Squat",
+    "match": "Freehand Jump Squat",
+    "score": 0.67,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Freehand_Jump_Squat/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Freehand_Jump_Squat/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "thruster",
+    "nome": "Thruster",
+    "hintUsado": "Thruster",
+    "match": "Kettlebell Thruster",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_Thruster/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_Thruster/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "turkish-get-up",
+    "nome": "Turkish Get-up",
+    "hintUsado": "Turkish Get-up",
+    "match": "Kettlebell Turkish Get-Up (Lunge style)",
+    "score": 0.4,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_Turkish_Get-Up_Lunge_style/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Kettlebell_Turkish_Get-Up_Lunge_style/1.jpg"
+    ],
+    "aprovado": false
+  },
+  {
+    "slug": "clean-and-press",
+    "nome": "Clean and Press",
+    "hintUsado": "Clean and Press",
+    "match": "Clean and Press",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Clean_and_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Clean_and_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "snatch",
+    "nome": "Snatch (Arranco)",
+    "hintUsado": "Snatch",
+    "match": "Snatch",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Snatch/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Snatch/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "supino-fechado-barra",
+    "nome": "Supino Fechado com Barra",
+    "hintUsado": "Close-Grip Barbell Bench Press",
+    "match": "Close-Grip Barbell Bench Press",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Close-Grip_Barbell_Bench_Press/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Close-Grip_Barbell_Bench_Press/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "supino-pegada-neutra",
+    "nome": "Supino com Pegada Neutra",
+    "hintUsado": "Neutral Grip Dumbbell Bench Press",
+    "match": "Dumbbell Bench Press with Neutral Grip",
+    "score": 0.83,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press_with_Neutral_Grip/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press_with_Neutral_Grip/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "abdominal-obliquo-halter",
+    "nome": "Abdominal Oblíquo com Halter",
+    "hintUsado": "Dumbbell Side Bend",
+    "match": "Dumbbell Side Bend",
+    "score": 1,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Side_Bend/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Side_Bend/1.jpg"
+    ],
+    "aprovado": true
+  },
+  {
+    "slug": "woodchopper-polia",
+    "nome": "Woodchopper na Polia",
+    "hintUsado": "Cable Woodchopper",
+    "match": "Cable Crossover",
+    "score": 0.5,
+    "images": [
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/0.jpg",
+      "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/1.jpg"
+    ],
+    "aprovado": true
+  }
+]

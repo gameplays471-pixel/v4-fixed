@@ -41,8 +41,8 @@ export default function Home() {
       .catch(() => setLoading(false));
   }, []);
 
-  const handleAuth = (u: unknown, token?: string) => {
-    if (token) setToken(token);
+  const handleAuth = (u: unknown, token?: string, rememberMe: boolean = true) => {
+    if (token) setToken(token, rememberMe);
     setUser(u);
     useAppStore.getState().setView("dashboard");
   };
@@ -104,10 +104,8 @@ function MobileTopbar() {
     <header className="md:hidden sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="flex items-center justify-between px-4 h-14">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">H</span>
-          </div>
-          <span className="font-bold text-base">Hevy</span>
+          <img src="/logo.png" alt="GEMgym" className="w-7 h-7 rounded-lg object-cover" />
+          <span className="font-bold text-base">GEMgym</span>
         </div>
         <span className="text-xs text-muted-foreground">Treinos</span>
       </div>

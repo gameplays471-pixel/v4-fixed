@@ -76,11 +76,9 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
       {/* Logo */}
       <div className="p-6">
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-            <span className="text-primary-foreground font-bold text-lg">H</span>
-          </div>
+          <img src="/logo.png" alt="GEMgym" className="w-9 h-9 rounded-xl object-cover shadow-lg shadow-primary/20" />
           <div className="flex flex-col">
-            <span className="font-bold text-base leading-tight">Hevy Web</span>
+            <span className="font-bold text-base leading-tight">GEMgym</span>
             <span className="text-[10px] text-muted-foreground leading-tight">Treinos & Hipertrofia</span>
           </div>
         </div>

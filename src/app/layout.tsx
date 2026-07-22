@@ -14,10 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hevy Web — Treinos de Musculação",
+  title: "GEMgym — Treinos de Musculação",
   description:
     "Aplicação web para registro de treinos de musculação, controle de evolução e biblioteca de exercícios.",
-  keywords: ["musculação", "treino", "exercícios", "academia", "hevy"],
+  keywords: ["musculação", "treino", "exercícios", "academia", "gemgym"],
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({

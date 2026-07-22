@@ -15,6 +15,7 @@ export type ExerciseData = {
   executionSteps?: string;
   commonMistakes?: string;
   tips?: string;
+  images?: string[];
 };
 
 export const exercisesData: ExerciseData[] = [
