@@ -35,6 +35,7 @@ import {
   type SetDraft,
   type CardioDraft,
 } from "@/lib/workout-draft";
+import { ExerciseThumb, ExerciseImageDialog } from "@/components/exercise-media";
 
 type Workout = {
   id: string;
@@ -56,6 +57,7 @@ type Workout = {
       muscleGroup: string;
       equipment: string | null;
       category: string;
+      images: string[];
     };
   }>;
 };
@@ -77,6 +79,7 @@ export function ActiveWorkoutView() {
   const [collapsedExercises, setCollapsedExercises] = useState<Set<string>>(new Set());
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [lightboxExercise, setLightboxExercise] = useState<{ name: string; images: string[] } | null>(null);
 
   // Sets state: Map<exerciseId, SetState[]>
   const [setsMap, setSetsMap] = useState<Record<string, SetState[]>>({});
@@ -566,8 +569,16 @@ export function ActiveWorkoutView() {
                   onClick={() => toggleCollapse(ex.id)}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
-                      {isCardio ? <HeartPulse className="w-4 h-4" /> : exIdx + 1}
+                    <div className="relative shrink-0">
+                      <ExerciseThumb
+                        images={ex.exercise.images}
+                        name={ex.exercise.name}
+                        className="w-12 h-12 rounded-lg"
+                        onClick={() => setLightboxExercise({ name: ex.exercise.name, images: ex.exercise.images })}
+                      />
+                      <span className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center border-2 border-background">
+                        {isCardio ? <HeartPulse className="w-2.5 h-2.5" /> : exIdx + 1}
+                      </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-sm">{ex.exercise.name}</h3>
@@ -814,6 +825,13 @@ export function ActiveWorkoutView() {
       </AnimatePresence>
 
       <audio ref={audioRef} preload="auto" />
+
+      <ExerciseImageDialog
+        open={!!lightboxExercise}
+        onOpenChange={(o) => !o && setLightboxExercise(null)}
+        images={lightboxExercise?.images}
+        name={lightboxExercise?.name || ""}
+      />
     </div>
   );
 }

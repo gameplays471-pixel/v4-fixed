@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical } from "lucide-react";
 import { motion } from "framer-motion";
 import { muscleGroups } from "@/lib/exercises-data";
-import { ExerciseThumb } from "@/components/exercise-media";
+import { ExerciseThumb, ExerciseImageDialog } from "@/components/exercise-media";
 
 type Exercise = {
   id: string;
@@ -241,6 +241,7 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
   const [loading, setLoading] = useState(!!workoutId);
   const [saving, setSaving] = useState(false);
   const [showExercisePicker, setShowExercisePicker] = useState(false);
+  const [lightboxExercise, setLightboxExercise] = useState<Exercise | null>(null);
 
   useEffect(() => {
     if (workoutId) {
@@ -454,7 +455,12 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
                     <div key={ex.id} className="bg-card rounded-lg p-3 border border-border">
                       <div className="flex items-center gap-2 mb-2">
                         <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
-                        <ExerciseThumb images={ex.exercise.images} name={ex.exercise.name} className="w-9 h-9 rounded-md" />
+                        <ExerciseThumb
+                          images={ex.exercise.images}
+                          name={ex.exercise.name}
+                          className="w-9 h-9 rounded-md"
+                          onClick={() => setLightboxExercise(ex.exercise)}
+                        />
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm truncate">{ex.exercise.name}</p>
                           <p className="text-xs text-muted-foreground">{ex.exercise.muscleGroup}</p>
@@ -577,6 +583,13 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
           )}
         </DialogContent>
       </Dialog>
+
+      <ExerciseImageDialog
+        open={!!lightboxExercise}
+        onOpenChange={(o) => !o && setLightboxExercise(null)}
+        images={lightboxExercise?.images}
+        name={lightboxExercise?.name || ""}
+      />
     </>
   );
 }
@@ -598,6 +611,7 @@ function ExercisePickerContent({
   const [filterMuscles, setFilterMuscles] = useState<string[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lightboxExercise, setLightboxExercise] = useState<Exercise | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -676,22 +690,38 @@ function ExercisePickerContent({
           <div className="text-center py-8 text-sm text-muted-foreground">Nenhum exercício encontrado</div>
         ) : (
           filtered.map((ex) => (
-            <button
+            <div
               key={ex.id}
-              type="button"
-              onClick={() => onPick(ex)}
-              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 active:bg-accent transition-colors text-left"
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors"
             >
-              <ExerciseThumb images={ex.images} name={ex.name} className="w-10 h-10 rounded-lg" />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{ex.name}</p>
-                <p className="text-xs text-muted-foreground">{ex.muscleGroup} · {ex.equipment}</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
+              <ExerciseThumb
+                images={ex.images}
+                name={ex.name}
+                className="w-10 h-10 rounded-lg"
+                onClick={() => setLightboxExercise(ex)}
+              />
+              <button
+                type="button"
+                onClick={() => onPick(ex)}
+                className="flex-1 min-w-0 flex items-center gap-2 text-left active:opacity-70"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{ex.name}</p>
+                  <p className="text-xs text-muted-foreground">{ex.muscleGroup} · {ex.equipment}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              </button>
+            </div>
           ))
         )}
       </div>
+
+      <ExerciseImageDialog
+        open={!!lightboxExercise}
+        onOpenChange={(o) => !o && setLightboxExercise(null)}
+        images={lightboxExercise?.images}
+        name={lightboxExercise?.name || ""}
+      />
     </div>
   );
 }

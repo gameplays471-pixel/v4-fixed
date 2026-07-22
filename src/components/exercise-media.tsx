@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Dumbbell } from "lucide-react";
+import { Dumbbell, ZoomIn } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 /**
  * Miniatura de exercício (usada em listas: biblioteca, busca de exercícios,
@@ -12,10 +13,13 @@ export function ExerciseThumb({
   images,
   name,
   className = "w-14 h-14 rounded-lg",
+  onClick,
 }: {
   images?: string[] | null;
   name: string;
   className?: string;
+  /** Se informado, a miniatura vira um botão clicável (ex: abrir lightbox). */
+  onClick?: () => void;
 }) {
   const [failed, setFailed] = useState(false);
   const src = images && images.length > 0 ? images[0] : null;
@@ -30,16 +34,39 @@ export function ExerciseThumb({
     );
   }
 
+  const img = (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={name}
+      className="w-full h-full object-cover"
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+        className={`${className} relative overflow-hidden shrink-0 bg-muted group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary`}
+        aria-label={`Ver imagem de ${name}`}
+      >
+        {img}
+        <span className="absolute inset-0 bg-black/0 group-hover:bg-black/30 group-active:bg-black/40 transition-colors flex items-center justify-center">
+          <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+        </span>
+      </button>
+    );
+  }
+
   return (
     <div className={`${className} overflow-hidden shrink-0 bg-muted`}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt={name}
-        className="w-full h-full object-cover"
-        loading="lazy"
-        onError={() => setFailed(true)}
-      />
+      {img}
     </div>
   );
 }
@@ -90,5 +117,32 @@ export function ExerciseMedia({
         onError={() => setFailed(true)}
       />
     </div>
+  );
+}
+
+/**
+ * Modal simples ("lightbox") pra ver a imagem/gif do exercício em tamanho
+ * grande — usado ao clicar em uma miniatura (na busca de exercícios ou na
+ * tela de treino em execução), sem precisar abrir a ficha completa do
+ * exercício.
+ */
+export function ExerciseImageDialog({
+  open,
+  onOpenChange,
+  images,
+  name,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  images?: string[] | null;
+  name: string;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md p-3 gap-2">
+        <DialogTitle className="text-sm font-semibold text-center px-2">{name}</DialogTitle>
+        <ExerciseMedia images={images} name={name} className="aspect-square rounded-lg" />
+      </DialogContent>
+    </Dialog>
   );
 }
