@@ -67,7 +67,7 @@ export async function PUT(
     if (exercises && exercises.length > 0) {
       await db.workoutExercise.createMany({
         data: exercises.map(
-          (ex: { exerciseId: string; targetSets: number; targetReps: number; restSeconds: number; notes?: string }, i: number) => ({
+          (ex: { exerciseId: string; targetSets: number; targetReps: number; restSeconds: number; notes?: string; targetDurationSec?: number; targetDistanceKm?: number; targetIntensity?: string }, i: number) => ({
             workoutId: id,
             exerciseId: ex.exerciseId,
             order: i + 1,
@@ -75,6 +75,9 @@ export async function PUT(
             targetReps: ex.targetReps ?? 10,
             restSeconds: ex.restSeconds ?? 90,
             notes: ex.notes || null,
+            targetDurationSec: ex.targetDurationSec ?? null,
+            targetDistanceKm: ex.targetDistanceKm ?? null,
+            targetIntensity: ex.targetIntensity ?? null,
           })
         ),
       });

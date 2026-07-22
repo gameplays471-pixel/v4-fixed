@@ -51,13 +51,16 @@ export async function POST(req: NextRequest) {
         color: color || null,
         exercises: {
           create: (exercises || []).map(
-            (ex: { exerciseId: string; targetSets: number; targetReps: number; restSeconds: number; notes?: string }, i: number) => ({
+            (ex: { exerciseId: string; targetSets: number; targetReps: number; restSeconds: number; notes?: string; targetDurationSec?: number; targetDistanceKm?: number; targetIntensity?: string }, i: number) => ({
               exerciseId: ex.exerciseId,
               order: i + 1,
               targetSets: ex.targetSets ?? 3,
               targetReps: ex.targetReps ?? 10,
               restSeconds: ex.restSeconds ?? 90,
               notes: ex.notes || null,
+              targetDurationSec: ex.targetDurationSec ?? null,
+              targetDistanceKm: ex.targetDistanceKm ?? null,
+              targetIntensity: ex.targetIntensity ?? null,
             })
           ),
         },

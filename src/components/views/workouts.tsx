@@ -29,6 +29,7 @@ type Exercise = {
   equipment: string | null;
   equipmentType: string | null;
   level: string;
+  category: string;
   images: string[];
 };
 
@@ -40,6 +41,9 @@ type WorkoutExercise = {
   targetReps: number;
   restSeconds: number;
   notes: string | null;
+  targetDurationSec: number | null;
+  targetDistanceKm: number | null;
+  targetIntensity: string | null;
   exercise: Exercise;
 };
 
@@ -54,6 +58,7 @@ type Workout = {
 };
 
 const COLOR_OPTIONS = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
+const INTENSITY_OPTIONS = ["Leve", "Moderada", "Intensa"];
 
 export function WorkoutsView() {
   const setView = useAppStore((s) => s.setView);
@@ -200,7 +205,9 @@ export function WorkoutsView() {
                     <div key={ex.id} className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground truncate flex-1">{ex.exercise.name}</span>
                       <span className="text-xs text-muted-foreground ml-2 shrink-0">
-                        {ex.targetSets}×{ex.targetReps} · {ex.restSeconds}s
+                        {ex.exercise.category === "Cardio"
+                          ? `${Math.round((ex.targetDurationSec ?? 1800) / 60)} min · ${ex.targetIntensity || "Moderada"}`
+                          : `${ex.targetSets}×${ex.targetReps} · ${ex.restSeconds}s`}
                       </span>
                     </div>
                   ))}
@@ -272,6 +279,9 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
         targetReps: ex.targetReps,
         restSeconds: ex.restSeconds,
         notes: ex.notes,
+        targetDurationSec: ex.targetDurationSec,
+        targetDistanceKm: ex.targetDistanceKm,
+        targetIntensity: ex.targetIntensity,
       })),
     };
 
@@ -293,6 +303,7 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
   };
 
   const addExercise = (ex: Exercise) => {
+    const isCardio = ex.category === "Cardio";
     setExercises([
       ...exercises,
       {
@@ -303,6 +314,9 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
         targetReps: 10,
         restSeconds: defaultRest,
         notes: null,
+        targetDurationSec: isCardio ? 1800 : null,
+        targetDistanceKm: null,
+        targetIntensity: isCardio ? "Moderada" : null,
         exercise: ex,
       },
     ]);
@@ -474,6 +488,46 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
                           </Button>
                         </div>
                       </div>
+                      {ex.exercise.category === "Cardio" ? (
+                        <div className="grid grid-cols-3 gap-2 pl-6">
+                          <div>
+                            <label className="text-[10px] text-muted-foreground">Duração (min)</label>
+                            <Input
+                              type="number"
+                              value={Math.round((ex.targetDurationSec ?? 1800) / 60)}
+                              onChange={(e) =>
+                                updateExercise(idx, { targetDurationSec: (parseInt(e.target.value) || 30) * 60 })
+                              }
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] text-muted-foreground">Distância (km)</label>
+                            <Input
+                              type="number"
+                              step="0.1"
+                              placeholder="opcional"
+                              value={ex.targetDistanceKm ?? ""}
+                              onChange={(e) =>
+                                updateExercise(idx, { targetDistanceKm: e.target.value ? parseFloat(e.target.value) : null })
+                              }
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] text-muted-foreground">Intensidade</label>
+                            <select
+                              value={ex.targetIntensity ?? "Moderada"}
+                              onChange={(e) => updateExercise(idx, { targetIntensity: e.target.value })}
+                              className="h-8 w-full text-sm rounded-md border border-input bg-background px-1"
+                            >
+                              {INTENSITY_OPTIONS.map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      ) : (
                       <div className="grid grid-cols-3 gap-2 pl-6">
                         <div>
                           <label className="text-[10px] text-muted-foreground">Séries</label>
@@ -503,6 +557,7 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
                           />
                         </div>
                       </div>
+                      )}
                     </div>
                   ))}
                 </div>

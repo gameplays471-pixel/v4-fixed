@@ -80,6 +80,9 @@ model WorkoutExercise {
   targetReps  Int     @default(10)
   restSeconds Int     @default(90)
   notes       String?
+  targetDurationSec Int?   // exercícios de cardio: duração alvo em segundos
+  targetDistanceKm  Float? // exercícios de cardio: distância alvo em km (opcional)
+  targetIntensity   String? // exercícios de cardio: "Leve" | "Moderada" | "Intensa"
 
   workout  Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   exercise Exercise @relation(fields: [exerciseId], references: [id])
@@ -119,6 +122,10 @@ model SessionSet {
   restSeconds Int     @default(90)
   completedAt DateTime @default(now())
   isPR        Boolean @default(false)
+  durationSec Int?    // exercícios de cardio: duração real em segundos
+  distanceKm  Float?  // exercícios de cardio: distância percorrida
+  avgBpm      Int?    // exercícios de cardio: batimento médio
+  intensity   String? // exercícios de cardio: "Leve" | "Moderada" | "Intensa"
 
   session  WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   exercise Exercise       @relation(fields: [exerciseId], references: [id])
