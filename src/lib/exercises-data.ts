@@ -2698,6 +2698,38 @@ export const exercisesData: ExerciseData[] = [
     tips: "Excelente para cardio completo. Baixo impacto nas articulações.",
   },
 {
+    name: "Escada (StairMaster)",
+    slug: "escada-stairmaster",
+    muscleGroup: "Pernas",
+    secondaryMuscles: "Glúteos, Core",
+    equipment: "Máquina",
+    category: "Cardio",
+    equipmentType: "Máquina",
+    level: "Intermediário",
+    description:
+      "Simulador de escada, excelente para cardio de alta queima calórica e fortalecimento de pernas e glúteos.",
+    executionSteps:
+      "1. Suba na máquina segurando levemente no corrimão.\n2. Ajuste a velocidade/nível inicial baixo.\n3. Pise com o pé inteiro em cada degrau, sem se apoiar no corrimão.\n4. Mantenha a postura ereta, core ativado.\n5. Continue no ritmo determinado pelo tempo do treino.",
+    commonMistakes: "Apoiar todo o peso nos braços; passos muito curtos; encurvar as costas.",
+    tips: "Evite se apoiar demais no corrimão — isso reduz o gasto calórico e o trabalho muscular.",
+  },
+{
+    name: "Caminhada Inclinada na Esteira",
+    slug: "caminhada-inclinada-esteira",
+    muscleGroup: "Pernas",
+    secondaryMuscles: "Glúteos, Panturrilhas, Core",
+    equipment: "Máquina",
+    category: "Cardio",
+    equipmentType: "Máquina",
+    level: "Iniciante",
+    description:
+      "Caminhada em inclinação na esteira, ótima para cardio de baixo impacto com maior ativação de posterior de coxa e glúteos.",
+    executionSteps:
+      "1. Suba na esteira e comece em velocidade baixa, sem inclinação.\n2. Aumente gradualmente a inclinação.\n3. Ajuste a velocidade para um ritmo de caminhada confortável.\n4. Mantenha postura ereta, sem se apoiar no painel.\n5. Continue pelo tempo determinado.",
+    commonMistakes: "Segurar no painel; passos muito curtos; inclinação alta demais no início.",
+    tips: "Ótima alternativa de baixo impacto à corrida para quem busca queima calórica.",
+  },
+{
     name: "Remo Ergômetro",
     slug: "remo-ergometro",
     muscleGroup: "Full Body",

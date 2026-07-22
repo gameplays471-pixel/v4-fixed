@@ -36,6 +36,12 @@ interface ExerciseDetailProps {
   onClose: () => void;
 }
 
+function splitLines(text: string): string[] {
+  // Alguns dados foram importados via CSV e ficaram com a sequência literal
+  // "\n" (barra + n) em vez de quebra de linha real. Normaliza os dois casos.
+  return text.replace(/\\n/g, "\n").split("\n");
+}
+
 export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClose }: ExerciseDetailProps) {
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(true);
@@ -117,7 +123,7 @@ export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClo
                   <h3 className="font-semibold text-sm">Como executar</h3>
                 </div>
                 <ol className="space-y-2">
-                  {exercise.executionSteps.split("\n").map((step, i) => {
+                  {splitLines(exercise.executionSteps).map((step, i) => {
                     const clean = step.replace(/^\d+\.\s*/, "").trim();
                     if (!clean) return null;
                     return (
@@ -140,7 +146,7 @@ export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClo
                   <AlertCircle className="w-4 h-4 text-destructive" />
                   <h3 className="font-semibold text-sm text-destructive">Erros comuns</h3>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{exercise.commonMistakes}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{splitLines(exercise.commonMistakes).join("\n")}</p>
               </div>
             )}
 
@@ -151,7 +157,7 @@ export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClo
                   <Lightbulb className="w-4 h-4 text-primary" />
                   <h3 className="font-semibold text-sm text-primary">Dicas do coach</h3>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{exercise.tips}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{splitLines(exercise.tips).join("\n")}</p>
               </div>
             )}
 

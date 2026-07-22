@@ -54,21 +54,32 @@ export async function POST(req: NextRequest) {
       reps: number;
       restSeconds: number;
       isPR: boolean;
+      durationSec?: number;
+      distanceKm?: number;
+      avgBpm?: number;
+      intensity?: string;
     }> = [];
 
     // Detectar PRs — consulta o maior peso já registrado para o mesmo exercício
-    // pelo usuário atual (via relação session -> userId).
+    // pelo usuário atual (via relação session -> userId). Exercícios de cardio
+    // (identificados pela presença de durationSec) não entram nessa comparação,
+    // já que não fazem sentido como "recorde de peso".
     for (const s of sets || []) {
-      const previousMax = await db.sessionSet.findFirst({
-        where: {
-          exerciseId: s.exerciseId,
-          session: { userId: user.id },
-        },
-        orderBy: { weight: "desc" },
-        select: { weight: true },
-      });
+      const isCardio = s.durationSec != null;
+      let isNewPR = false;
 
-      const isNewPR = !previousMax || s.weight > previousMax.weight;
+      if (!isCardio) {
+        const previousMax = await db.sessionSet.findFirst({
+          where: {
+            exerciseId: s.exerciseId,
+            session: { userId: user.id },
+          },
+          orderBy: { weight: "desc" },
+          select: { weight: true },
+        });
+        isNewPR = !previousMax || s.weight > previousMax.weight;
+      }
+
       prUpdates.push({
         exerciseId: s.exerciseId,
         exerciseName: s.exerciseName,
@@ -76,6 +87,10 @@ export async function POST(req: NextRequest) {
         reps: s.reps,
         restSeconds: s.restSeconds || 90,
         isPR: isNewPR,
+        durationSec: s.durationSec,
+        distanceKm: s.distanceKm,
+        avgBpm: s.avgBpm,
+        intensity: s.intensity,
       });
     }
 
@@ -97,6 +112,10 @@ export async function POST(req: NextRequest) {
             weight: s.weight,
             reps: s.reps,
             restSeconds: s.restSeconds || 90,
+            durationSec: s.durationSec ?? null,
+            distanceKm: s.distanceKm ?? null,
+            avgBpm: s.avgBpm ?? null,
+            intensity: s.intensity ?? null,
           })),
         },
       },

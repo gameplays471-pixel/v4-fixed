@@ -32,8 +32,12 @@ export default function Home() {
           setToken(null);
           useAppStore.getState().setView("auth");
         } else {
-          // Auto-login como demo se não houver view definida
-          if (useAppStore.getState().view === "auth") {
+          // Se havia um treino em andamento (salvo no localStorage), volta
+          // direto pra tela dele em vez do dashboard — evita perder o treino
+          // ao recarregar a página.
+          if (useAppStore.getState().activeWorkoutId) {
+            useAppStore.getState().setView("active-workout");
+          } else if (useAppStore.getState().view === "auth") {
             useAppStore.getState().setView("dashboard");
           }
         }

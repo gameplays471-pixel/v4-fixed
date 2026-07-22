@@ -25,8 +25,16 @@ import {
   Clock,
   Flame,
   History,
+  HeartPulse,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  loadWorkoutDraft,
+  saveWorkoutDraft,
+  clearWorkoutDraft,
+  type SetDraft,
+  type CardioDraft,
+} from "@/lib/workout-draft";
 
 type Workout = {
   id: string;
@@ -39,28 +47,32 @@ type Workout = {
     targetSets: number;
     targetReps: number;
     restSeconds: number;
+    targetDurationSec: number | null;
+    targetDistanceKm: number | null;
+    targetIntensity: string | null;
     exercise: {
       id: string;
       name: string;
       muscleGroup: string;
       equipment: string | null;
+      category: string;
     };
   }>;
 };
 
-type SetState = {
-  weight: string;
-  reps: string;
-  completed: boolean;
-};
+type SetState = SetDraft;
+type CardioState = CardioDraft;
+
+const INTENSITY_OPTIONS = ["Leve", "Moderada", "Intensa"];
 
 export function ActiveWorkoutView() {
   const setView = useAppStore((s) => s.setView);
   const activeWorkoutId = useAppStore((s) => s.activeWorkoutId);
+  const setActiveWorkoutId = useAppStore((s) => s.setActiveWorkoutId);
 
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [loading, setLoading] = useState(true);
-  const [startedAt] = useState(new Date());
+  const [startedAt, setStartedAt] = useState(new Date());
   const [elapsed, setElapsed] = useState(0);
   const [collapsedExercises, setCollapsedExercises] = useState<Set<string>>(new Set());
   const [showFinishModal, setShowFinishModal] = useState(false);
@@ -68,6 +80,13 @@ export function ActiveWorkoutView() {
 
   // Sets state: Map<exerciseId, SetState[]>
   const [setsMap, setSetsMap] = useState<Record<string, SetState[]>>({});
+  // Cardio state: Map<exerciseId, CardioState> (exercícios de cardio não usam setsMap)
+  const [cardioMap, setCardioMap] = useState<Record<string, CardioState>>({});
+
+  // Só começa a salvar o rascunho depois que o estado inicial (novo ou
+  // restaurado) já foi montado, pra não sobrescrever o rascunho salvo com
+  // um estado vazio momentâneo durante o carregamento.
+  const hydratedRef = useRef(false);
 
   // Últimos sets registrados para cada exerciseId (histórico do usuário)
   // Usado para mostrar como placeholder "última vez" nos inputs.
@@ -92,16 +111,43 @@ export function ActiveWorkoutView() {
     apiGet<{ workout: Workout }>(`/api/workouts/${activeWorkoutId}`)
       .then(async (data) => {
         setWorkout(data.workout);
-        // Inicializar sets
+
+        const draft = loadWorkoutDraft(activeWorkoutId);
+
+        // Inicializar sets/cardio (usa o rascunho salvo quando existir)
         const initial: Record<string, SetState[]> = {};
+        const initialCardio: Record<string, CardioState> = {};
         for (const ex of data.workout.exercises) {
-          initial[ex.id] = Array.from({ length: ex.targetSets }, () => ({
-            weight: "",
-            reps: ex.targetReps.toString(),
-            completed: false,
-          }));
+          const isCardio = ex.exercise.category === "Cardio";
+          if (isCardio) {
+            initialCardio[ex.id] = draft?.cardioMap[ex.id] || {
+              durationMin: ex.targetDurationSec ? String(Math.round(ex.targetDurationSec / 60)) : "30",
+              distanceKm: ex.targetDistanceKm ? String(ex.targetDistanceKm) : "",
+              avgBpm: "",
+              intensity: ex.targetIntensity || "Moderada",
+              completed: false,
+            };
+          } else {
+            initial[ex.id] =
+              draft?.setsMap[ex.id] ||
+              Array.from({ length: ex.targetSets }, () => ({
+                weight: "",
+                reps: ex.targetReps.toString(),
+                completed: false,
+              }));
+          }
         }
         setSetsMap(initial);
+        setCardioMap(initialCardio);
+
+        if (draft) {
+          setStartedAt(new Date(draft.startedAt));
+          setCollapsedExercises(new Set(draft.collapsedExercises));
+          toast.info("Treino em andamento restaurado 💾");
+        } else {
+          setStartedAt(new Date());
+        }
+        hydratedRef.current = true;
 
         // Buscar últimos sets de cada exercício do histórico do usuário
         // (trazer mesmo se o exercício está em outro treino)
@@ -119,6 +165,20 @@ export function ActiveWorkoutView() {
       })
       .finally(() => setLoading(false));
   }, [activeWorkoutId, setView]);
+
+  // Autosave: salva o progresso no localStorage sempre que algo muda,
+  // pra sobreviver a um reload/aba fechada sem querer.
+  useEffect(() => {
+    if (!hydratedRef.current || !activeWorkoutId) return;
+    saveWorkoutDraft({
+      workoutId: activeWorkoutId,
+      startedAt: startedAt.toISOString(),
+      setsMap,
+      cardioMap,
+      collapsedExercises: Array.from(collapsedExercises),
+      savedAt: new Date().toISOString(),
+    });
+  }, [activeWorkoutId, setsMap, cardioMap, collapsedExercises, startedAt]);
 
   // Cronômetro de treino
   useEffect(() => {
@@ -227,6 +287,18 @@ export function ActiveWorkoutView() {
     });
   };
 
+  const updateCardio = (exerciseId: string, updates: Partial<CardioState>) => {
+    const current = cardioMap[exerciseId];
+    if (!current) return;
+    setCardioMap({ ...cardioMap, [exerciseId]: { ...current, ...updates } });
+  };
+
+  const toggleCardioComplete = (exerciseId: string) => {
+    const current = cardioMap[exerciseId];
+    if (!current) return;
+    setCardioMap({ ...cardioMap, [exerciseId]: { ...current, completed: !current.completed } });
+  };
+
   const toggleCollapse = (exerciseId: string) => {
     const newSet = new Set(collapsedExercises);
     if (newSet.has(exerciseId)) {
@@ -237,21 +309,58 @@ export function ActiveWorkoutView() {
     setCollapsedExercises(newSet);
   };
 
-  const totalSets = workout?.exercises.reduce((acc, ex) => acc + (setsMap[ex.id]?.length || 0), 0) || 0;
-  const completedSets = workout?.exercises.reduce((acc, ex) => {
-    return acc + (setsMap[ex.id]?.filter((s) => s.completed).length || 0);
-  }, 0) || 0;
+  const totalSets =
+    (workout?.exercises.reduce((acc, ex) => acc + (setsMap[ex.id]?.length || 0), 0) || 0) +
+    (workout?.exercises.filter((ex) => ex.exercise.category === "Cardio").length || 0);
+  const completedSets =
+    (workout?.exercises.reduce((acc, ex) => {
+      return acc + (setsMap[ex.id]?.filter((s) => s.completed).length || 0);
+    }, 0) || 0) +
+    (workout?.exercises.filter((ex) => cardioMap[ex.id]?.completed).length || 0);
 
   const totalVolume = workout?.exercises.reduce((acc, ex) => {
     return acc + (setsMap[ex.id]?.reduce((s, set) => s + (set.completed ? (parseFloat(set.weight) || 0) * (parseInt(set.reps) || 0) : 0), 0) || 0);
   }, 0) || 0;
 
+  const totalCardioMin =
+    workout?.exercises.reduce((acc, ex) => {
+      const c = cardioMap[ex.id];
+      return acc + (c?.completed ? parseInt(c.durationMin) || 0 : 0);
+    }, 0) || 0;
+
   const handleFinish = async () => {
     if (!workout) return;
     setSaving(true);
 
-    const setsData: Array<{ exerciseId: string; exerciseName: string; weight: number; reps: number; restSeconds: number }> = [];
+    const setsData: Array<{
+      exerciseId: string;
+      exerciseName: string;
+      weight: number;
+      reps: number;
+      restSeconds: number;
+      durationSec?: number;
+      distanceKm?: number;
+      avgBpm?: number;
+      intensity?: string;
+    }> = [];
     for (const ex of workout.exercises) {
+      if (ex.exercise.category === "Cardio") {
+        const c = cardioMap[ex.id];
+        if (c?.completed) {
+          setsData.push({
+            exerciseId: ex.exerciseId,
+            exerciseName: ex.exercise.name,
+            weight: 0,
+            reps: 0,
+            restSeconds: 0,
+            durationSec: (parseInt(c.durationMin) || 0) * 60,
+            distanceKm: c.distanceKm ? parseFloat(c.distanceKm) : undefined,
+            avgBpm: c.avgBpm ? parseInt(c.avgBpm) : undefined,
+            intensity: c.intensity,
+          });
+        }
+        continue;
+      }
       const sets = setsMap[ex.id] || [];
       for (const set of sets) {
         if (set.completed && set.weight && set.reps) {
@@ -281,6 +390,8 @@ export function ActiveWorkoutView() {
         durationSec: elapsed,
         sets: setsData,
       });
+      clearWorkoutDraft(workout.id);
+      setActiveWorkoutId(null);
       toast.success("Treino finalizado! 💪 Confira seus recordes.");
       setView("history");
     } catch (e) {
@@ -293,7 +404,9 @@ export function ActiveWorkoutView() {
   };
 
   const handleCancel = () => {
-    if (confirm("Cancelar treino? Os dados não serão salvos.")) {
+    if (confirm("Cancelar treino? O progresso salvo será apagado.")) {
+      if (workout) clearWorkoutDraft(workout.id);
+      setActiveWorkoutId(null);
       setView("workouts");
     }
   };
@@ -335,6 +448,12 @@ export function ActiveWorkoutView() {
                 <Dumbbell className="w-3 h-3" />
                 {Math.round(totalVolume)} kg
               </span>
+              {totalCardioMin > 0 && (
+                <span className="flex items-center gap-1">
+                  <HeartPulse className="w-3 h-3" />
+                  {totalCardioMin} min cardio
+                </span>
+              )}
             </div>
           </div>
           <div className="flex gap-2">
@@ -427,7 +546,9 @@ export function ActiveWorkoutView() {
       {/* Exercícios */}
       <div className="space-y-3 mt-4">
         {workout.exercises.map((ex, exIdx) => {
+          const isCardio = ex.exercise.category === "Cardio";
           const sets = setsMap[ex.id] || [];
+          const cardio = cardioMap[ex.id];
           const isCollapsed = collapsedExercises.has(ex.id);
           const completedCount = sets.filter((s) => s.completed).length;
 
@@ -446,31 +567,42 @@ export function ActiveWorkoutView() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
-                      {exIdx + 1}
+                      {isCardio ? <HeartPulse className="w-4 h-4" /> : exIdx + 1}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-sm">{ex.exercise.name}</h3>
                       <p className="text-xs text-muted-foreground">
-                        {ex.exercise.muscleGroup} · {sets.length} séries · descanso {ex.restSeconds}s
+                        {isCardio
+                          ? `${ex.exercise.muscleGroup} · cardio`
+                          : `${ex.exercise.muscleGroup} · ${sets.length} séries · descanso ${ex.restSeconds}s`}
                       </p>
-                      {formatLastSets(ex.exerciseId) && (
+                      {!isCardio && formatLastSets(ex.exerciseId) && (
                         <p className="text-[11px] text-primary/80 flex items-center gap-1 mt-0.5 font-medium">
                           <History className="w-3 h-3 shrink-0" />
                           <span className="truncate">Última vez: {formatLastSets(ex.exerciseId)}</span>
                         </p>
                       )}
                     </div>
-                    {completedCount > 0 && completedCount === sets.length && (
-                      <Badge className="bg-primary/15 text-primary hover:bg-primary/20">
-                        <Check className="w-3 h-3 mr-1" />
-                        {completedCount}/{sets.length}
-                      </Badge>
+                    {isCardio ? (
+                      cardio?.completed && (
+                        <Badge className="bg-primary/15 text-primary hover:bg-primary/20">
+                          <Check className="w-3 h-3 mr-1" />
+                          Feito
+                        </Badge>
+                      )
+                    ) : (
+                      completedCount > 0 && completedCount === sets.length && (
+                        <Badge className="bg-primary/15 text-primary hover:bg-primary/20">
+                          <Check className="w-3 h-3 mr-1" />
+                          {completedCount}/{sets.length}
+                        </Badge>
+                      )
                     )}
                     {isCollapsed ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronUp className="w-4 h-4 text-muted-foreground" />}
                   </div>
                 </div>
 
-                {/* Sets */}
+                {/* Conteúdo: cardio ou séries de força */}
                 <AnimatePresence>
                   {!isCollapsed && (
                     <motion.div
@@ -479,6 +611,66 @@ export function ActiveWorkoutView() {
                       exit={{ height: 0 }}
                       className="overflow-hidden"
                     >
+                      {isCardio && cardio ? (
+                        <div className="px-4 pb-4 space-y-3">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-[10px] text-muted-foreground">Duração (min)</label>
+                              <Input
+                                type="number"
+                                value={cardio.durationMin}
+                                onChange={(e) => updateCardio(ex.id, { durationMin: e.target.value })}
+                                className="h-10 text-center font-medium"
+                                disabled={cardio.completed}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-muted-foreground">Distância (km) · opcional</label>
+                              <Input
+                                type="number"
+                                step="0.1"
+                                placeholder="0"
+                                value={cardio.distanceKm}
+                                onChange={(e) => updateCardio(ex.id, { distanceKm: e.target.value })}
+                                className="h-10 text-center font-medium"
+                                disabled={cardio.completed}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-muted-foreground">BPM médio · opcional</label>
+                              <Input
+                                type="number"
+                                placeholder="0"
+                                value={cardio.avgBpm}
+                                onChange={(e) => updateCardio(ex.id, { avgBpm: e.target.value })}
+                                className="h-10 text-center font-medium"
+                                disabled={cardio.completed}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[10px] text-muted-foreground">Intensidade</label>
+                              <select
+                                value={cardio.intensity}
+                                onChange={(e) => updateCardio(ex.id, { intensity: e.target.value })}
+                                disabled={cardio.completed}
+                                className="h-10 w-full text-sm text-center font-medium rounded-md border border-input bg-background disabled:opacity-60"
+                              >
+                                {INTENSITY_OPTIONS.map((opt) => (
+                                  <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                          <Button
+                            variant={cardio.completed ? "default" : "outline"}
+                            className={`w-full ${cardio.completed ? "bg-primary" : ""}`}
+                            onClick={() => toggleCardioComplete(ex.id)}
+                          >
+                            <Check className="w-4 h-4 mr-2" />
+                            {cardio.completed ? "Concluído" : "Marcar como concluído"}
+                          </Button>
+                        </div>
+                      ) : (
                       <div className="px-4 pb-3">
                         {/* Cabeçalho */}
                         <div className="grid grid-cols-[2rem_1fr_1fr_2.5rem] gap-2 px-1 mb-1 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
@@ -558,6 +750,7 @@ export function ActiveWorkoutView() {
                           Adicionar série
                         </Button>
                       </div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>

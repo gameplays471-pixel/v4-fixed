@@ -1,5 +1,6 @@
 // Store global para navegação entre views (sem router)
 import { create } from "zustand";
+import { getPersistedActiveWorkoutId, setPersistedActiveWorkoutId } from "@/lib/workout-draft";
 
 export type ViewKey =
   | "dashboard"
@@ -33,8 +34,13 @@ export const useAppStore = create<AppState>((set) => ({
   view: "dashboard",
   setView: (view) => set({ view }),
   
-  activeWorkoutId: null,
-  setActiveWorkoutId: (id) => set({ activeWorkoutId: id }),
+  // Restaura o treino ativo salvo no localStorage (se houver) já na
+  // inicialização, para o app conseguir decidir a tela certa ao carregar.
+  activeWorkoutId: getPersistedActiveWorkoutId(),
+  setActiveWorkoutId: (id) => {
+    setPersistedActiveWorkoutId(id);
+    set({ activeWorkoutId: id });
+  },
   
   editingWorkoutId: null,
   setEditingWorkoutId: (id) => set({ editingWorkoutId: id }),
