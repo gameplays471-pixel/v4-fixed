@@ -1,19 +1,32 @@
 // Cliente de API com suporte a Bearer token (localStorage) + cookie fallback
 // Trata 401 redirecionando para a tela de login
 
-export const TOKEN_KEY = "hevy_token";
+export const TOKEN_KEY = "gemgym_token";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
+  // Prioriza localStorage (login persistente); cai para sessionStorage
+  // (login válido só nesta aba/sessão do navegador) se não achar.
+  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
 }
 
-export function setToken(token: string | null) {
+/**
+ * Salva o token de autenticação.
+ * @param remember Se true (padrão), usa localStorage e o login persiste
+ *   entre sessões do navegador ("Manter conectado"). Se false, usa
+ *   sessionStorage e a sessão termina ao fechar a aba/navegador.
+ */
+export function setToken(token: string | null, remember: boolean = true) {
   if (typeof window === "undefined") return;
+  // Sempre limpa os dois primeiro para não deixar token velho para trás.
+  localStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(TOKEN_KEY);
   if (token) {
-    localStorage.setItem(TOKEN_KEY, token);
-  } else {
-    localStorage.removeItem(TOKEN_KEY);
+    if (remember) {
+      localStorage.setItem(TOKEN_KEY, token);
+    } else {
+      sessionStorage.setItem(TOKEN_KEY, token);
+    }
   }
 }
 

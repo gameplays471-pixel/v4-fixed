@@ -7,14 +7,15 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 interface AuthScreenProps {
-  onAuth: (user: unknown, token?: string) => void;
+  onAuth: (user: unknown, token?: string, rememberMe?: boolean) => void;
 }
 
 export function AuthScreen({ onAuth }: AuthScreenProps) {
   const [mode, setMode] = useState<"login" | "signup">("login");
-  const [email, setEmail] = useState("demo@hevy.com");
-  const [password, setPassword] = useState("demo123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,7 +24,8 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
 
     try {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
-      const body = mode === "login" ? { email, password } : { email, password, name };
+      const body =
+        mode === "login" ? { email, password, rememberMe } : { email, password, name };
 
       const res = await fetch(endpoint, {
         method: "POST",
@@ -39,8 +41,8 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
       }
 
       toast.success(mode === "login" ? "Bem-vindo de volta!" : "Conta criada com sucesso!");
-      // Passa o token para ser armazenado em localStorage
-      onAuth(data, data.token);
+      // Passa o token e a preferência de "manter conectado" para armazenamento
+      onAuth(data, data.token, mode === "login" ? rememberMe : true);
     } catch (err) {
       console.error(err);
       toast.error("Erro de conexão");
@@ -55,11 +57,11 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "demo@hevy.com", password: "demo123" }),
+        body: JSON.stringify({ email: "demo@hevy.com", password: "demo123", rememberMe }),
       });
       const data = await res.json();
       if (res.ok) {
-        onAuth(data, data.token);
+        onAuth(data, data.token, rememberMe);
       } else {
         toast.error(data.error);
       }
@@ -75,10 +77,8 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/30 mb-4">
-            <span className="text-primary-foreground font-bold text-2xl">H</span>
-          </div>
-          <h1 className="text-2xl font-bold">Hevy Web</h1>
+          <img src="/logo.png" alt="GEMgym" className="w-20 h-20 rounded-2xl object-cover shadow-xl shadow-primary/30 mb-4" />
+          <h1 className="text-2xl font-bold">GEMgym</h1>
           <p className="text-sm text-muted-foreground mt-1">Treine. Evolua. Supere.</p>
         </div>
 
@@ -145,6 +145,18 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
               />
             </div>
 
+            {mode === "login" && (
+              <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-border accent-primary"
+                />
+                Manter conectado
+              </label>
+            )}
+
             <Button type="submit" disabled={loading} className="w-full" size="lg">
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -171,10 +183,6 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
           <Button variant="outline" onClick={handleDemo} disabled={loading} className="w-full" size="lg">
             Entrar com conta demo
           </Button>
-
-          <p className="text-xs text-center text-muted-foreground">
-            Demo: <span className="text-foreground font-medium">demo@hevy.com</span> / <span className="text-foreground font-medium">demo123</span>
-          </p>
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-4">

@@ -5,7 +5,7 @@ import { verifyPassword, createSession, setSessionCookie } from "@/lib/auth";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, password } = body;
+    const { email, password, rememberMe = true } = body;
 
     if (!email || !password) {
       return NextResponse.json({ error: "Email e senha são obrigatórios" }, { status: 400 });
@@ -26,13 +26,14 @@ export async function POST(req: NextRequest) {
     }
 
     const token = await createSession(user.id);
-    await setSessionCookie(token);
+    await setSessionCookie(token, !!rememberMe);
 
     return NextResponse.json({
       id: user.id,
       email: user.email,
       name: user.name,
       token, // token também no body para localStorage (suporte cross-origin)
+      rememberMe: !!rememberMe,
     });
   } catch (e) {
     console.error("Login error:", e);

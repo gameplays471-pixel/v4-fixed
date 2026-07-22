@@ -1,4 +1,4 @@
-// Hevy Web - Prisma Schema
+// GEMgym - Prisma Schema
 
 generator client {
   provider = "prisma-client-js"
@@ -28,6 +28,7 @@ model User {
   workouts  Workout[]
   sessions  WorkoutSession[]
   favorites Favorite[]
+  bodyWeightLogs BodyWeightLog[]
 }
 
 model Exercise {
@@ -44,6 +45,7 @@ model Exercise {
   executionSteps  String?  // passo a passo (separado por \n)
   commonMistakes  String?
   tips            String?
+  images          String[] @default([]) // URLs das imagens/gif de demonstração (posição inicial e final)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -135,4 +137,20 @@ model Favorite {
   exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, exerciseId])
+}
+
+// Histórico de peso corporal — permite registrar a evolução do peso ao
+// longo do tempo (diferente do User.weight, que é só o valor "atual").
+model BodyWeightLog {
+  id        String   @id @default(cuid())
+  userId    String
+  weight    Float
+  loggedAt  DateTime @default(now())
+  notes     String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([loggedAt])
 }

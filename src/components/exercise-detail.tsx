@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { apiGet } from "@/lib/api";
-import { Heart, Dumbbell, ListChecks, AlertCircle, Lightbulb } from "lucide-react";
+import { Heart, ListChecks, AlertCircle, Lightbulb } from "lucide-react";
+import { ExerciseMedia } from "@/components/exercise-media";
 
 type Exercise = {
   id: string;
@@ -25,6 +26,7 @@ type Exercise = {
   executionSteps: string | null;
   commonMistakes: string | null;
   tips: string | null;
+  images: string[];
 };
 
 interface ExerciseDetailProps {
@@ -82,10 +84,8 @@ export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClo
           </div>
         ) : exercise ? (
           <div className="space-y-5">
-            {/* Ícone decorativo */}
-            <div className="aspect-video rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent flex items-center justify-center border border-border">
-              <Dumbbell className="w-16 h-16 text-primary/60" />
-            </div>
+            {/* Demonstração do exercício */}
+            <ExerciseMedia images={exercise.images} name={exercise.name} />
 
             {/* Descrição */}
             {exercise.description && (

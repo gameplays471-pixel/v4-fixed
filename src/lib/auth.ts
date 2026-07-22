@@ -6,8 +6,8 @@ import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import crypto from "crypto";
 
-export const SESSION_COOKIE = "hevy_session";
-export const TOKEN_LOCALSTORAGE_KEY = "hevy_token";
+export const SESSION_COOKIE = "gemgym_session";
+export const TOKEN_LOCALSTORAGE_KEY = "gemgym_token";
 const SESSION_EXPIRY_DAYS = 30;
 
 // Hash simples para demo (não usar em produção)
@@ -25,18 +25,29 @@ export async function createSession(userId: string): Promise<string> {
   return token;
 }
 
-export async function setSessionCookie(token: string) {
-  const expires = new Date();
-  expires.setDate(expires.getDate() + SESSION_EXPIRY_DAYS);
-
+export async function setSessionCookie(token: string, remember: boolean = true) {
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax",
-    expires,
-    path: "/",
-  });
+
+  if (remember) {
+    // "Manter conectado": cookie persiste por 30 dias mesmo fechando o navegador.
+    const expires = new Date();
+    expires.setDate(expires.getDate() + SESSION_EXPIRY_DAYS);
+    cookieStore.set(SESSION_COOKIE, token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      expires,
+      path: "/",
+    });
+  } else {
+    // Sem "manter conectado": cookie de sessão, expira ao fechar o navegador.
+    cookieStore.set(SESSION_COOKIE, token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+    });
+  }
 }
 
 export async function clearSessionCookie() {

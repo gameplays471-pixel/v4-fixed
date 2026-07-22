@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Heart, Filter } from "lucide-react";
 import { ExerciseDetail } from "@/components/exercise-detail";
+import { ExerciseThumb } from "@/components/exercise-media";
 import { apiGet, apiPost } from "@/lib/api";
 import { muscleGroups, equipmentTypes, levels } from "@/lib/exercises-data";
 import { motion } from "framer-motion";
@@ -22,6 +23,7 @@ type Exercise = {
   equipmentType: string | null;
   level: string;
   description: string | null;
+  images: string[];
 };
 
 type Favorite = {
@@ -34,25 +36,29 @@ export function LibraryView() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterMuscle, setFilterMuscle] = useState("");
+  const [filterMuscles, setFilterMuscles] = useState<string[]>([]);
   const [filterEquipment, setFilterEquipment] = useState("");
   const [filterLevel, setFilterLevel] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const toggleMuscle = (m: string) => {
+    setFilterMuscles((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]));
+  };
 
   // Carregar exercícios
   useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set("search", search);
-    if (filterMuscle) params.set("muscleGroup", filterMuscle);
+    if (filterMuscles.length > 0) params.set("muscleGroup", filterMuscles.join(","));
     if (filterEquipment) params.set("equipmentType", filterEquipment);
     if (filterLevel) params.set("level", filterLevel);
     
     apiGet<{ exercises: Exercise[] }>(`/api/exercises?${params.toString()}`)
       .then((data) => setExercises(data.exercises))
       .finally(() => setLoading(false));
-  }, [search, filterMuscle, filterEquipment, filterLevel]);
+  }, [search, filterMuscles, filterEquipment, filterLevel]);
 
   // Carregar favoritos
   useEffect(() => {
@@ -88,7 +94,7 @@ export function LibraryView() {
     }
   };
 
-  const activeFiltersCount = [filterMuscle, filterEquipment, filterLevel].filter(Boolean).length;
+  const activeFiltersCount = filterMuscles.length + [filterEquipment, filterLevel].filter(Boolean).length;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -131,7 +137,7 @@ export function LibraryView() {
               variant="ghost"
               size="sm"
               onClick={() => {
-                setFilterMuscle("");
+                setFilterMuscles([]);
                 setFilterEquipment("");
                 setFilterLevel("");
               }}
@@ -146,26 +152,43 @@ export function LibraryView() {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-3"
+            className="space-y-3"
           >
-            <FilterSelect
-              label="Grupo muscular"
-              value={filterMuscle}
-              onChange={setFilterMuscle}
-              options={muscleGroups as readonly string[]}
-            />
-            <FilterSelect
-              label="Equipamento"
-              value={filterEquipment}
-              onChange={setFilterEquipment}
-              options={equipmentTypes as readonly string[]}
-            />
-            <FilterSelect
-              label="Nível"
-              value={filterLevel}
-              onChange={setFilterLevel}
-              options={levels as readonly string[]}
-            />
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground">
+                Grupo muscular {filterMuscles.length > 0 && `(${filterMuscles.length} selecionado${filterMuscles.length > 1 ? "s" : ""})`}
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {muscleGroups.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => toggleMuscle(m)}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      filterMuscles.includes(m)
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-card text-muted-foreground border-border hover:bg-accent"
+                    }`}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FilterSelect
+                label="Equipamento"
+                value={filterEquipment}
+                onChange={setFilterEquipment}
+                options={equipmentTypes as readonly string[]}
+              />
+              <FilterSelect
+                label="Nível"
+                value={filterLevel}
+                onChange={setFilterLevel}
+                options={levels as readonly string[]}
+              />
+            </div>
           </motion.div>
         )}
       </div>
@@ -204,9 +227,7 @@ export function LibraryView() {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex gap-3 min-w-0 flex-1">
-                          <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-bold shrink-0">
-                            <span>{ex.name.charAt(0)}</span>
-                          </div>
+                          <ExerciseThumb images={ex.images} name={ex.name} className="w-14 h-14 rounded-lg" />
                           <div className="min-w-0 flex-1">
                             <h3 className="font-semibold text-sm group-hover:text-primary transition-colors line-clamp-1">{ex.name}</h3>
                             <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
