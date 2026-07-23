@@ -1,15 +1,14 @@
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+// Usa style inline para garantir que var(--card-bg) seja aplicado
+// independente do Tailwind v4 resolver bg-card ou não.
+function Card({ className, style, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card"
-      className={cn(
-        "bg-card text-card-foreground rounded-2xl border border-border/60 shadow-sm",
-        className
-      )}
+      style={{ backgroundColor: "var(--card-bg)", color: "var(--fg)", ...style }}
+      className={cn("rounded-2xl border shadow-sm", className)}
       {...props}
     />
   )
@@ -19,10 +18,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-header"
-      className={cn(
-        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
-        className
-      )}
+      className={cn("flex flex-col gap-1.5 p-6", className)}
       {...props}
     />
   )
@@ -38,11 +34,12 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+function CardDescription({ className, style, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      style={{ color: "var(--muted-fg)", ...style }}
+      className={cn("text-sm", className)}
       {...props}
     />
   )
@@ -52,10 +49,7 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-action"
-      className={cn(
-        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-        className
-      )}
+      className={cn("col-start-2 row-span-2 row-start-1 self-start justify-self-end", className)}
       {...props}
     />
   )
@@ -63,30 +57,14 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
 
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="card-content"
-      className={cn("px-6", className)}
-      {...props}
-    />
+    <div data-slot="card-content" className={cn("p-6 pt-0", className)} {...props} />
   )
 }
 
 function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="card-footer"
-      className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
-      {...props}
-    />
+    <div data-slot="card-footer" className={cn("flex items-center p-6 pt-0", className)} {...props} />
   )
 }
 
-export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardAction,
-  CardDescription,
-  CardContent,
-}
+export { Card, CardHeader, CardFooter, CardTitle, CardAction, CardDescription, CardContent }

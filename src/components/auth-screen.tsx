@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 
 interface AuthScreenProps {
@@ -22,34 +21,21 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
-      const body =
-        mode === "login" ? { email, password, rememberMe } : { email, password, name };
-
+      const body = mode === "login"
+        ? { email, password, rememberMe }
+        : { email, password, name };
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error || "Erro ao autenticar");
-        return;
-      }
-
-      toast.success(mode === "login" ? "Bem-vindo de volta!" : "Conta criada com sucesso!");
-      // Passa o token e a preferência de "manter conectado" para armazenamento
+      if (!res.ok) { toast.error(data.error || "Erro ao autenticar"); return; }
+      toast.success(mode === "login" ? "Bem-vindo de volta!" : "Conta criada!");
       onAuth(data, data.token, mode === "login" ? rememberMe : true);
-    } catch (err) {
-      console.error(err);
-      toast.error("Erro de conexão");
-    } finally {
-      setLoading(false);
-    }
+    } catch { toast.error("Erro de conexão"); } finally { setLoading(false); }
   };
 
   const handleDemo = async () => {
@@ -58,136 +44,191 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "demo@hevy.com", password: "demo123", rememberMe }),
+        body: JSON.stringify({ email: "demo@hevy.com", password: "demo123", rememberMe: true }),
       });
       const data = await res.json();
-      if (res.ok) {
-        onAuth(data, data.token, rememberMe);
-      } else {
-        toast.error(data.error);
-      }
-    } catch {
-      toast.error("Erro de conexão");
-    } finally {
-      setLoading(false);
-    }
+      if (res.ok) onAuth(data, data.token, true);
+      else toast.error(data.error);
+    } catch { toast.error("Erro de conexão"); } finally { setLoading(false); }
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+    <div
+      style={{ backgroundColor: "var(--bg)", color: "var(--fg)" }}
+      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden"
+    >
+      {/* Glow decorativo de fundo */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: "20%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "600px",
+          height: "600px",
+          background: "radial-gradient(circle, oklch(0.80 0.18 162 / 0.08) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
 
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-lg shadow-primary/20 mb-4 ring-1 ring-primary/20">
-            <img src="/logo.png" alt="GEMgym" className="w-full h-full object-cover" />
+      <div className="w-full max-w-sm relative z-10">
+
+        {/* ── Logo ── */}
+        <div className="flex flex-col items-center mb-10">
+          <div
+            style={{
+              background: "linear-gradient(135deg, var(--card-bg) 0%, oklch(0.22 0.015 255) 100%)",
+              boxShadow: "0 0 0 1px oklch(1 0 0 / 0.12), 0 8px 32px oklch(0.80 0.18 162 / 0.18)",
+            }}
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
+          >
+            <img src="/logo.png" alt="GEMgym" className="w-12 h-12 object-contain" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">GEMgym</h1>
-          <p className="text-sm text-muted-foreground mt-1">Treine. Evolua. Supere.</p>
+          <h1 className="text-3xl font-bold tracking-tight">GEMgym</h1>
+          <p style={{ color: "var(--muted-fg)" }} className="text-sm mt-1.5">
+            Treine. Evolua. Supere.
+          </p>
         </div>
 
-        {/* Card */}
-        <Card className="p-6 space-y-5">
+        {/* ── Card ── */}
+        <div
+          style={{
+            backgroundColor: "var(--card-bg)",
+            border: "1px solid oklch(1 0 0 / 0.10)",
+            boxShadow: "0 1px 3px oklch(0 0 0 / 0.3), 0 8px 40px oklch(0 0 0 / 0.25)",
+          }}
+          className="rounded-2xl p-6 space-y-5"
+        >
 
           {/* Tab switcher */}
-          <div className="flex gap-1 p-1 bg-muted/50 rounded-xl">
-            <button
-              type="button"
-              onClick={() => setMode("login")}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                mode === "login" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Entrar
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("signup")}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                mode === "signup" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Cadastrar
-            </button>
+          <div
+            style={{ backgroundColor: "oklch(1 0 0 / 0.05)" }}
+            className="flex gap-1 p-1 rounded-xl"
+          >
+            {(["login", "signup"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                style={{
+                  backgroundColor: mode === m ? "var(--card-bg)" : "transparent",
+                  color: mode === m ? "var(--fg)" : "var(--muted-fg)",
+                  boxShadow: mode === m ? "0 1px 4px oklch(0 0 0 / 0.25)" : "none",
+                }}
+                className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
+              >
+                {m === "login" ? "Entrar" : "Cadastrar"}
+              </button>
+            ))}
           </div>
 
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="auth-name" style={{ color: "var(--fg)" }}>Nome</Label>
                 <Input
-                  id="name"
+                  id="auth-name"
                   type="text"
                   placeholder="Seu nome"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="bg-background"
+                  className="h-11"
+                  style={{ backgroundColor: "oklch(1 0 0 / 0.04)", borderColor: "oklch(1 0 0 / 0.12)" }}
                 />
               </div>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="auth-email" style={{ color: "var(--fg)" }}>Email</Label>
               <Input
-                id="email"
+                id="auth-email"
                 type="email"
                 placeholder="voce@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-background"
+                className="h-11"
+                style={{ backgroundColor: "oklch(1 0 0 / 0.04)", borderColor: "oklch(1 0 0 / 0.12)" }}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="auth-password" style={{ color: "var(--fg)" }}>Senha</Label>
               <Input
-                id="password"
+                id="auth-password"
                 type="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-background"
+                className="h-11"
+                style={{ backgroundColor: "oklch(1 0 0 / 0.04)", borderColor: "oklch(1 0 0 / 0.12)" }}
               />
             </div>
 
             {mode === "login" && (
-              <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+              <label
+                style={{ color: "var(--muted-fg)" }}
+                className="flex items-center gap-2.5 text-sm cursor-pointer select-none"
+              >
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-border accent-primary"
+                  className="w-4 h-4 rounded"
+                  style={{ accentColor: "var(--primary)" }}
                 />
                 Manter conectado
               </label>
             )}
 
-            <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-opacity" size="lg">
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                backgroundColor: "var(--primary)",
+                color: "var(--primary-fg)",
+                boxShadow: "0 4px 16px oklch(0.80 0.18 162 / 0.35)",
+                opacity: loading ? 0.7 : 1,
+              }}
+              className="w-full h-11 rounded-xl font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
               {loading ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-primary-foreground/60 border-t-primary-foreground rounded-full animate-spin" />
+                <>
+                  <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                   Carregando...
-                </span>
+                </>
               ) : mode === "login" ? "Entrar" : "Criar conta"}
-            </Button>
+            </button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border/60" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-card px-3 text-xs text-muted-foreground">ou</span>
-            </div>
+          {/* Divisor */}
+          <div className="flex items-center gap-3">
+            <div style={{ flex: 1, height: "1px", backgroundColor: "oklch(1 0 0 / 0.08)" }} />
+            <span style={{ color: "var(--muted-fg)" }} className="text-xs">ou</span>
+            <div style={{ flex: 1, height: "1px", backgroundColor: "oklch(1 0 0 / 0.08)" }} />
           </div>
 
-          <Button variant="outline" onClick={handleDemo} disabled={loading} className="w-full h-11 rounded-xl" size="lg">
+          {/* Demo */}
+          <button
+            type="button"
+            onClick={handleDemo}
+            disabled={loading}
+            style={{
+              border: "1px solid oklch(1 0 0 / 0.12)",
+              color: "var(--fg)",
+              backgroundColor: "oklch(1 0 0 / 0.04)",
+            }}
+            className="w-full h-11 rounded-xl text-sm font-medium transition-all hover:opacity-80 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Entrar com conta demo
-          </Button>
-        </Card>
+          </button>
+        </div>
 
-        <p className="text-center text-xs text-muted-foreground mt-5">
+        <p style={{ color: "var(--muted-fg)" }} className="text-center text-xs mt-5">
           Ao continuar, você concorda com os termos de uso.
         </p>
       </div>
