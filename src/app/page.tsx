@@ -199,13 +199,13 @@ export default function Home() {
 
         <div className="flex-1 overflow-y-auto pb-24 md:pb-8">
           <div className="container max-w-5xl mx-auto px-4 py-6 md:py-8">
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               <motion.div
                 key={view}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.2 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
               >
                 {view === "dashboard" && <DashboardView />}
                 {view === "library" && <LibraryView />}

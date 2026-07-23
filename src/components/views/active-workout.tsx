@@ -108,9 +108,16 @@ export function ActiveWorkoutView() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Carregar treino + últimos sets do histórico
+  // Ref para evitar redirect ao workouts quando o treino for finalizado
+  // (nesse caso setView("workout-summary") já foi chamado)
+  const finishingRef = useRef(false);
+
   useEffect(() => {
     if (!activeWorkoutId) {
-      setView("workouts");
+      // Só redireciona se não estamos indo para o resumo
+      if (!finishingRef.current) {
+        setView("workouts");
+      }
       return;
     }
     apiGet<{ workout: Workout }>(`/api/workouts/${activeWorkoutId}`)
@@ -454,9 +461,10 @@ export function ActiveWorkoutView() {
       };
 
       clearWorkoutDraft(workout.id);
-      setActiveWorkoutId(null);
       setWorkoutSummaryData(summaryData);
+      finishingRef.current = true;
       setView("workout-summary");
+      setActiveWorkoutId(null);
     } catch (e) {
       toast.error("Erro ao salvar treino");
       console.error(e);
