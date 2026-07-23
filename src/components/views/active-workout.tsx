@@ -1,6 +1,8 @@
 "use client";
+"use client";
 
 import { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useAppStore, type WorkoutSummaryData } from "@/lib/store";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -767,7 +769,7 @@ export function ActiveWorkoutView() {
                             return (
                             <div
                               key={setIdx}
-                              className={`grid grid-cols-[2rem_1fr_1fr_2.5rem] gap-2 items-center p-1.5 rounded-xl transition-all ${
+                              className={`grid grid-cols-[1.75rem_1fr_1fr_auto] gap-2 items-center px-1.5 py-1.5 rounded-xl transition-all ${
                                 set.completed
                                   ? "bg-primary/10 border border-primary/15"
                                   : "hover:bg-muted/30"
@@ -795,21 +797,21 @@ export function ActiveWorkoutView() {
                                 className={`h-11 text-center font-bold text-base placeholder:text-muted-foreground/40 ${set.completed ? "bg-background" : ""}`}
                                 disabled={set.completed}
                               />
-                              <div className="flex gap-0.5">
+                              <div className="flex items-center gap-1 shrink-0">
                                 {sets.length > 1 && (
                                   <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-11 w-7 hover:text-destructive rounded-lg"
+                                    className="h-9 w-9 hover:text-destructive hover:bg-destructive/10 rounded-lg shrink-0"
                                     onClick={() => removeSet(ex.id, setIdx)}
                                   >
-                                    <Minus className="w-3.5 h-3.5" />
+                                    <Minus className="w-4 h-4" />
                                   </Button>
                                 )}
                                 <Button
                                   size="icon"
                                   variant={set.completed ? "default" : "outline"}
-                                  className={`h-11 w-11 shrink-0 rounded-xl transition-all ${set.completed ? "bg-primary shadow-md shadow-primary/20 scale-105" : "hover:border-primary/40"}`}
+                                  className={`h-11 w-11 shrink-0 rounded-xl transition-all ${set.completed ? "bg-primary shadow-md shadow-primary/20" : "hover:border-primary/40"}`}
                                   onClick={() => handleCompleteSet(ex.id, setIdx, ex.restSeconds)}
                                 >
                                   <Check className={`w-4 h-4 ${set.completed ? "stroke-[3]" : ""}`} />
@@ -841,23 +843,23 @@ export function ActiveWorkoutView() {
         })}
       </div>
 
-      {/* Modal de finalização */}
+      {/* Modal de finalização — renderizado no body para ficar centralizado */}
       <AnimatePresence>
-        {showFinishModal && (
+        {showFinishModal && typeof window !== "undefined" && createPortal(
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+            className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
             onClick={() => setShowFinishModal(false)}
           >
             <motion.div
-              initial={{ scale: 0.92, y: 40 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.92, y: 40 }}
-              transition={{ type: "spring", stiffness: 280, damping: 28 }}
+              initial={{ scale: 0.92, y: 24, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.92, y: 24, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 28 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-card border border-border/60 rounded-t-3xl sm:rounded-3xl p-6 w-full sm:max-w-md"
+              className="bg-card border border-border/60 rounded-3xl p-6 w-full max-w-sm shadow-2xl"
             >
               <div className="text-center">
                 <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
@@ -893,7 +895,8 @@ export function ActiveWorkoutView() {
                 </div>
               </div>
             </motion.div>
-          </motion.div>
+          </motion.div>,
+          document.body
         )}
       </AnimatePresence>
 

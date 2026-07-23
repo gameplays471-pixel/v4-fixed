@@ -2,300 +2,249 @@
 
 import { motion } from "framer-motion";
 
-// Mapeamento de grupos musculares para regiões do SVG
-// Cada grupo muscular do banco de dados é mapeado para IDs de paths no SVG
 export const MUSCLE_TO_REGION: Record<string, { front?: string[]; back?: string[] }> = {
-  Peitoral:     { front: ["chest-l", "chest-r"] },
-  Costas:       { back: ["lats-l", "lats-r", "traps-upper", "traps-lower"] },
-  Ombros:       { front: ["shoulder-l", "shoulder-r"], back: ["rear-delt-l", "rear-delt-r"] },
-  Bíceps:       { front: ["bicep-l", "bicep-r"] },
-  Tríceps:      { front: ["tricep-l", "tricep-r"], back: ["tricep-back-l", "tricep-back-r"] },
-  Abdômen:      { front: ["abs-upper", "abs-lower", "oblique-l", "oblique-r"] },
-  "Quadríceps": { front: ["quad-l", "quad-r"] },
-  Pernas:       { front: ["quad-l", "quad-r"], back: ["hamstring-l", "hamstring-r", "calf-l", "calf-r"] },
-  Glúteos:      { back: ["glute-l", "glute-r"] },
-  Isquiotibiais:{ back: ["hamstring-l", "hamstring-r"] },
-  Panturrilha:  { back: ["calf-l", "calf-r"] },
-  Trapézio:     { back: ["traps-upper", "traps-lower"] },
-  Antebraço:    { front: ["forearm-l", "forearm-r"], back: ["forearm-back-l", "forearm-back-r"] },
-  Cardio:       { front: ["chest-l", "chest-r"], back: ["lats-l", "lats-r"] },
+  Peitoral:      { front: ["chest-l", "chest-r"] },
+  Costas:        { back: ["lats-l", "lats-r", "traps"] },
+  Ombros:        { front: ["delt-front-l", "delt-front-r"], back: ["delt-back-l", "delt-back-r"] },
+  Bíceps:        { front: ["bicep-l", "bicep-r"] },
+  Tríceps:       { back: ["tricep-l", "tricep-r"] },
+  Abdômen:       { front: ["abs"] },
+  "Quadríceps":  { front: ["quad-l", "quad-r"] },
+  Pernas:        { front: ["quad-l", "quad-r"], back: ["hamstring-l", "hamstring-r", "calf-l", "calf-r"] },
+  Glúteos:       { back: ["glute-l", "glute-r"] },
+  Isquiotibiais: { back: ["hamstring-l", "hamstring-r"] },
+  Panturrilha:   { back: ["calf-l", "calf-r"] },
+  Trapézio:      { back: ["traps"] },
+  Antebraço:     { front: ["forearm-l", "forearm-r"], back: ["forearm-back-l", "forearm-back-r"] },
+  Cardio:        { front: ["chest-l", "chest-r", "abs"], back: ["lats-l", "lats-r"] },
 };
 
 type MuscleStatus = "primary" | "secondary" | "none";
 
-function getRegionColor(status: MuscleStatus): string {
-  switch (status) {
-    case "primary":   return "oklch(0.72 0.22 145)";   // verde vivo
-    case "secondary": return "oklch(0.80 0.14 145 / 0.55)"; // verde claro semi-transparente
-    default:          return "oklch(0.30 0.01 255)";    // cinza escuro
-  }
-}
-
-function getRegionOpacity(status: MuscleStatus): number {
-  return status === "none" ? 0.5 : 1;
-}
-
-interface MuscleMapProps {
-  primaryMuscles: string[];
-  secondaryMuscles: string[];
-}
-
-// Computa o mapa de status por ID de região
 function buildStatusMap(primary: string[], secondary: string[]): Record<string, MuscleStatus> {
   const map: Record<string, MuscleStatus> = {};
-
-  for (const muscle of secondary) {
-    const regions = MUSCLE_TO_REGION[muscle];
-    if (!regions) continue;
-    const allIds = [...(regions.front ?? []), ...(regions.back ?? [])];
-    for (const id of allIds) {
+  for (const m of secondary) {
+    const r = MUSCLE_TO_REGION[m];
+    if (!r) continue;
+    for (const id of [...(r.front ?? []), ...(r.back ?? [])]) {
       if (!map[id]) map[id] = "secondary";
     }
   }
-
-  for (const muscle of primary) {
-    const regions = MUSCLE_TO_REGION[muscle];
-    if (!regions) continue;
-    const allIds = [...(regions.front ?? []), ...(regions.back ?? [])];
-    for (const id of allIds) {
+  for (const m of primary) {
+    const r = MUSCLE_TO_REGION[m];
+    if (!r) continue;
+    for (const id of [...(r.front ?? []), ...(r.back ?? [])]) {
       map[id] = "primary";
     }
   }
-
   return map;
 }
 
-// ─── SVG FRENTE ──────────────────────────────────────────────────────────────
-function BodyFront({ statusMap }: { statusMap: Record<string, MuscleStatus> }) {
-  const s = (id: string): MuscleStatus => statusMap[id] ?? "none";
-  const c = (id: string) => getRegionColor(s(id));
-  const o = (id: string) => getRegionOpacity(s(id));
+const PRIMARY_COLOR = "#22c55e";
+const SECONDARY_COLOR = "rgba(134,239,172,0.55)";
+const NEUTRAL_COLOR = "rgba(100,116,139,0.28)";
+const BODY_COLOR = "rgba(51,65,85,0.55)";
+const OUTLINE = "rgba(148,163,184,0.18)";
 
+function color(s: MuscleStatus) {
+  if (s === "primary") return PRIMARY_COLOR;
+  if (s === "secondary") return SECONDARY_COLOR;
+  return NEUTRAL_COLOR;
+}
+
+interface RegionProps {
+  id: string;
+  statusMap: Record<string, MuscleStatus>;
+  d: string;
+}
+
+function R({ id, statusMap, d }: RegionProps) {
+  const s = statusMap[id] ?? "none";
   return (
-    <svg viewBox="0 0 120 280" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-      {/* ── Cabeça ── */}
-      <ellipse cx="60" cy="18" rx="14" ry="16" fill="oklch(0.35 0.01 255)" stroke="oklch(0.50 0.01 255)" strokeWidth="0.8"/>
+    <motion.path
+      d={d}
+      fill={color(s)}
+      animate={{ fill: color(s) }}
+      transition={{ duration: 0.5 }}
+    />
+  );
+}
+
+// ─── FRENTE ───────────────────────────────────────────────────────────────────
+function BodyFront({ statusMap }: { statusMap: Record<string, MuscleStatus> }) {
+  return (
+    <svg viewBox="0 0 120 260" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      {/* --- SILHUETA BASE (corpo inteiro) --- */}
+      {/* Cabeça */}
+      <ellipse cx="60" cy="17" rx="12" ry="14" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.8"/>
       {/* Pescoço */}
-      <rect x="54" y="32" width="12" height="10" rx="3" fill="oklch(0.32 0.01 255)"/>
+      <path d="M55 29 Q57 32 60 33 Q63 32 65 29 L66 36 Q63 38 60 38.5 Q57 38 54 36Z" fill={BODY_COLOR}/>
+      {/* Tronco */}
+      <path d="M38 40 Q48 37 60 37 Q72 37 82 40 L86 82 Q83 90 80 95 L78 118 Q69 122 60 122 Q51 122 42 118 L40 95 Q37 90 34 82Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      {/* Braço esquerdo */}
+      <path d="M38 42 Q28 46 24 56 Q20 68 22 82 L28 80 Q27 68 30 58 Q33 50 40 47Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      {/* Antebraço esquerdo */}
+      <path d="M22 82 Q19 94 20 108 L26 108 Q25 96 28 84Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      {/* Mão esquerda */}
+      <ellipse cx="23" cy="111" rx="4" ry="5.5" fill={BODY_COLOR}/>
+      {/* Braço direito */}
+      <path d="M82 42 Q92 46 96 56 Q100 68 98 82 L92 80 Q93 68 90 58 Q87 50 80 47Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      {/* Antebraço direito */}
+      <path d="M98 82 Q101 94 100 108 L94 108 Q95 96 92 84Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      {/* Mão direita */}
+      <ellipse cx="97" cy="111" rx="4" ry="5.5" fill={BODY_COLOR}/>
+      {/* Quadril/cintura */}
+      <path d="M42 118 Q51 122 60 122 Q69 122 78 118 L80 128 Q70 133 60 133 Q50 133 40 128Z" fill={BODY_COLOR}/>
+      {/* Perna esquerda */}
+      <path d="M40 128 Q50 133 60 133 L58 185 Q55 192 52 192 L46 192 Q42 192 40 185Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      {/* Joelho esquerdo */}
+      <ellipse cx="49" cy="188" rx="7" ry="5" fill={BODY_COLOR}/>
+      {/* Canela esquerda */}
+      <path d="M42 192 Q43 210 44 224 Q47 228 50 228 Q53 228 55 224 Q56 210 57 192Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      {/* Pé esquerdo */}
+      <path d="M43 224 Q46 230 50 231 Q54 230 57 226 L56 232 Q52 236 48 234 Q44 232 43 228Z" fill={BODY_COLOR}/>
+      {/* Perna direita */}
+      <path d="M80 128 Q70 133 60 133 L62 185 Q65 192 68 192 L74 192 Q78 192 80 185Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      {/* Joelho direito */}
+      <ellipse cx="71" cy="188" rx="7" ry="5" fill={BODY_COLOR}/>
+      {/* Canela direita */}
+      <path d="M63 192 Q64 210 65 224 Q67 228 70 228 Q73 228 76 224 Q77 210 77 192Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      {/* Pé direito */}
+      <path d="M63 224 Q66 230 70 231 Q74 230 77 226 L76 232 Q72 236 68 234 Q64 232 63 228Z" fill={BODY_COLOR}/>
 
-      {/* ── Ombros ── */}
-      <motion.ellipse id="shoulder-l" cx="30" cy="55" rx="11" ry="9"
-        fill={c("shoulder-l")} opacity={o("shoulder-l")}
-        animate={{ fill: c("shoulder-l") }} transition={{ duration: 0.5 }}/>
-      <motion.ellipse id="shoulder-r" cx="90" cy="55" rx="11" ry="9"
-        fill={c("shoulder-r")} opacity={o("shoulder-r")}
-        animate={{ fill: c("shoulder-r") }} transition={{ duration: 0.5 }}/>
+      {/* --- REGIÕES MUSCULARES --- */}
+      {/* Deltóide frente esquerdo */}
+      <R id="delt-front-l" statusMap={statusMap} d="M38 42 Q31 46 28 52 Q27 58 30 62 Q34 56 38 52 Q40 48 40 44Z"/>
+      {/* Deltóide frente direito */}
+      <R id="delt-front-r" statusMap={statusMap} d="M82 42 Q89 46 92 52 Q93 58 90 62 Q86 56 82 52 Q80 48 80 44Z"/>
+      {/* Peitoral esquerdo */}
+      <R id="chest-l" statusMap={statusMap} d="M40 47 Q48 44 58 45 L58 64 Q50 66 42 63 Q39 58 40 52Z"/>
+      {/* Peitoral direito */}
+      <R id="chest-r" statusMap={statusMap} d="M80 47 Q72 44 62 45 L62 64 Q70 66 78 63 Q81 58 80 52Z"/>
+      {/* Bícep esquerdo */}
+      <R id="bicep-l" statusMap={statusMap} d="M28 52 Q22 60 23 72 Q23 77 26 80 L30 78 Q28 72 28 64 Q28 58 31 54Z"/>
+      {/* Bícep direito */}
+      <R id="bicep-r" statusMap={statusMap} d="M92 52 Q98 60 97 72 Q97 77 94 80 L90 78 Q92 72 92 64 Q92 58 89 54Z"/>
+      {/* Antebraço esquerdo */}
+      <R id="forearm-l" statusMap={statusMap} d="M23 82 Q20 92 21 104 L25 104 Q25 93 27 83Z"/>
+      {/* Antebraço direito */}
+      <R id="forearm-r" statusMap={statusMap} d="M97 82 Q100 92 99 104 L95 104 Q95 93 93 83Z"/>
+      {/* Abdômen */}
+      <R id="abs" statusMap={statusMap} d="M44 67 Q52 65 60 65 Q68 65 76 67 L75 114 Q68 118 60 118 Q52 118 45 114Z"/>
+      {/* Quadríceps esquerdo */}
+      <R id="quad-l" statusMap={statusMap} d="M42 130 Q51 133 59 133 L57 182 Q54 187 49 185 Q44 182 42 176Z"/>
+      {/* Quadríceps direito */}
+      <R id="quad-r" statusMap={statusMap} d="M78 130 Q69 133 61 133 L63 182 Q66 187 71 185 Q76 182 78 176Z"/>
 
-      {/* ── Peito ── */}
-      <motion.path id="chest-l" d="M42 50 Q55 48 58 62 L42 66 Q36 60 42 50Z"
-        fill={c("chest-l")} opacity={o("chest-l")}
-        animate={{ fill: c("chest-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="chest-r" d="M78 50 Q65 48 62 62 L78 66 Q84 60 78 50Z"
-        fill={c("chest-r")} opacity={o("chest-r")}
-        animate={{ fill: c("chest-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* ── Bíceps ── */}
-      <motion.path id="bicep-l" d="M22 60 Q14 70 16 84 L26 84 Q28 70 30 62Z"
-        fill={c("bicep-l")} opacity={o("bicep-l")}
-        animate={{ fill: c("bicep-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="bicep-r" d="M98 60 Q106 70 104 84 L94 84 Q92 70 90 62Z"
-        fill={c("bicep-r")} opacity={o("bicep-r")}
-        animate={{ fill: c("bicep-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* ── Tríceps (visível de frente, lateral) ── */}
-      <motion.path id="tricep-l" d="M18 64 Q10 74 12 86 L20 84 Q18 74 22 64Z"
-        fill={c("tricep-l")} opacity={o("tricep-l")}
-        animate={{ fill: c("tricep-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="tricep-r" d="M102 64 Q110 74 108 86 L100 84 Q102 74 98 64Z"
-        fill={c("tricep-r")} opacity={o("tricep-r")}
-        animate={{ fill: c("tricep-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* ── Antebraço ── */}
-      <motion.path id="forearm-l" d="M14 86 Q10 100 12 114 L22 112 Q20 100 22 86Z"
-        fill={c("forearm-l")} opacity={o("forearm-l")}
-        animate={{ fill: c("forearm-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="forearm-r" d="M106 86 Q110 100 108 114 L98 112 Q100 100 98 86Z"
-        fill={c("forearm-r")} opacity={o("forearm-r")}
-        animate={{ fill: c("forearm-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* ── Abdômen ── */}
-      <motion.path id="abs-upper" d="M44 67 Q60 65 76 67 L76 90 Q60 92 44 90Z"
-        fill={c("abs-upper")} opacity={o("abs-upper")}
-        animate={{ fill: c("abs-upper") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="abs-lower" d="M46 91 Q60 89 74 91 L72 112 Q60 114 48 112Z"
-        fill={c("abs-lower")} opacity={o("abs-lower")}
-        animate={{ fill: c("abs-lower") }} transition={{ duration: 0.5 }}/>
-
-      {/* Oblíquos */}
-      <motion.path id="oblique-l" d="M40 68 Q44 80 44 112 L36 108 Q34 82 38 68Z"
-        fill={c("oblique-l")} opacity={o("oblique-l")}
-        animate={{ fill: c("oblique-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="oblique-r" d="M80 68 Q76 80 76 112 L84 108 Q86 82 82 68Z"
-        fill={c("oblique-r")} opacity={o("oblique-r")}
-        animate={{ fill: c("oblique-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* ── Quadríceps ── */}
-      <motion.path id="quad-l" d="M46 116 Q38 130 38 160 L54 160 Q56 130 56 118Z"
-        fill={c("quad-l")} opacity={o("quad-l")}
-        animate={{ fill: c("quad-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="quad-r" d="M74 116 Q82 130 82 160 L66 160 Q64 130 64 118Z"
-        fill={c("quad-r")} opacity={o("quad-r")}
-        animate={{ fill: c("quad-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* ── Panturrilha (frente, visível) ── */}
-      <motion.path id="calf-l" d="M38 164 Q35 178 37 196 L50 196 Q50 178 50 164Z"
-        fill={c("calf-l")} opacity={o("calf-l")}
-        animate={{ fill: c("calf-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="calf-r" d="M82 164 Q85 178 83 196 L70 196 Q70 178 70 164Z"
-        fill={c("calf-r")} opacity={o("calf-r")}
-        animate={{ fill: c("calf-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* ── Joelhos / Pés (neutros) ── */}
-      <ellipse cx="44" cy="162" rx="8" ry="5" fill="oklch(0.30 0.01 255)" opacity="0.6"/>
-      <ellipse cx="76" cy="162" rx="8" ry="5" fill="oklch(0.30 0.01 255)" opacity="0.6"/>
-      <rect x="36" y="198" width="16" height="10" rx="4" fill="oklch(0.28 0.01 255)"/>
-      <rect x="68" y="198" width="16" height="10" rx="4" fill="oklch(0.28 0.01 255)"/>
-
-      {/* ── Torso/Cintura (fundo) ── */}
-      <path d="M40 48 Q60 44 80 48 L84 116 Q60 120 36 116Z" fill="oklch(0.25 0.01 255)" className="-z-10"/>
-
-      {/* Linhas de separação abdômen */}
-      <line x1="60" y1="65" x2="60" y2="112" stroke="oklch(0.20 0.01 255)" strokeWidth="0.6" opacity="0.5"/>
-      <line x1="44" y1="80" x2="76" y2="80" stroke="oklch(0.20 0.01 255)" strokeWidth="0.6" opacity="0.5"/>
-      <line x1="44" y1="96" x2="76" y2="96" stroke="oklch(0.20 0.01 255)" strokeWidth="0.6" opacity="0.5"/>
+      {/* Linha central e detalhes do abdômen */}
+      <line x1="60" y1="65" x2="60" y2="115" stroke="rgba(0,0,0,0.25)" strokeWidth="0.8"/>
+      <line x1="45" y1="80" x2="75" y2="80" stroke="rgba(0,0,0,0.18)" strokeWidth="0.6"/>
+      <line x1="45" y1="94" x2="75" y2="94" stroke="rgba(0,0,0,0.18)" strokeWidth="0.6"/>
+      <line x1="45" y1="107" x2="75" y2="107" stroke="rgba(0,0,0,0.18)" strokeWidth="0.6"/>
     </svg>
   );
 }
 
-// ─── SVG COSTAS ───────────────────────────────────────────────────────────────
+// ─── COSTAS ───────────────────────────────────────────────────────────────────
 function BodyBack({ statusMap }: { statusMap: Record<string, MuscleStatus> }) {
-  const s = (id: string): MuscleStatus => statusMap[id] ?? "none";
-  const c = (id: string) => getRegionColor(s(id));
-  const o = (id: string) => getRegionOpacity(s(id));
-
   return (
-    <svg viewBox="0 0 120 280" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-      {/* Cabeça */}
-      <ellipse cx="60" cy="18" rx="14" ry="16" fill="oklch(0.35 0.01 255)" stroke="oklch(0.50 0.01 255)" strokeWidth="0.8"/>
-      {/* Pescoço */}
-      <rect x="54" y="32" width="12" height="10" rx="3" fill="oklch(0.32 0.01 255)"/>
+    <svg viewBox="0 0 120 260" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      {/* --- SILHUETA BASE --- */}
+      <ellipse cx="60" cy="17" rx="12" ry="14" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.8"/>
+      <path d="M55 29 Q57 32 60 33 Q63 32 65 29 L66 36 Q63 38 60 38.5 Q57 38 54 36Z" fill={BODY_COLOR}/>
+      <path d="M38 40 Q48 37 60 37 Q72 37 82 40 L86 82 Q83 90 80 95 L78 118 Q69 122 60 122 Q51 122 42 118 L40 95 Q37 90 34 82Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      <path d="M38 42 Q28 46 24 56 Q20 68 22 82 L28 80 Q27 68 30 58 Q33 50 40 47Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      <path d="M22 82 Q19 94 20 108 L26 108 Q25 96 28 84Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      <ellipse cx="23" cy="111" rx="4" ry="5.5" fill={BODY_COLOR}/>
+      <path d="M82 42 Q92 46 96 56 Q100 68 98 82 L92 80 Q93 68 90 58 Q87 50 80 47Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      <path d="M98 82 Q101 94 100 108 L94 108 Q95 96 92 84Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      <ellipse cx="97" cy="111" rx="4" ry="5.5" fill={BODY_COLOR}/>
+      <path d="M42 118 Q51 122 60 122 Q69 122 78 118 L80 128 Q70 133 60 133 Q50 133 40 128Z" fill={BODY_COLOR}/>
+      <path d="M40 128 Q50 133 60 133 L58 185 Q55 192 52 192 L46 192 Q42 192 40 185Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      <ellipse cx="49" cy="188" rx="7" ry="5" fill={BODY_COLOR}/>
+      <path d="M42 192 Q43 210 44 224 Q47 228 50 228 Q53 228 55 224 Q56 210 57 192Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      <path d="M43 224 Q46 230 50 231 Q54 230 57 226 L56 232 Q52 236 48 234 Q44 232 43 228Z" fill={BODY_COLOR}/>
+      <path d="M80 128 Q70 133 60 133 L62 185 Q65 192 68 192 L74 192 Q78 192 80 185Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      <ellipse cx="71" cy="188" rx="7" ry="5" fill={BODY_COLOR}/>
+      <path d="M63 192 Q64 210 65 224 Q67 228 70 228 Q73 228 76 224 Q77 210 77 192Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
+      <path d="M63 224 Q66 230 70 231 Q74 230 77 226 L76 232 Q72 236 68 234 Q64 232 63 228Z" fill={BODY_COLOR}/>
 
-      {/* ── Trapézio ── */}
-      <motion.path id="traps-upper" d="M42 38 Q60 34 78 38 L80 52 Q60 50 40 52Z"
-        fill={c("traps-upper")} opacity={o("traps-upper")}
-        animate={{ fill: c("traps-upper") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="traps-lower" d="M40 52 Q60 50 80 52 L78 70 Q60 68 42 70Z"
-        fill={c("traps-lower")} opacity={o("traps-lower")}
-        animate={{ fill: c("traps-lower") }} transition={{ duration: 0.5 }}/>
+      {/* --- REGIÕES MUSCULARES --- */}
+      {/* Trapézio */}
+      <R id="traps" statusMap={statusMap} d="M44 38 Q52 36 60 36 Q68 36 76 38 L80 52 Q72 50 60 50 Q48 50 40 52Z"/>
+      {/* Deltóide costas esquerdo */}
+      <R id="delt-back-l" statusMap={statusMap} d="M38 42 Q30 46 27 53 Q26 60 29 64 Q33 58 38 54 Q40 50 40 45Z"/>
+      {/* Deltóide costas direito */}
+      <R id="delt-back-r" statusMap={statusMap} d="M82 42 Q90 46 93 53 Q94 60 91 64 Q87 58 82 54 Q80 50 80 45Z"/>
+      {/* Latíssimo esquerdo */}
+      <R id="lats-l" statusMap={statusMap} d="M40 52 Q36 62 35 74 Q34 86 37 94 L42 92 Q40 80 41 68 Q42 58 44 53Z"/>
+      {/* Latíssimo direito */}
+      <R id="lats-r" statusMap={statusMap} d="M80 52 Q84 62 85 74 Q86 86 83 94 L78 92 Q80 80 79 68 Q78 58 76 53Z"/>
+      {/* Trícep esquerdo */}
+      <R id="tricep-l" statusMap={statusMap} d="M28 52 Q23 60 22 72 Q22 78 25 82 L29 80 Q27 74 27 66 Q27 58 31 54Z"/>
+      {/* Trícep direito */}
+      <R id="tricep-r" statusMap={statusMap} d="M92 52 Q97 60 98 72 Q98 78 95 82 L91 80 Q93 74 93 66 Q93 58 89 54Z"/>
+      {/* Antebraço costas esq */}
+      <R id="forearm-back-l" statusMap={statusMap} d="M22 82 Q19 93 20 105 L24 105 Q24 94 26 83Z"/>
+      {/* Antebraço costas dir */}
+      <R id="forearm-back-r" statusMap={statusMap} d="M98 82 Q101 93 100 105 L96 105 Q96 94 94 83Z"/>
+      {/* Glúteo esquerdo */}
+      <R id="glute-l" statusMap={statusMap} d="M42 120 Q51 123 60 123 L59 142 Q53 144 48 140 Q42 135 41 128Z"/>
+      {/* Glúteo direito */}
+      <R id="glute-r" statusMap={statusMap} d="M78 120 Q69 123 60 123 L61 142 Q67 144 72 140 Q78 135 79 128Z"/>
+      {/* Isquiotibial esquerdo */}
+      <R id="hamstring-l" statusMap={statusMap} d="M41 142 Q49 146 59 145 L57 182 Q53 186 48 183 Q42 179 41 170Z"/>
+      {/* Isquiotibial direito */}
+      <R id="hamstring-r" statusMap={statusMap} d="M79 142 Q71 146 61 145 L63 182 Q67 186 72 183 Q78 179 79 170Z"/>
+      {/* Panturrilha esquerda */}
+      <R id="calf-l" statusMap={statusMap} d="M42 193 Q44 208 45 220 Q48 226 51 225 Q53 224 55 220 Q56 208 57 193Z"/>
+      {/* Panturrilha direita */}
+      <R id="calf-r" statusMap={statusMap} d="M63 193 Q64 208 65 220 Q68 226 70 225 Q73 224 75 220 Q76 208 77 193Z"/>
 
-      {/* ── Deltóide posterior ── */}
-      <motion.ellipse id="rear-delt-l" cx="30" cy="55" rx="11" ry="9"
-        fill={c("rear-delt-l")} opacity={o("rear-delt-l")}
-        animate={{ fill: c("rear-delt-l") }} transition={{ duration: 0.5 }}/>
-      <motion.ellipse id="rear-delt-r" cx="90" cy="55" rx="11" ry="9"
-        fill={c("rear-delt-r")} opacity={o("rear-delt-r")}
-        animate={{ fill: c("rear-delt-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* ── Latíssimo ── */}
-      <motion.path id="lats-l" d="M40 68 Q30 80 34 106 L46 108 Q44 82 44 68Z"
-        fill={c("lats-l")} opacity={o("lats-l")}
-        animate={{ fill: c("lats-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="lats-r" d="M80 68 Q90 80 86 106 L74 108 Q76 82 76 68Z"
-        fill={c("lats-r")} opacity={o("lats-r")}
-        animate={{ fill: c("lats-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* ── Coluna / Rombóides (centro costas) ── */}
-      <rect x="52" y="52" width="16" height="58" rx="4" fill="oklch(0.28 0.01 255)"/>
-      {/* linhas de vértebra */}
-      {[58,66,74,82,96,102].map((y,i) => (
-        <line key={i} x1="56" y1={y} x2="64" y2={y} stroke="oklch(0.20 0.01 255)" strokeWidth="0.5" opacity="0.6"/>
-      ))}
-
-      {/* ── Tríceps (costas) ── */}
-      <motion.path id="tricep-back-l" d="M22 60 Q14 74 16 88 L26 86 Q24 72 28 62Z"
-        fill={c("tricep-back-l")} opacity={o("tricep-back-l")}
-        animate={{ fill: c("tricep-back-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="tricep-back-r" d="M98 60 Q106 74 104 88 L94 86 Q96 72 92 62Z"
-        fill={c("tricep-back-r")} opacity={o("tricep-back-r")}
-        animate={{ fill: c("tricep-back-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* Antebraço costas */}
-      <motion.path id="forearm-back-l" d="M14 88 Q10 102 12 116 L22 114 Q20 100 20 88Z"
-        fill={c("forearm-back-l")} opacity={o("forearm-back-l")}
-        animate={{ fill: c("forearm-back-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="forearm-back-r" d="M106 88 Q110 102 108 116 L98 114 Q100 100 100 88Z"
-        fill={c("forearm-back-r")} opacity={o("forearm-back-r")}
-        animate={{ fill: c("forearm-back-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* ── Glúteos ── */}
-      <motion.path id="glute-l" d="M46 112 Q38 118 38 134 L58 134 Q60 118 56 112Z"
-        fill={c("glute-l")} opacity={o("glute-l")}
-        animate={{ fill: c("glute-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="glute-r" d="M74 112 Q82 118 82 134 L62 134 Q60 118 64 112Z"
-        fill={c("glute-r")} opacity={o("glute-r")}
-        animate={{ fill: c("glute-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* ── Isquiotibiais ── */}
-      <motion.path id="hamstring-l" d="M38 136 Q36 152 38 164 L54 162 Q54 150 50 136Z"
-        fill={c("hamstring-l")} opacity={o("hamstring-l")}
-        animate={{ fill: c("hamstring-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="hamstring-r" d="M82 136 Q84 152 82 164 L66 162 Q66 150 70 136Z"
-        fill={c("hamstring-r")} opacity={o("hamstring-r")}
-        animate={{ fill: c("hamstring-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* ── Panturrilha ── */}
-      <motion.path id="calf-l" d="M38 166 Q34 180 36 198 L52 198 Q52 182 52 166Z"
-        fill={c("calf-l")} opacity={o("calf-l")}
-        animate={{ fill: c("calf-l") }} transition={{ duration: 0.5 }}/>
-      <motion.path id="calf-r" d="M82 166 Q86 180 84 198 L68 198 Q68 182 68 166Z"
-        fill={c("calf-r")} opacity={o("calf-r")}
-        animate={{ fill: c("calf-r") }} transition={{ duration: 0.5 }}/>
-
-      {/* Joelhos / Pés */}
-      <ellipse cx="44" cy="165" rx="8" ry="4" fill="oklch(0.30 0.01 255)" opacity="0.6"/>
-      <ellipse cx="76" cy="165" rx="8" ry="4" fill="oklch(0.30 0.01 255)" opacity="0.6"/>
-      <rect x="36" y="200" width="16" height="10" rx="4" fill="oklch(0.28 0.01 255)"/>
-      <rect x="68" y="200" width="16" height="10" rx="4" fill="oklch(0.28 0.01 255)"/>
-
-      {/* Torso fundo */}
-      <path d="M40 48 Q60 44 80 48 L84 116 Q60 120 36 116Z" fill="oklch(0.25 0.01 255)" className="-z-10"/>
+      {/* Coluna vertebral */}
+      <line x1="60" y1="38" x2="60" y2="120" stroke="rgba(0,0,0,0.3)" strokeWidth="1" strokeDasharray="2 3"/>
     </svg>
   );
 }
 
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
+interface MuscleMapProps {
+  primaryMuscles: string[];
+  secondaryMuscles: string[];
+}
+
 export function MuscleMap({ primaryMuscles, secondaryMuscles }: MuscleMapProps) {
   const statusMap = buildStatusMap(primaryMuscles, secondaryMuscles);
 
   return (
     <div className="flex flex-col items-center gap-4">
       {/* Legenda */}
-      <div className="flex items-center gap-5 text-xs">
+      <div className="flex items-center justify-center gap-5 text-xs flex-wrap">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm" style={{ background: "oklch(0.72 0.22 145)" }} />
+          <div className="w-3 h-3 rounded-sm shadow-sm" style={{ background: PRIMARY_COLOR }} />
           <span className="text-muted-foreground">Primário</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm" style={{ background: "oklch(0.80 0.14 145 / 0.55)" }} />
+          <div className="w-3 h-3 rounded-sm" style={{ background: SECONDARY_COLOR }} />
           <span className="text-muted-foreground">Secundário</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm" style={{ background: "oklch(0.30 0.01 255)" }} />
+          <div className="w-3 h-3 rounded-sm" style={{ background: NEUTRAL_COLOR }} />
           <span className="text-muted-foreground">Não trabalhado</span>
         </div>
       </div>
 
       {/* Manequins */}
-      <div className="grid grid-cols-2 gap-6 w-full max-w-xs mx-auto">
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Frente</p>
-          <div className="h-48">
+      <div className="grid grid-cols-2 gap-8 w-full max-w-[280px] mx-auto">
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Frente</p>
+          <div className="w-full" style={{ aspectRatio: "120/260" }}>
             <BodyFront statusMap={statusMap} />
           </div>
         </div>
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Costas</p>
-          <div className="h-48">
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Costas</p>
+          <div className="w-full" style={{ aspectRatio: "120/260" }}>
             <BodyBack statusMap={statusMap} />
           </div>
         </div>
