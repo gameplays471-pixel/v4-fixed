@@ -2,7 +2,6 @@
 
 import { useAppStore, type ViewKey } from "@/lib/store";
 import { LogOut, User } from "lucide-react";
-import { motion } from "framer-motion";
 
 interface SidebarProps {
   user: { name: string; email: string };
@@ -73,14 +72,15 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
   };
 
   return (
-    <div className="flex flex-col w-full h-screen sticky top-0 border-r border-border/60 bg-sidebar/95 backdrop-blur-sm">
+    <div className="flex flex-col w-full h-screen sticky top-0">
       {/* Logo */}
       <div className="p-5">
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <img src="/logo.png" alt="GEMgym" className="w-10 h-10 rounded-xl object-cover shadow-lg shadow-primary/20 ring-1 ring-primary/20" />
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full ring-2 ring-background" />
-          </div>
+          <img
+            src="/logo.png"
+            alt="GEMgym"
+            className="w-10 h-10 rounded-xl object-cover shadow-lg shadow-primary/20 ring-1 ring-primary/20"
+          />
           <div className="flex flex-col">
             <span className="font-bold text-lg leading-tight tracking-tight">GEMgym</span>
             <span className="text-[10px] text-muted-foreground leading-tight font-medium">Treinos & Hipertrofia</span>
@@ -89,48 +89,43 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 space-y-1 overflow-y-auto scrollbar-hide">
+      <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => (
-          <motion.button
+          <button
             key={item.key}
             onClick={() => setView(item.key)}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
               view === item.key
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 ring-1 ring-primary/50"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent hover:shadow-sm"
+                ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent"
             }`}
           >
             {item.icon}
             {item.label}
-          </motion.button>
+          </button>
         ))}
       </nav>
 
       {/* User */}
-      <div className="p-3 border-t border-border/60 bg-sidebar/50 backdrop-blur-sm">
-        <div
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent transition-all duration-200 cursor-pointer group"
+      <div className="p-3 border-t border-border">
+        <button
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-accent transition-colors group text-left"
           onClick={() => setView("profile")}
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-sm ring-1 ring-primary/30 group-hover:scale-105 transition-transform">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-sm shrink-0">
             {user.name.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate group-hover:text-foreground transition-colors">{user.name}</p>
+            <p className="text-sm font-semibold truncate">{user.name}</p>
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           </div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </div>
+        </button>
         <button
           onClick={handleLogout}
-          className="w-full mt-1.5 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200 group"
+          className="w-full mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
         >
-          <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-          <span className="flex-1 text-left">Sair</span>
+          <LogOut className="w-5 h-5" />
+          Sair
         </button>
       </div>
     </div>

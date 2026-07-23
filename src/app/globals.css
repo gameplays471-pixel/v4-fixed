@@ -1,11 +1,15 @@
-/* GEMgym - Modern Dark Theme */
+@import "tailwindcss";
 
-@reference "./tailwind.css";
+/* ===== TEMA GEMGYM ===== */
+
+@theme {
+  --radius: 0.875rem;
+  --radius-lg: 0.875rem;
+  --radius-md: calc(0.875rem - 2px);
+  --radius-sm: calc(0.875rem - 4px);
+}
 
 :root {
-  --radius: 0.875rem;
-  
-  /* Light theme (opcional, manter por compatibilidade) */
   --background: oklch(0.99 0 0);
   --foreground: oklch(0.15 0.02 270);
   --card: oklch(1 0 0);
@@ -40,49 +44,31 @@
   --sidebar-ring: oklch(0.68 0.22 160);
 }
 
-/* Dark theme (padrão) - Moderno e clean */
 .dark {
-  /* Fundo quase preto com leve tonalidade azulada */
   --background: oklch(0.14 0.008 255);
   --foreground: oklch(0.97 0 0);
-  
-  /* Cards com contraste suave */
   --card: oklch(0.19 0.01 255);
   --card-foreground: oklch(0.97 0 0);
-  
-  /* Popovers */
   --popover: oklch(0.19 0.01 255);
   --popover-foreground: oklch(0.97 0 0);
-  
-  /* Primary: verde menta moderno (estilo Hevy atualizado) */
   --primary: oklch(0.80 0.18 162);
   --primary-foreground: oklch(0.14 0.008 255);
-  
-  /* Secondary e accent mais sutis */
   --secondary: oklch(0.24 0.01 255);
   --secondary-foreground: oklch(0.97 0 0);
   --muted: oklch(0.24 0.01 255);
   --muted-foreground: oklch(0.65 0 0);
   --accent: oklch(0.24 0.01 255);
   --accent-foreground: oklch(0.97 0 0);
-  
-  /* Destructive mais suave */
   --destructive: oklch(0.62 0.22 22);
   --destructive-foreground: oklch(0.99 0 0);
-  
-  /* Bordas extremamente sutis */
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 12%);
   --ring: oklch(0.80 0.18 162);
-  
-  /* Charts */
   --chart-1: oklch(0.80 0.18 162);
   --chart-2: oklch(0.72 0.18 200);
   --chart-3: oklch(0.77 0.20 65);
   --chart-4: oklch(0.67 0.22 345);
   --chart-5: oklch(0.72 0.20 280);
-  
-  /* Sidebar */
   --sidebar: oklch(0.16 0.008 255);
   --sidebar-foreground: oklch(0.97 0 0);
   --sidebar-primary: oklch(0.80 0.18 162);
@@ -95,110 +81,63 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
+    outline-color: color-mix(in oklch, var(--ring) 50%, transparent);
   }
-  
+
   html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-  
-  /* Scrollbar moderna e sutil */
+
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
-  
   ::-webkit-scrollbar-track {
     background: transparent;
   }
-  
   ::-webkit-scrollbar-thumb {
-    background: oklch(1 0 0 / 0.15);
+    background: oklch(1 0 0 / 0.12);
     border-radius: 8px;
     border: 2px solid transparent;
     background-clip: content-box;
   }
-  
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(1 0 0 / 0.25);
+    background: oklch(1 0 0 / 0.22);
     background-clip: content-box;
-  }
-  
-  ::-webkit-scrollbar-corner {
-    background: transparent;
   }
 }
 
 @layer utilities {
-  /* Fade-in suave */
   .animate-fade-in {
     animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-  
-  /* Slide up com bounce sutil */
+
   .animate-slide-up {
     animation: slideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  
   @keyframes slideUp {
     from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-  
-  /* Slide in da esquerda */
-  .animate-slide-in-left {
-    animation: slideInLeft 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  
-  @keyframes slideInLeft {
-    from { opacity: 0; transform: translateX(-16px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  
-  /* Slide in da direita */
-  .animate-slide-in-right {
-    animation: slideInRight 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  
-  @keyframes slideInRight {
-    from { opacity: 0; transform: translateX(16px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  
-  /* Pulse sutil para loading */
+
   .animate-pulse-slow {
-    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: pulseSlow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
-  
-  @keyframes pulse {
+  @keyframes pulseSlow {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-  }
-  
-  /* Blur-in para imagens */
-  .animate-blur-in {
-    animation: blurIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  
-  @keyframes blurIn {
-    from { opacity: 0; transform: scale(0.95); filter: blur(8px); }
-    to { opacity: 1; transform: scale(1); filter: blur(0); }
-  }
-  
-  /* Transições suaves */
-  .transition-all-custom {
-    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    50%       { opacity: 0.6; }
   }
 }
