@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useAppStore } from "@/lib/store";
+import { useAppStore, type WorkoutSummaryData } from "@/lib/store";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +55,7 @@ type Workout = {
       id: string;
       name: string;
       muscleGroup: string;
+      secondaryMuscles?: string | null;
       equipment: string | null;
       category: string;
       images: string[];
@@ -71,7 +72,9 @@ export function ActiveWorkoutView() {
   const setView = useAppStore((s) => s.setView);
   const activeWorkoutId = useAppStore((s) => s.activeWorkoutId);
   const setActiveWorkoutId = useAppStore((s) => s.setActiveWorkoutId);
+  const setWorkoutSummaryData = useAppStore((s) => s.setWorkoutSummaryData);
 
+  const [lightboxExercise, setLightboxExercise] = useState<{ name: string; images: string[] } | null>(null);
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [loading, setLoading] = useState(true);
   const [startedAt, setStartedAt] = useState(new Date());
@@ -79,7 +82,6 @@ export function ActiveWorkoutView() {
   const [collapsedExercises, setCollapsedExercises] = useState<Set<string>>(new Set());
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [lightboxExercise, setLightboxExercise] = useState<{ name: string; images: string[] } | null>(null);
 
   // Sets state: Map<exerciseId, SetState[]>
   const [setsMap, setSetsMap] = useState<Record<string, SetState[]>>({});
@@ -385,7 +387,7 @@ export function ActiveWorkoutView() {
     }
 
     try {
-      await apiPost("/api/sessions", {
+      const { session } = await apiPost<{ session: { sets: Array<{ exerciseId: string; weight: number; reps: number; isPR: boolean; durationSec: number | null; distanceKm: number | null; avgBpm: number | null; intensity: string | null }> } }>("/api/sessions", {
         workoutId: workout.id,
         workoutName: workout.name,
         startedAt: startedAt.toISOString(),
@@ -393,10 +395,68 @@ export function ActiveWorkoutView() {
         durationSec: elapsed,
         sets: setsData,
       });
+
+      // Monta o resumo por exercício, aproveitando as flags de PR vindas da API
+      const prByIndex: Record<number, boolean> = {};
+      session.sets.forEach((s, i) => { prByIndex[i] = s.isPR; });
+
+      // Agrupa os sets de volta por exercício (mesma ordem de setsData)
+      const exerciseMap = new Map<string, WorkoutSummaryData["exercises"][number]>();
+      let setIdx = 0;
+      for (const ex of workout.exercises) {
+        const isCardio = ex.exercise.category === "Cardio";
+        const key = ex.exerciseId;
+
+        if (!exerciseMap.has(key)) {
+          exerciseMap.set(key, {
+            name: ex.exercise.name,
+            muscleGroup: ex.exercise.muscleGroup,
+            secondaryMuscles: ex.exercise.secondaryMuscles ?? null,
+            category: ex.exercise.category,
+            sets: [],
+          });
+        }
+        const entry = exerciseMap.get(key)!;
+
+        if (isCardio) {
+          const c = cardioMap[ex.id];
+          if (c?.completed) {
+            entry.sets.push({
+              weight: 0,
+              reps: 0,
+              isPR: prByIndex[setIdx] ?? false,
+              durationSec: (parseInt(c.durationMin) || 0) * 60,
+              distanceKm: c.distanceKm ? parseFloat(c.distanceKm) : undefined,
+              avgBpm: c.avgBpm ? parseInt(c.avgBpm) : undefined,
+              intensity: c.intensity,
+            });
+            setIdx++;
+          }
+        } else {
+          for (const set of setsMap[ex.id] || []) {
+            if (set.completed && set.weight && set.reps) {
+              entry.sets.push({
+                weight: parseFloat(set.weight) || 0,
+                reps: parseInt(set.reps) || 0,
+                isPR: prByIndex[setIdx] ?? false,
+              });
+              setIdx++;
+            }
+          }
+        }
+      }
+
+      const summaryData: WorkoutSummaryData = {
+        workoutName: workout.name,
+        durationSec: elapsed,
+        totalVolume,
+        exercises: [...exerciseMap.values()].filter((e) => e.sets.length > 0),
+      };
+
       clearWorkoutDraft(workout.id);
       setActiveWorkoutId(null);
-      toast.success("Treino finalizado! 💪 Confira seus recordes.");
-      setView("history");
+      setWorkoutSummaryData(summaryData);
+      setView("workout-summary");
     } catch (e) {
       toast.error("Erro ao salvar treino");
       console.error(e);

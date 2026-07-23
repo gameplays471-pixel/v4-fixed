@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/sidebar";
 import { DashboardView } from "@/components/views/dashboard";
 import { LibraryView } from "@/components/views/library";
 import { WorkoutsView } from "@/components/views/workouts";
+import { WorkoutSummaryView } from "@/components/views/workout-summary";
 import { ActiveWorkoutView } from "@/components/views/active-workout";
 import { HistoryView } from "@/components/views/history";
 import { StatsView } from "@/components/views/stats";
@@ -90,6 +91,7 @@ export default function Home() {
             {view === "library" && <LibraryView />}
             {view === "workouts" && <WorkoutsView />}
             {view === "active-workout" && <ActiveWorkoutView />}
+            {view === "workout-summary" && <WorkoutSummaryView />}
             {view === "history" && <HistoryView />}
             {view === "stats" && <StatsView />}
             {view === "profile" && <ProfileView />}
