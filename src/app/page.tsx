@@ -7,15 +7,15 @@ import { Sidebar } from "@/components/sidebar";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { getToken, setToken } from "@/lib/api";
 
-// Lazy loading para views pesadas
-const DashboardView = lazy(() => import("@/components/views/dashboard"));
-const LibraryView = lazy(() => import("@/components/views/library"));
-const WorkoutsView = lazy(() => import("@/components/views/workouts"));
-const WorkoutSummaryView = lazy(() => import("@/components/views/workout-summary"));
-const ActiveWorkoutView = lazy(() => import("@/components/views/active-workout"));
-const HistoryView = lazy(() => import("@/components/views/history"));
-const StatsView = lazy(() => import("@/components/views/stats"));
-const ProfileView = lazy(() => import("@/components/views/profile"));
+// Lazy loading com named exports requer .then(m => ({ default: m.ComponentName }))
+const DashboardView = lazy(() => import("@/components/views/dashboard").then((m) => ({ default: m.DashboardView })));
+const LibraryView = lazy(() => import("@/components/views/library").then((m) => ({ default: m.LibraryView })));
+const WorkoutsView = lazy(() => import("@/components/views/workouts").then((m) => ({ default: m.WorkoutsView })));
+const WorkoutSummaryView = lazy(() => import("@/components/views/workout-summary").then((m) => ({ default: m.WorkoutSummaryView })));
+const ActiveWorkoutView = lazy(() => import("@/components/views/active-workout").then((m) => ({ default: m.ActiveWorkoutView })));
+const HistoryView = lazy(() => import("@/components/views/history").then((m) => ({ default: m.HistoryView })));
+const StatsView = lazy(() => import("@/components/views/stats").then((m) => ({ default: m.StatsView })));
+const ProfileView = lazy(() => import("@/components/views/profile").then((m) => ({ default: m.ProfileView })));
 
 function MobileTopbar() {
   const view = useAppStore((s) => s.view);
