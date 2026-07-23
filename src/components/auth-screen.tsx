@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 
 interface AuthScreenProps {
@@ -74,22 +75,27 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm">
+
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <img src="/logo.png" alt="GEMgym" className="w-20 h-20 rounded-2xl object-cover shadow-xl shadow-primary/30 mb-4" />
-          <h1 className="text-2xl font-bold">GEMgym</h1>
+          <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-lg shadow-primary/20 mb-4 ring-1 ring-primary/20">
+            <img src="/logo.png" alt="GEMgym" className="w-full h-full object-cover" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">GEMgym</h1>
           <p className="text-sm text-muted-foreground mt-1">Treine. Evolua. Supere.</p>
         </div>
 
         {/* Card */}
-        <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
-          <div className="flex gap-1 p-1 bg-muted rounded-lg">
+        <Card className="p-6 space-y-5">
+
+          {/* Tab switcher */}
+          <div className="flex gap-1 p-1 bg-muted/50 rounded-xl">
             <button
               type="button"
               onClick={() => setMode("login")}
-              className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${
-                mode === "login" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
+              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                mode === "login" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Entrar
@@ -97,8 +103,8 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
             <button
               type="button"
               onClick={() => setMode("signup")}
-              className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${
-                mode === "signup" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
+              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                mode === "signup" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Cadastrar
@@ -157,36 +163,32 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
               </label>
             )}
 
-            <Button type="submit" disabled={loading} className="w-full" size="lg">
+            <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-opacity" size="lg">
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-primary-foreground/60 border-t-primary-foreground rounded-full animate-spin" />
                   Carregando...
                 </span>
-              ) : mode === "login" ? (
-                "Entrar"
-              ) : (
-                "Criar conta"
-              )}
+              ) : mode === "login" ? "Entrar" : "Criar conta"}
             </Button>
           </form>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border" />
+              <span className="w-full border-t border-border/60" />
             </div>
             <div className="relative flex justify-center">
               <span className="bg-card px-3 text-xs text-muted-foreground">ou</span>
             </div>
           </div>
 
-          <Button variant="outline" onClick={handleDemo} disabled={loading} className="w-full" size="lg">
+          <Button variant="outline" onClick={handleDemo} disabled={loading} className="w-full h-11 rounded-xl" size="lg">
             Entrar com conta demo
           </Button>
-        </div>
+        </Card>
 
-        <p className="text-center text-xs text-muted-foreground mt-4">
-          Ao continuar, você concorda com os termos de uso e a política de privacidade.
+        <p className="text-center text-xs text-muted-foreground mt-5">
+          Ao continuar, você concorda com os termos de uso.
         </p>
       </div>
     </div>

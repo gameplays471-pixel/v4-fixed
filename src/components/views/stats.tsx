@@ -363,10 +363,12 @@ export function StatsView() {
 
 function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) {
   return (
-    <Card className="p-4">
-      <div className={`mb-2 ${color}`}>{icon}</div>
-      <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
-      <p className="text-lg font-bold">{value}</p>
+    <Card className="p-4 flex flex-col gap-2">
+      <div className={color}>{icon}</div>
+      <div>
+        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">{label}</p>
+        <p className="text-xl font-bold mt-0.5 tabular-nums">{value}</p>
+      </div>
     </Card>
   );
 }
