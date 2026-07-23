@@ -494,44 +494,42 @@ export function ActiveWorkoutView() {
   return (
     <div className="space-y-4 animate-fade-in pb-24">
       {/* Header fixo */}
-      <div className="sticky top-14 md:top-0 z-30 -mx-4 px-4 py-3 bg-background/95 backdrop-blur-md border-b border-border">
+      <div className="sticky top-14 md:top-0 z-30 -mx-4 px-4 py-3 bg-background/90 backdrop-blur-xl border-b border-border/60">
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <h1 className="font-bold text-lg truncate">{workout.name}</h1>
-            <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {formatTime(elapsed)}
+            <h1 className="font-black text-lg truncate">{workout.name}</h1>
+            <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+              <span className="flex items-center gap-1 text-xs font-semibold text-primary tabular-nums">
+                <Clock className="w-3 h-3" />{formatTime(elapsed)}
               </span>
-              <span className="flex items-center gap-1">
-                <Flame className="w-3 h-3" />
-                {completedSets}/{totalSets} sets
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Flame className="w-3 h-3 text-orange-400" />{completedSets}/{totalSets} sets
               </span>
-              <span className="flex items-center gap-1">
-                <Dumbbell className="w-3 h-3" />
-                {Math.round(totalVolume)} kg
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Dumbbell className="w-3 h-3" />{Math.round(totalVolume)} kg
               </span>
               {totalCardioMin > 0 && (
-                <span className="flex items-center gap-1">
-                  <HeartPulse className="w-3 h-3" />
-                  {totalCardioMin} min cardio
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <HeartPulse className="w-3 h-3 text-rose-400" />{totalCardioMin}min
                 </span>
               )}
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={handleCancel}>Cancelar</Button>
-            <Button size="sm" onClick={() => setShowFinishModal(true)} className="bg-primary">
+          <div className="flex gap-2 shrink-0">
+            <Button variant="ghost" size="sm" onClick={handleCancel} className="h-9 rounded-xl text-muted-foreground">Cancelar</Button>
+            <Button size="sm" onClick={() => setShowFinishModal(true)}
+              className="h-9 rounded-xl bg-primary font-semibold shadow-md shadow-primary/20 px-4">
               Finalizar
             </Button>
           </div>
         </div>
 
         {/* Barra de progresso */}
-        <div className="mt-2 h-1 bg-muted rounded-full overflow-hidden">
+        <div className="mt-2.5 h-1.5 bg-muted/60 rounded-full overflow-hidden">
           <motion.div
-            className="h-full bg-primary"
+            className="h-full bg-primary rounded-full"
             animate={{ width: `${totalSets > 0 ? (completedSets / totalSets) * 100 : 0}%` }}
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
           />
         </div>
       </div>
@@ -545,11 +543,11 @@ export function ActiveWorkoutView() {
             exit={{ opacity: 0, y: -20 }}
             className="sticky top-32 md:top-24 z-20"
           >
-            <Card className="p-4 bg-primary/10 border-primary/30">
+            <Card className="p-4 border-primary/30" style={{ background: "linear-gradient(135deg, oklch(0.17 0.012 255), oklch(0.20 0.020 162 / 0.5))" }}>
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs text-primary font-medium">Descanso</p>
-                  <p className="text-3xl font-bold tabular-nums">{formatTime(restTimer.remaining)}</p>
+                  <p className="text-xs text-primary font-bold uppercase tracking-widest">⏱ Descanso</p>
+                  <p className="text-4xl font-black tabular-nums text-primary">{formatTime(restTimer.remaining)}</p>
                 </div>
                 <div className="flex gap-1">
                   <Button
@@ -622,10 +620,10 @@ export function ActiveWorkoutView() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: exIdx * 0.03 }}
             >
-              <Card className="overflow-hidden">
+              <Card className="overflow-hidden hover:border-primary/20 transition-colors">
                 {/* Header do exercício */}
                 <div
-                  className="p-4 cursor-pointer hover:bg-accent/30 transition-colors"
+                  className="p-4 cursor-pointer hover:bg-accent/20 transition-colors select-none"
                   onClick={() => toggleCollapse(ex.id)}
                 >
                   <div className="flex items-center gap-3">
@@ -761,28 +759,32 @@ export function ActiveWorkoutView() {
                             return (
                             <div
                               key={setIdx}
-                              className={`grid grid-cols-[2rem_1fr_1fr_2.5rem] gap-2 items-center p-1 rounded-lg transition-colors ${
-                                set.completed ? "bg-primary/10" : ""
+                              className={`grid grid-cols-[2rem_1fr_1fr_2.5rem] gap-2 items-center p-1.5 rounded-xl transition-all ${
+                                set.completed
+                                  ? "bg-primary/10 border border-primary/15"
+                                  : "hover:bg-muted/30"
                               }`}
                             >
-                              <div className="text-center text-sm font-medium text-muted-foreground">
+                              <div className="text-center text-sm font-bold text-muted-foreground">
                                 {setIdx + 1}
                               </div>
                               <Input
                                 type="number"
+                                inputMode="decimal"
                                 step="0.5"
                                 placeholder={weightPlaceholder}
                                 value={set.weight}
                                 onChange={(e) => updateSet(ex.id, setIdx, "weight", e.target.value)}
-                                className={`h-10 text-center font-medium placeholder:text-primary/40 ${set.completed ? "bg-background" : ""}`}
+                                className={`h-11 text-center font-bold text-base placeholder:text-muted-foreground/40 ${set.completed ? "bg-background" : ""}`}
                                 disabled={set.completed}
                               />
                               <Input
                                 type="number"
+                                inputMode="numeric"
                                 placeholder={repsPlaceholder}
                                 value={set.reps}
                                 onChange={(e) => updateSet(ex.id, setIdx, "reps", e.target.value)}
-                                className={`h-10 text-center font-medium placeholder:text-primary/40 ${set.completed ? "bg-background" : ""}`}
+                                className={`h-11 text-center font-bold text-base placeholder:text-muted-foreground/40 ${set.completed ? "bg-background" : ""}`}
                                 disabled={set.completed}
                               />
                               <div className="flex gap-0.5">
@@ -790,19 +792,19 @@ export function ActiveWorkoutView() {
                                   <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="h-9 w-7 hover:text-destructive"
+                                    className="h-11 w-7 hover:text-destructive rounded-lg"
                                     onClick={() => removeSet(ex.id, setIdx)}
                                   >
-                                    <Minus className="w-3 h-3" />
+                                    <Minus className="w-3.5 h-3.5" />
                                   </Button>
                                 )}
                                 <Button
                                   size="icon"
                                   variant={set.completed ? "default" : "outline"}
-                                  className={`h-9 w-9 shrink-0 ${set.completed ? "bg-primary" : ""}`}
+                                  className={`h-11 w-11 shrink-0 rounded-xl transition-all ${set.completed ? "bg-primary shadow-md shadow-primary/20 scale-105" : "hover:border-primary/40"}`}
                                   onClick={() => handleCompleteSet(ex.id, setIdx, ex.restSeconds)}
                                 >
-                                  <Check className="w-4 h-4" />
+                                  <Check className={`w-4 h-4 ${set.completed ? "stroke-[3]" : ""}`} />
                                 </Button>
                               </div>
                             </div>
@@ -815,9 +817,9 @@ export function ActiveWorkoutView() {
                           variant="ghost"
                           size="sm"
                           onClick={() => addSet(ex.id)}
-                          className="w-full mt-2 text-xs"
+                          className="w-full mt-3 h-9 text-xs rounded-xl border border-dashed border-border/60 hover:border-primary/40 hover:text-primary transition-all"
                         >
-                          <Plus className="w-3 h-3 mr-1" />
+                          <Plus className="w-3.5 h-3.5 mr-1.5" />
                           Adicionar série
                         </Button>
                       </div>
@@ -838,44 +840,47 @@ export function ActiveWorkoutView() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
             onClick={() => setShowFinishModal(false)}
           >
             <motion.div
-              initial={{ scale: 0.9, y: 20 }}
+              initial={{ scale: 0.92, y: 40 }}
               animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
+              exit={{ scale: 0.92, y: 40 }}
+              transition={{ type: "spring", stiffness: 280, damping: 28 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-card border border-border rounded-2xl p-6 w-full max-w-md"
+              className="bg-card border border-border/60 rounded-t-3xl sm:rounded-3xl p-6 w-full sm:max-w-md"
             >
               <div className="text-center">
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/15 flex items-center justify-center mb-4">
-                  <Trophy className="w-8 h-8 text-primary" />
-                </div>
-                <h2 className="text-xl font-bold mb-1">Finalizar treino?</h2>
-                <p className="text-sm text-muted-foreground mb-6">Confira o resumo do seu treino:</p>
+                <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
+                  className="w-20 h-20 mx-auto rounded-3xl bg-primary/15 flex items-center justify-center mb-4"
+                  style={{ boxShadow: "0 0 40px oklch(0.80 0.18 162 / 0.25)" }}>
+                  <Trophy className="w-10 h-10 text-primary" />
+                </motion.div>
+                <h2 className="text-2xl font-black mb-1">Finalizar treino?</h2>
+                <p className="text-sm text-muted-foreground mb-6">Confira o resumo antes de salvar:</p>
 
                 <div className="grid grid-cols-3 gap-3 mb-6">
-                  <div className="bg-background rounded-lg p-3">
-                    <p className="text-2xl font-bold">{completedSets}</p>
+                  <div className="bg-muted/40 rounded-2xl p-3">
+                    <p className="text-2xl font-black">{completedSets}</p>
                     <p className="text-xs text-muted-foreground">sets</p>
                   </div>
-                  <div className="bg-background rounded-lg p-3">
-                    <p className="text-2xl font-bold">{Math.round(totalVolume)}</p>
+                  <div className="bg-muted/40 rounded-2xl p-3">
+                    <p className="text-2xl font-black">{Math.round(totalVolume)}</p>
                     <p className="text-xs text-muted-foreground">kg total</p>
                   </div>
-                  <div className="bg-background rounded-lg p-3">
-                    <p className="text-2xl font-bold">{formatTime(elapsed)}</p>
+                  <div className="bg-muted/40 rounded-2xl p-3">
+                    <p className="text-2xl font-black">{formatTime(elapsed)}</p>
                     <p className="text-xs text-muted-foreground">tempo</p>
                   </div>
                 </div>
 
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setShowFinishModal(false)} className="flex-1">
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setShowFinishModal(false)} className="flex-1 h-12 rounded-xl font-semibold">
                     Continuar
                   </Button>
-                  <Button onClick={handleFinish} disabled={saving} className="flex-1 bg-primary">
-                    {saving ? "Salvando..." : "Finalizar"}
+                  <Button onClick={handleFinish} disabled={saving} className="flex-1 h-12 rounded-xl bg-primary font-bold shadow-lg shadow-primary/25">
+                    {saving ? "Salvando..." : "Finalizar 🏆"}
                   </Button>
                 </div>
               </div>

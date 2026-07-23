@@ -1,4 +1,5 @@
 "use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
@@ -8,46 +9,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
-import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical } from "lucide-react";
-import { motion } from "framer-motion";
+import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical, CheckSquare, Square } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { muscleGroups } from "@/lib/exercises-data";
 import { ExerciseThumb, ExerciseImageDialog } from "@/components/exercise-media";
 
 type Exercise = {
-  id: string;
-  name: string;
-  muscleGroup: string;
-  equipment: string | null;
-  equipmentType: string | null;
-  level: string;
-  category: string;
-  images: string[];
+  id: string; name: string; muscleGroup: string; equipment: string | null;
+  equipmentType: string | null; level: string; category: string; images: string[];
 };
 
 type WorkoutExercise = {
-  id: string;
-  exerciseId: string;
-  order: number;
-  targetSets: number;
-  targetReps: number;
-  restSeconds: number;
-  notes: string | null;
-  targetDurationSec: number | null;
-  targetDistanceKm: number | null;
-  targetIntensity: string | null;
-  exercise: Exercise;
+  id: string; exerciseId: string; order: number; targetSets: number; targetReps: number;
+  restSeconds: number; notes: string | null; targetDurationSec: number | null;
+  targetDistanceKm: number | null; targetIntensity: string | null; exercise: Exercise;
 };
 
 type Workout = {
-  id: string;
-  name: string;
-  description: string | null;
-  defaultRest: number;
-  color: string | null;
-  exercises: WorkoutExercise[];
-  _count: { sessions: number };
+  id: string; name: string; description: string | null; defaultRest: number;
+  color: string | null; exercises: WorkoutExercise[]; _count: { sessions: number };
 };
 
 const COLOR_OPTIONS = ["#ef4444","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ec4899","#06b6d4","#84cc16"];
@@ -58,18 +41,14 @@ export function WorkoutsView() {
   const setActiveWorkoutId = useAppStore((s) => s.setActiveWorkoutId);
   const editingWorkoutId = useAppStore((s) => s.editingWorkoutId);
   const setEditingWorkoutId = useAppStore((s) => s.setEditingWorkoutId);
-
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
 
   const load = () => {
     setLoading(true);
-    apiGet<{ workouts: Workout[] }>("/api/workouts")
-      .then((d) => setWorkouts(d.workouts))
-      .finally(() => setLoading(false));
+    apiGet<{ workouts: Workout[] }>("/api/workouts").then((d) => setWorkouts(d.workouts)).finally(() => setLoading(false));
   };
-
   useEffect(() => { load(); }, []);
   useEffect(() => { if (editingWorkoutId) setShowEditor(true); }, [editingWorkoutId]);
 
@@ -77,43 +56,29 @@ export function WorkoutsView() {
     if (!confirm("Excluir este treino?")) return;
     await apiDelete(`/api/workouts/${id}`).then(() => { toast.success("Treino excluído"); load(); }).catch(() => toast.error("Erro ao excluir"));
   };
-
   const handleCloseEditor = () => { setShowEditor(false); setEditingWorkoutId(null); load(); };
 
   return (
     <div className="space-y-6 animate-fade-in">
-
-      {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Meus Treinos</h1>
+          <h1 className="text-3xl font-black tracking-tight">Meus Treinos</h1>
           <p className="text-sm text-muted-foreground mt-1">Organize suas divisões e inicie treinos.</p>
         </div>
-        <Button
-          onClick={() => { setEditingWorkoutId(null); setShowEditor(true); }}
-          className="shrink-0 rounded-xl h-10 px-4 gap-2 bg-primary shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity"
-        >
+        <Button onClick={() => { setEditingWorkoutId(null); setShowEditor(true); }}
+          className="shrink-0 rounded-xl h-10 px-5 gap-2 bg-primary shadow-lg shadow-primary/25 hover:opacity-90 transition-opacity font-semibold">
           <Plus className="w-4 h-4" /> Criar
         </Button>
       </div>
 
-      {/* Empty state com sugestões */}
       {workouts.length === 0 && !loading && (
         <Card className="p-5">
           <p className="text-sm font-semibold mb-3 text-muted-foreground">Divisões populares para começar</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {[
-              { name: "Treino A", desc: "Peito + Tríceps", color: "#ef4444" },
-              { name: "Treino B", desc: "Costas + Bíceps", color: "#10b981" },
-              { name: "Treino C", desc: "Pernas", color: "#f59e0b" },
-              { name: "Push", desc: "Empurrar", color: "#3b82f6" },
-            ].map((t) => (
-              <button
-                key={t.name}
-                onClick={() => { setEditingWorkoutId(null); setShowEditor(true); }}
-                className="text-left p-3 rounded-xl border border-border hover:border-primary/40 hover:bg-accent/30 transition-all"
-              >
-                <div className="w-8 h-8 rounded-lg mb-2" style={{ background: t.color }} />
+            {[{name:"Treino A",desc:"Peito + Tríceps",color:"#ef4444"},{name:"Treino B",desc:"Costas + Bíceps",color:"#10b981"},{name:"Treino C",desc:"Pernas",color:"#f59e0b"},{name:"Push/Pull",desc:"Empurrar/Puxar",color:"#8b5cf6"}].map((t) => (
+              <button key={t.name} onClick={() => { setEditingWorkoutId(null); setShowEditor(true); }}
+                className="text-left p-3 rounded-xl border border-border hover:border-primary/40 hover:bg-accent/30 transition-all group">
+                <div className="w-9 h-9 rounded-xl mb-2 shadow-sm group-hover:scale-105 transition-transform" style={{ background: t.color }} />
                 <p className="font-semibold text-sm">{t.name}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{t.desc}</p>
               </button>
@@ -122,78 +87,63 @@ export function WorkoutsView() {
         </Card>
       )}
 
-      {/* Lista */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-44 bg-card rounded-2xl border border-border/60 animate-pulse-slow" />
+            <div key={i} className="h-48 bg-card rounded-2xl border border-border/60 animate-pulse-slow" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {workouts.map((w, i) => (
-            <motion.div key={w.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-              <Card className="p-5 flex flex-col gap-4 hover:border-border transition-colors">
-                {/* Top row */}
+            <motion.div key={w.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+              <Card className="p-5 flex flex-col gap-4 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm"
-                      style={{ background: w.color || "var(--primary)" }}
-                    >
+                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-md group-hover:scale-105 transition-transform"
+                      style={{ background: w.color || "var(--primary)", boxShadow: `0 4px 12px ${w.color || "var(--primary)"}40` }}>
                       {w.name.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-semibold leading-tight">{w.name}</p>
-                      <p className="text-[11px] text-muted-foreground">{w._count.sessions}× realizado</p>
+                      <p className="font-bold leading-tight">{w.name}</p>
+                      <p className="text-[11px] text-muted-foreground">{w._count.sessions}× realizado · {w.exercises.length} exercícios</p>
                     </div>
                   </div>
                   <div className="flex gap-0.5">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => { setEditingWorkoutId(w.id); setShowEditor(true); }}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:bg-accent" onClick={() => { setEditingWorkoutId(w.id); setShowEditor(true); }}>
                       <Edit2 className="w-3.5 h-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:text-destructive" onClick={() => handleDelete(w.id)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(w.id)}>
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 </div>
-
-                {/* Exercícios */}
-                <div className="flex-1 space-y-1.5">
+                <div className="flex-1 space-y-1.5 min-h-[60px]">
                   {w.exercises.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic">Nenhum exercício</p>
+                    <p className="text-xs text-muted-foreground italic">Nenhum exercício — clique em editar para adicionar</p>
                   ) : (
                     <>
                       {w.exercises.slice(0, 5).map((ex) => (
                         <div key={ex.id} className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground truncate flex-1 pr-2">{ex.exercise.name}</span>
-                          <span className="text-[11px] text-muted-foreground/60 shrink-0 tabular-nums">
-                            {ex.exercise.category === "Cardio"
-                              ? `${Math.round((ex.targetDurationSec ?? 1800) / 60)}min`
-                              : `${ex.targetSets}×${ex.targetReps}`}
+                          <span className="text-[11px] text-muted-foreground/60 shrink-0 tabular-nums font-medium">
+                            {ex.exercise.category === "Cardio" ? `${Math.round((ex.targetDurationSec ?? 1800) / 60)}min` : `${ex.targetSets}×${ex.targetReps}`}
                           </span>
                         </div>
                       ))}
-                      {w.exercises.length > 5 && (
-                        <p className="text-[11px] text-muted-foreground/50">+{w.exercises.length - 5} exercícios</p>
-                      )}
+                      {w.exercises.length > 5 && <p className="text-[11px] text-muted-foreground/50">+{w.exercises.length - 5} exercícios</p>}
                     </>
                   )}
                 </div>
-
-                {/* Botão */}
-                <Button
-                  onClick={() => { setActiveWorkoutId(w.id); setView("active-workout"); }}
-                  className="w-full h-9 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-opacity gap-2"
-                >
-                  <Play className="w-3.5 h-3.5" /> Iniciar treino
+                <Button onClick={() => { setActiveWorkoutId(w.id); setView("active-workout"); }}
+                  className="w-full h-10 rounded-xl font-semibold gap-2" style={{ background: w.color || "var(--primary)", boxShadow: `0 4px 16px ${w.color || "var(--primary)"}30` }}>
+                  <Play className="w-4 h-4 fill-current" /> Iniciar treino
                 </Button>
               </Card>
             </motion.div>
           ))}
         </div>
       )}
-
       {showEditor && <WorkoutEditor workoutId={editingWorkoutId} onClose={handleCloseEditor} />}
     </div>
   );
@@ -238,22 +188,25 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
     } catch { toast.error("Erro ao salvar"); } finally { setSaving(false); }
   };
 
-  const addExercise = (ex: Exercise) => {
-    const isCardio = ex.category === "Cardio";
-    setExercises([...exercises, {
-      id: `temp-${Date.now()}`, exerciseId: ex.id, order: exercises.length + 1,
-      targetSets: 3, targetReps: 10, restSeconds: defaultRest, notes: null,
-      targetDurationSec: isCardio ? 1800 : null, targetDistanceKm: null,
-      targetIntensity: isCardio ? "Moderada" : null, exercise: ex,
-    }]);
+  // addExercises now accepts an array (multi-select)
+  const addExercises = (exList: Exercise[]) => {
+    const newOnes = exList.map((ex) => {
+      const isCardio = ex.category === "Cardio";
+      return {
+        id: `temp-${Date.now()}-${ex.id}`, exerciseId: ex.id, order: exercises.length + 1,
+        targetSets: 3, targetReps: 10, restSeconds: defaultRest, notes: null,
+        targetDurationSec: isCardio ? 1800 : null, targetDistanceKm: null,
+        targetIntensity: isCardio ? "Moderada" : null, exercise: ex,
+      } as WorkoutExercise;
+    });
+    setExercises((prev) => [...prev, ...newOnes]);
     setShowPicker(false);
   };
 
   const removeExercise = (idx: number) => setExercises(exercises.filter((_, i) => i !== idx));
   const updateExercise = (idx: number, u: Partial<WorkoutExercise>) => setExercises(exercises.map((ex, i) => i === idx ? { ...ex, ...u } : ex));
   const moveExercise = (idx: number, dir: -1 | 1) => {
-    const n = idx + dir;
-    if (n < 0 || n >= exercises.length) return;
+    const n = idx + dir; if (n < 0 || n >= exercises.length) return;
     const a = [...exercises]; [a[idx], a[n]] = [a[n], a[idx]]; setExercises(a);
   };
 
@@ -261,9 +214,7 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
     return (
       <Dialog open onOpenChange={() => onClose()}>
         <DialogContent className="max-w-2xl">
-          <div className="py-16 flex justify-center">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          </div>
+          <div className="py-16 flex justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
         </DialogContent>
       </Dialog>
     );
@@ -272,78 +223,64 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
   return (
     <>
       <Dialog open onOpenChange={(open) => { if (!open) { if (showPicker) { setShowPicker(false); return; } onClose(); } }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto">
           {showPicker ? (
             <ExercisePickerContent
-              onPick={addExercise}
+              onAdd={addExercises}
               onBack={() => setShowPicker(false)}
               excludeIds={exercises.map((e) => e.exerciseId)}
             />
           ) : (
             <>
               <DialogHeader>
-                <DialogTitle>{workoutId ? "Editar treino" : "Criar treino"}</DialogTitle>
+                <DialogTitle className="text-xl font-black">{workoutId ? "Editar treino" : "Criar treino"}</DialogTitle>
               </DialogHeader>
-
               <div className="space-y-5 py-1">
-                {/* Nome */}
                 <div className="space-y-1.5">
                   <Label htmlFor="wname">Nome do treino</Label>
-                  <Input id="wname" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Treino A — Peito e Tríceps" className="h-10" />
+                  <Input id="wname" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Treino A — Peito e Tríceps" className="h-11" />
                 </div>
-
-                {/* Cor */}
                 <div className="space-y-1.5">
                   <Label>Cor</Label>
                   <div className="flex gap-2 flex-wrap">
                     {COLOR_OPTIONS.map((c) => (
-                      <button
-                        key={c}
-                        onClick={() => setColor(c)}
-                        className={`w-8 h-8 rounded-full transition-all ${color === c ? "ring-2 ring-offset-2 ring-offset-background ring-white scale-110" : "opacity-70 hover:opacity-100"}`}
-                        style={{ background: c }}
-                      />
+                      <button key={c} onClick={() => setColor(c)}
+                        className={`w-8 h-8 rounded-full transition-all ${color === c ? "ring-2 ring-offset-2 ring-offset-background ring-white scale-110" : "opacity-60 hover:opacity-100 hover:scale-105"}`}
+                        style={{ background: c }} />
                     ))}
                   </div>
                 </div>
-
-                {/* Descrição */}
                 <div className="space-y-1.5">
                   <Label htmlFor="wdesc">Descrição <span className="text-muted-foreground font-normal">(opcional)</span></Label>
                   <Textarea id="wdesc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Notas sobre este treino" rows={2} />
                 </div>
-
-                {/* Descanso padrão */}
                 <div className="space-y-1.5">
                   <Label htmlFor="wrest">Descanso padrão (segundos)</Label>
                   <Input id="wrest" type="number" value={defaultRest} onChange={(e) => setDefaultRest(parseInt(e.target.value) || 90)} className="h-10 w-32" />
                 </div>
 
-                {/* Exercícios */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Label>Exercícios <span className="text-muted-foreground font-normal">({exercises.length})</span></Label>
-                    <Button size="sm" variant="outline" onClick={() => setShowPicker(true)} className="h-8 rounded-lg gap-1">
+                    <Button size="sm" variant="outline" onClick={() => setShowPicker(true)} className="h-9 rounded-xl gap-1.5 font-semibold">
                       <Plus className="w-3.5 h-3.5" /> Adicionar
                     </Button>
                   </div>
-
                   {exercises.length === 0 ? (
-                    <button
-                      onClick={() => setShowPicker(true)}
-                      className="w-full py-8 text-sm text-muted-foreground border border-dashed border-border/60 rounded-xl hover:border-primary/40 hover:text-primary transition-all"
-                    >
-                      + Adicionar exercícios
+                    <button onClick={() => setShowPicker(true)}
+                      className="w-full py-10 text-sm text-muted-foreground border-2 border-dashed border-border/50 rounded-2xl hover:border-primary/40 hover:text-primary transition-all flex flex-col items-center gap-2">
+                      <Plus className="w-6 h-6" />
+                      Toque para adicionar exercícios
                     </button>
                   ) : (
                     <div className="space-y-2">
                       {exercises.map((ex, idx) => (
-                        <div key={ex.id} className="bg-muted/30 rounded-xl p-3 border border-border/40">
+                        <div key={ex.id} className="bg-muted/30 rounded-xl p-3 border border-border/40 hover:border-border/70 transition-colors">
                           <div className="flex items-center gap-2 mb-3">
-                            <GripVertical className="w-4 h-4 text-muted-foreground/50 shrink-0" />
+                            <GripVertical className="w-4 h-4 text-muted-foreground/40 shrink-0" />
                             <ExerciseThumb images={ex.exercise.images} name={ex.exercise.name} className="w-9 h-9 rounded-lg shrink-0" onClick={() => setLightbox(ex.exercise)} />
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm truncate">{ex.exercise.name}</p>
+                              <p className="font-semibold text-sm truncate">{ex.exercise.name}</p>
                               <p className="text-[11px] text-muted-foreground">{ex.exercise.muscleGroup}</p>
                             </div>
                             <div className="flex gap-0.5">
@@ -352,38 +289,17 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
                               <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg hover:text-destructive" onClick={() => removeExercise(idx)}><X className="w-3.5 h-3.5" /></Button>
                             </div>
                           </div>
-
                           {ex.exercise.category === "Cardio" ? (
                             <div className="grid grid-cols-3 gap-2 pl-5">
-                              <div>
-                                <label className="text-[10px] text-muted-foreground">Duração (min)</label>
-                                <Input type="number" value={Math.round((ex.targetDurationSec ?? 1800) / 60)} onChange={(e) => updateExercise(idx, { targetDurationSec: (parseInt(e.target.value) || 30) * 60 })} className="h-8 text-sm mt-1" />
-                              </div>
-                              <div>
-                                <label className="text-[10px] text-muted-foreground">Distância (km)</label>
-                                <Input type="number" step="0.1" placeholder="—" value={ex.targetDistanceKm ?? ""} onChange={(e) => updateExercise(idx, { targetDistanceKm: e.target.value ? parseFloat(e.target.value) : null })} className="h-8 text-sm mt-1" />
-                              </div>
-                              <div>
-                                <label className="text-[10px] text-muted-foreground">Intensidade</label>
-                                <select value={ex.targetIntensity ?? "Moderada"} onChange={(e) => updateExercise(idx, { targetIntensity: e.target.value })} className="h-8 w-full text-sm rounded-lg border border-input bg-background px-2 mt-1">
-                                  {INTENSITY_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-                                </select>
-                              </div>
+                              <div><label className="text-[10px] text-muted-foreground">Duração (min)</label><Input type="number" value={Math.round((ex.targetDurationSec ?? 1800) / 60)} onChange={(e) => updateExercise(idx, { targetDurationSec: (parseInt(e.target.value) || 30) * 60 })} className="h-8 text-sm mt-1" /></div>
+                              <div><label className="text-[10px] text-muted-foreground">Distância (km)</label><Input type="number" step="0.1" placeholder="—" value={ex.targetDistanceKm ?? ""} onChange={(e) => updateExercise(idx, { targetDistanceKm: e.target.value ? parseFloat(e.target.value) : null })} className="h-8 text-sm mt-1" /></div>
+                              <div><label className="text-[10px] text-muted-foreground">Intensidade</label><select value={ex.targetIntensity ?? "Moderada"} onChange={(e) => updateExercise(idx, { targetIntensity: e.target.value })} className="h-8 w-full text-sm rounded-lg border border-input bg-background px-2 mt-1">{INTENSITY_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}</select></div>
                             </div>
                           ) : (
                             <div className="grid grid-cols-3 gap-2 pl-5">
-                              <div>
-                                <label className="text-[10px] text-muted-foreground">Séries</label>
-                                <Input type="number" value={ex.targetSets} onChange={(e) => updateExercise(idx, { targetSets: parseInt(e.target.value) || 3 })} className="h-8 text-sm mt-1" />
-                              </div>
-                              <div>
-                                <label className="text-[10px] text-muted-foreground">Reps</label>
-                                <Input type="number" value={ex.targetReps} onChange={(e) => updateExercise(idx, { targetReps: parseInt(e.target.value) || 10 })} className="h-8 text-sm mt-1" />
-                              </div>
-                              <div>
-                                <label className="text-[10px] text-muted-foreground">Descanso (s)</label>
-                                <Input type="number" value={ex.restSeconds} onChange={(e) => updateExercise(idx, { restSeconds: parseInt(e.target.value) || 90 })} className="h-8 text-sm mt-1" />
-                              </div>
+                              <div><label className="text-[10px] text-muted-foreground">Séries</label><Input type="number" value={ex.targetSets} onChange={(e) => updateExercise(idx, { targetSets: parseInt(e.target.value) || 3 })} className="h-8 text-sm mt-1" /></div>
+                              <div><label className="text-[10px] text-muted-foreground">Reps</label><Input type="number" value={ex.targetReps} onChange={(e) => updateExercise(idx, { targetReps: parseInt(e.target.value) || 10 })} className="h-8 text-sm mt-1" /></div>
+                              <div><label className="text-[10px] text-muted-foreground">Descanso (s)</label><Input type="number" value={ex.restSeconds} onChange={(e) => updateExercise(idx, { restSeconds: parseInt(e.target.value) || 90 })} className="h-8 text-sm mt-1" /></div>
                             </div>
                           )}
                         </div>
@@ -392,93 +308,149 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
                   )}
                 </div>
               </div>
-
-              <DialogFooter className="pt-2">
-                <Button variant="outline" onClick={onClose} disabled={saving}>Cancelar</Button>
-                <Button onClick={handleSave} disabled={saving} className="bg-primary">
-                  {saving ? "Salvando..." : workoutId ? "Salvar" : "Criar treino"}
+              <DialogFooter className="pt-2 gap-2">
+                <Button variant="outline" onClick={onClose} disabled={saving} className="h-11 rounded-xl">Cancelar</Button>
+                <Button onClick={handleSave} disabled={saving} className="h-11 rounded-xl bg-primary font-semibold shadow-lg shadow-primary/20">
+                  {saving ? "Salvando..." : workoutId ? "Salvar alterações" : "Criar treino"}
                 </Button>
               </DialogFooter>
             </>
           )}
         </DialogContent>
       </Dialog>
-
       <ExerciseImageDialog open={!!lightbox} onOpenChange={(o) => !o && setLightbox(null)} images={lightbox?.images} name={lightbox?.name || ""} />
     </>
   );
 }
 
-// ─── SELETOR DE EXERCÍCIOS ────────────────────────────────────────────────────
-function ExercisePickerContent({ onPick, onBack, excludeIds }: { onPick: (ex: Exercise) => void; onBack: () => void; excludeIds: string[] }) {
+// ─── SELETOR MULTI-SELECT ─────────────────────────────────────────────────────
+function ExercisePickerContent({
+  onAdd, onBack, excludeIds,
+}: { onAdd: (exList: Exercise[]) => void; onBack: () => void; excludeIds: string[] }) {
   const [search, setSearch] = useState("");
   const [filterMuscles, setFilterMuscles] = useState<string[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState<Exercise | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setLoading(true);
     const p = new URLSearchParams();
     if (search) p.set("search", search);
     if (filterMuscles.length) p.set("muscleGroup", filterMuscles.join(","));
-    apiGet<{ exercises: Exercise[] }>(`/api/exercises?${p}`).then((d) => setExercises(d.exercises)).finally(() => setLoading(false));
+    apiGet<{ exercises: Exercise[] }>(`/api/exercises?${p}`)
+      .then((d) => setExercises(d.exercises))
+      .finally(() => setLoading(false));
   }, [search, filterMuscles]);
 
   const filtered = exercises.filter((e) => !excludeIds.includes(e.id));
 
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    if (selected.size === filtered.length) setSelected(new Set());
+    else setSelected(new Set(filtered.map((e) => e.id)));
+  };
+
+  const handleAdd = () => {
+    const toAdd = exercises.filter((e) => selected.has(e.id));
+    if (toAdd.length === 0) return toast.error("Selecione pelo menos um exercício");
+    onAdd(toAdd);
+  };
+
   return (
-    <div className="flex flex-col gap-3 max-h-[80vh]">
+    <div className="flex flex-col gap-3" style={{ maxHeight: "80vh" }}>
       <DialogHeader>
         <div className="flex items-center gap-2">
-          <Button type="button" variant="ghost" size="icon" className="h-8 w-8 -ml-2 rounded-lg" onClick={onBack}>
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8 -ml-2 rounded-xl" onClick={onBack}>
             <ChevronRight className="w-4 h-4 rotate-180" />
           </Button>
-          <DialogTitle>Adicionar exercício</DialogTitle>
+          <DialogTitle className="font-black">Adicionar exercícios</DialogTitle>
         </div>
       </DialogHeader>
 
-      {/* Busca */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-10" autoFocus />
+        <Input placeholder="Buscar exercício ou músculo..." value={search}
+          onChange={(e) => setSearch(e.target.value)} className="pl-9 h-11" autoFocus />
       </div>
 
       {/* Filtros de músculo */}
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-1.5 pb-1">
         {muscleGroups.map((m) => (
-          <button
-            key={m} type="button"
+          <button key={m} type="button"
             onClick={() => setFilterMuscles((p) => p.includes(m) ? p.filter((x) => x !== m) : [...p, m])}
-            className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-              filterMuscles.includes(m) ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border hover:bg-accent"
-            }`}
-          >{m}</button>
+            className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${filterMuscles.includes(m) ? "bg-primary text-primary-foreground border-primary shadow-sm" : "bg-card text-muted-foreground border-border hover:bg-accent hover:border-primary/30"}`}>
+            {m}
+          </button>
         ))}
         {filterMuscles.length > 0 && (
-          <button type="button" onClick={() => setFilterMuscles([])} className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2">Limpar</button>
+          <button type="button" onClick={() => setFilterMuscles([])}
+            className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2">Limpar</button>
         )}
       </div>
 
+      {/* Seleção em massa */}
+      {filtered.length > 0 && (
+        <div className="flex items-center justify-between px-1 text-xs text-muted-foreground">
+          <button type="button" onClick={toggleAll}
+            className="flex items-center gap-1.5 hover:text-foreground transition-colors font-medium">
+            {selected.size === filtered.length && filtered.length > 0
+              ? <CheckSquare className="w-3.5 h-3.5 text-primary" />
+              : <Square className="w-3.5 h-3.5" />}
+            {selected.size === filtered.length && filtered.length > 0 ? "Desmarcar todos" : "Selecionar todos"}
+          </button>
+          <span>{filtered.length} exercício{filtered.length !== 1 ? "s" : ""}</span>
+        </div>
+      )}
+
       {/* Lista */}
-      <div className="flex-1 overflow-y-auto -mx-1 px-1 space-y-0.5 min-h-0">
+      <div className="flex-1 overflow-y-auto -mx-1 px-1 space-y-0.5 min-h-0" style={{ maxHeight: "45vh" }}>
         {loading ? (
           <div className="py-10 text-center text-sm text-muted-foreground">Carregando...</div>
         ) : filtered.length === 0 ? (
           <div className="py-10 text-center text-sm text-muted-foreground">Nenhum exercício encontrado</div>
-        ) : filtered.map((ex) => (
-          <div key={ex.id} className="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-accent/50 transition-colors">
-            <ExerciseThumb images={ex.images} name={ex.name} className="w-10 h-10 rounded-lg shrink-0" onClick={() => setLightbox(ex)} />
-            <button type="button" onClick={() => onPick(ex)} className="flex-1 min-w-0 flex items-center gap-2 text-left">
+        ) : filtered.map((ex) => {
+          const isSel = selected.has(ex.id);
+          return (
+            <div key={ex.id}
+              className={`flex items-center gap-3 px-2 py-2.5 rounded-xl transition-all cursor-pointer ${isSel ? "bg-primary/10 border border-primary/20" : "hover:bg-accent/50"}`}
+              onClick={() => toggleSelect(ex.id)}>
+              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${isSel ? "bg-primary border-primary" : "border-border"}`}>
+                {isSel && <svg className="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+              </div>
+              <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+                <ExerciseThumb images={ex.images} name={ex.name} className="w-10 h-10 rounded-lg"
+                  onClick={() => setLightbox(ex)} />
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{ex.name}</p>
+                <p className="font-semibold text-sm truncate">{ex.name}</p>
                 <p className="text-[11px] text-muted-foreground">{ex.muscleGroup} · {ex.equipment}</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
-            </button>
-          </div>
-        ))}
+              {isSel && <Badge className="shrink-0 bg-primary/15 text-primary border-primary/20 text-[10px] rounded-full">✓</Badge>}
+            </div>
+          );
+        })}
       </div>
+
+      {/* Botão confirmar */}
+      <AnimatePresence>
+        {selected.size > 0 && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
+            <Button onClick={handleAdd}
+              className="w-full h-12 rounded-xl font-bold text-base bg-primary shadow-lg shadow-primary/25">
+              Adicionar {selected.size} exercício{selected.size !== 1 ? "s" : ""}
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <ExerciseImageDialog open={!!lightbox} onOpenChange={(o) => !o && setLightbox(null)} images={lightbox?.images} name={lightbox?.name || ""} />
     </div>
