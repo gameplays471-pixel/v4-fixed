@@ -1,4 +1,7 @@
 /* GEMgym - Modern Dark Theme */
+
+@reference "./tailwind.css";
+
 :root {
   --radius: 0.875rem;
   
