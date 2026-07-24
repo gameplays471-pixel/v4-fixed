@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { verifyPassword, createSession, setSessionCookie } from "@/lib/auth";
+import { verifyPassword, needsRehash, hashPassword, createSession, setSessionCookie } from "@/lib/auth";
+import { checkRateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
+
+// Por IP: barra brute force vindo de uma única origem.
+const IP_LIMIT = { limit: 10, windowMs: 15 * 60 * 1000 }; // 10 tentativas / 15 min
+// Por e-mail: barra credential stuffing contra UMA conta vindo de várias
+// origens/IPs. Limite um pouco mais folgado que o de IP para reduzir o
+// risco de alguém travar a conta de outra pessoa só de propósito.
+const EMAIL_LIMIT = { limit: 15, windowMs: 15 * 60 * 1000 };
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,18 +19,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email e senha são obrigatórios" }, { status: 400 });
     }
 
+    const ip = getClientIp(req);
+    const ipCheck = await checkRateLimit(`login:ip:${ip}`, IP_LIMIT);
+    if (!ipCheck.allowed) return rateLimitResponse(ipCheck);
+
+    const emailKey = `login:email:${String(email).toLowerCase().trim()}`;
+    const emailCheck = await checkRateLimit(emailKey, EMAIL_LIMIT);
+    if (!emailCheck.allowed) return rateLimitResponse(emailCheck);
+
     const user = await db.user.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json({ error: "Credenciais inválidas" }, { status: 401 });
     }
 
-    // Compat: senha em texto puro (demo) ou hash
-    const isValid =
-      user.passwordHash === password ||
-      verifyPassword(password, user.passwordHash);
-
+    const isValid = await verifyPassword(password, user.passwordHash);
     if (!isValid) {
       return NextResponse.json({ error: "Credenciais inválidas" }, { status: 401 });
+    }
+
+    // Migração transparente: contas ainda no hash antigo (sha256 sem salt
+    // ou texto puro) são re-hasheadas com bcrypt neste login bem-sucedido.
+    if (needsRehash(user.passwordHash)) {
+      await db.user.update({
+        where: { id: user.id },
+        data: { passwordHash: await hashPassword(password) },
+      });
     }
 
     const token = await createSession(user.id);

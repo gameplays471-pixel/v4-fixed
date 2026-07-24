@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hashPassword, createSession, setSessionCookie } from "@/lib/auth";
+import { checkRateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
+
+// Barra criação automatizada/massiva de contas a partir de um mesmo IP.
+const SIGNUP_IP_LIMIT = { limit: 5, windowMs: 60 * 60 * 1000 }; // 5 cadastros / hora
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +15,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email e senha são obrigatórios" }, { status: 400 });
     }
 
+    const ip = getClientIp(req);
+    const ipCheck = await checkRateLimit(`signup:ip:${ip}`, SIGNUP_IP_LIMIT);
+    if (!ipCheck.allowed) return rateLimitResponse(ipCheck);
+
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json({ error: "Email já cadastrado" }, { status: 400 });
@@ -20,7 +28,7 @@ export async function POST(req: NextRequest) {
       data: {
         email,
         name: name || email.split("@")[0],
-        passwordHash: hashPassword(password),
+        passwordHash: await hashPassword(password),
       },
     });
 

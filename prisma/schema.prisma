@@ -161,3 +161,15 @@ model BodyWeightLog {
   @@index([userId])
   @@index([loggedAt])
 }
+
+// Rate limiting de endpoints sensíveis (login, signup) contra brute force.
+// Cada tentativa (bem ou mal sucedida) grava uma linha; a contagem de
+// linhas dentro da janela de tempo decide se a próxima tentativa é
+// bloqueada. Ver src/lib/rate-limit.ts.
+model RateLimitAttempt {
+  id        String   @id @default(cuid())
+  key       String   // ex: "login:ip:203.0.113.4" | "login:email:foo@bar.com" | "signup:ip:203.0.113.4"
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
