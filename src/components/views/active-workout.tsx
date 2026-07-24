@@ -202,26 +202,41 @@ export function ActiveWorkoutView() {
     return () => clearInterval(interval);
   }, [startedAt]);
 
-  // Timer de descanso
+  // Timer de descanso — baseado em Date.now() para não ter drift
+  // restEndRef guarda o timestamp (ms) em que o descanso termina
+  const restEndRef = useRef<number | null>(null);
+  const restPausedAtRef = useRef<number | null>(null); // ms restantes quando pausou
+
   useEffect(() => {
-    if (!restTimer.active || restTimer.paused) return;
-    if (restTimer.remaining <= 0) {
-      // Timer concluído
-      if (soundOn) {
-        playBeep();
-      }
-      if (navigator.vibrate) {
-        navigator.vibrate([200, 100, 200]);
-      }
-      toast.success("Descanso concluído! 🔥");
-      setRestTimer({ active: false, remaining: 0, total: 0, paused: false });
+    if (!restTimer.active) {
+      restEndRef.current = null;
+      restPausedAtRef.current = null;
       return;
     }
-    const interval = setInterval(() => {
-      setRestTimer((prev) => ({ ...prev, remaining: prev.remaining - 1 }));
-    }, 1000);
+    if (restTimer.paused) return;
+
+    // Na primeira vez que o timer fica ativo e não pausado, define o endTime
+    if (restEndRef.current === null) {
+      restEndRef.current = Date.now() + restTimer.remaining * 1000;
+    }
+
+    const tick = () => {
+      if (!restEndRef.current) return;
+      const remaining = Math.max(0, Math.round((restEndRef.current - Date.now()) / 1000));
+      setRestTimer((prev) => ({ ...prev, remaining }));
+      if (remaining <= 0) {
+        restEndRef.current = null;
+        if (soundOn) playBeep();
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        toast.success("Descanso concluído! 🔥");
+        setRestTimer({ active: false, remaining: 0, total: 0, paused: false });
+      }
+    };
+
+    tick(); // roda imediatamente
+    const interval = setInterval(tick, 500); // 500ms para maior precisão
     return () => clearInterval(interval);
-  }, [restTimer.active, restTimer.paused, restTimer.remaining, soundOn]);
+  }, [restTimer.active, restTimer.paused, soundOn]); // sem restTimer.remaining nas deps!
 
   const playBeep = () => {
     try {
@@ -572,7 +587,11 @@ export function ActiveWorkoutView() {
                     size="icon"
                     variant="ghost"
                     className="h-9 w-9"
-                    onClick={() => setRestTimer((prev) => ({ ...prev, remaining: prev.remaining + 15 }))}
+                    onClick={() => {
+                      // Ajusta o endTime real em +15s
+                      if (restEndRef.current) restEndRef.current += 15000;
+                      setRestTimer((prev) => ({ ...prev, remaining: prev.remaining + 15 }));
+                    }}
                   >
                     <Plus className="w-4 h-4" />
                   </Button>
@@ -580,7 +599,11 @@ export function ActiveWorkoutView() {
                     size="icon"
                     variant="ghost"
                     className="h-9 w-9"
-                    onClick={() => setRestTimer((prev) => ({ ...prev, remaining: Math.max(0, prev.remaining - 15) }))}
+                    onClick={() => {
+                      // Ajusta o endTime real em -15s
+                      if (restEndRef.current) restEndRef.current = Math.max(Date.now(), restEndRef.current - 15000);
+                      setRestTimer((prev) => ({ ...prev, remaining: Math.max(0, prev.remaining - 15) }));
+                    }}
                   >
                     <Minus className="w-4 h-4" />
                   </Button>
@@ -843,62 +866,18 @@ export function ActiveWorkoutView() {
         })}
       </div>
 
-      {/* Modal de finalização — renderizado no body para ficar centralizado */}
-      <AnimatePresence>
-        {showFinishModal && typeof window !== "undefined" && createPortal(
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setShowFinishModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.92, y: 24, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.92, y: 24, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 28 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-card border border-border/60 rounded-3xl p-6 w-full max-w-sm shadow-2xl"
-            >
-              <div className="text-center">
-                <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
-                  className="w-20 h-20 mx-auto rounded-3xl bg-primary/15 flex items-center justify-center mb-4"
-                  style={{ boxShadow: "0 0 40px oklch(0.80 0.18 162 / 0.25)" }}>
-                  <Trophy className="w-10 h-10 text-primary" />
-                </motion.div>
-                <h2 className="text-2xl font-black mb-1">Finalizar treino?</h2>
-                <p className="text-sm text-muted-foreground mb-6">Confira o resumo antes de salvar:</p>
-
-                <div className="grid grid-cols-3 gap-3 mb-6">
-                  <div className="bg-muted/40 rounded-2xl p-3">
-                    <p className="text-2xl font-black">{completedSets}</p>
-                    <p className="text-xs text-muted-foreground">sets</p>
-                  </div>
-                  <div className="bg-muted/40 rounded-2xl p-3">
-                    <p className="text-2xl font-black">{Math.round(totalVolume)}</p>
-                    <p className="text-xs text-muted-foreground">kg total</p>
-                  </div>
-                  <div className="bg-muted/40 rounded-2xl p-3">
-                    <p className="text-2xl font-black">{formatTime(elapsed)}</p>
-                    <p className="text-xs text-muted-foreground">tempo</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setShowFinishModal(false)} className="flex-1 h-12 rounded-xl font-semibold">
-                    Continuar
-                  </Button>
-                  <Button onClick={handleFinish} disabled={saving} className="flex-1 h-12 rounded-xl bg-primary font-bold shadow-lg shadow-primary/25">
-                    {saving ? "Salvando..." : "Finalizar 🏆"}
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>,
-          document.body
-        )}
-      </AnimatePresence>
+      {/* Modal de finalização — portal estável fora do scroll container */}
+      {showFinishModal && (
+        <FinishModal
+          completedSets={completedSets}
+          totalVolume={totalVolume}
+          elapsed={elapsed}
+          saving={saving}
+          onClose={() => setShowFinishModal(false)}
+          onFinish={handleFinish}
+          formatTime={formatTime}
+        />
+      )}
 
       <audio ref={audioRef} preload="auto" />
 
@@ -909,5 +888,107 @@ export function ActiveWorkoutView() {
         name={lightboxExercise?.name || ""}
       />
     </div>
+  );
+}
+
+// ─── FINISH MODAL ─────────────────────────────────────────────────────────────
+// Componente separado com portal próprio para garantir que os handlers
+// funcionem corretamente sem depender do AnimatePresence do pai.
+interface FinishModalProps {
+  completedSets: number;
+  totalVolume: number;
+  elapsed: number;
+  saving: boolean;
+  onClose: () => void;
+  onFinish: () => void;
+  formatTime: (s: number) => string;
+}
+
+function FinishModal({ completedSets, totalVolume, elapsed, saving, onClose, onFinish, formatTime }: FinishModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // bloqueia scroll do body enquanto modal está aberto
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[300] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}
+      onMouseDown={onClose}
+    >
+      <div
+        className="bg-card border border-border/60 rounded-3xl p-6 w-full max-w-sm shadow-2xl"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        {/* Ícone */}
+        <div className="flex justify-center mb-4">
+          <div
+            className="w-20 h-20 rounded-3xl bg-primary/15 flex items-center justify-center"
+            style={{ boxShadow: "0 0 40px oklch(0.80 0.18 162 / 0.30)" }}
+          >
+            <Trophy className="w-10 h-10 text-primary" />
+          </div>
+        </div>
+
+        <h2 className="text-2xl font-black text-center mb-1">Finalizar treino?</h2>
+        <p className="text-sm text-muted-foreground text-center mb-6">Confira o resumo antes de salvar:</p>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-muted/50 rounded-2xl p-3 text-center">
+            <p className="text-2xl font-black tabular-nums">{completedSets}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">sets</p>
+          </div>
+          <div className="bg-muted/50 rounded-2xl p-3 text-center">
+            <p className="text-2xl font-black tabular-nums">{Math.round(totalVolume)}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">kg total</p>
+          </div>
+          <div className="bg-muted/50 rounded-2xl p-3 text-center">
+            <p className="text-2xl font-black tabular-nums">{formatTime(elapsed)}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">tempo</p>
+          </div>
+        </div>
+
+        {/* Botões */}
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            className="flex-1 h-12 rounded-xl font-semibold border border-border bg-transparent hover:bg-accent transition-colors text-sm disabled:opacity-50"
+          >
+            Continuar
+          </button>
+          <button
+            type="button"
+            onClick={onFinish}
+            disabled={saving}
+            className="flex-1 h-12 rounded-xl font-bold text-sm text-primary-foreground disabled:opacity-60 transition-all active:scale-[0.98]"
+            style={{
+              background: "var(--primary)",
+              boxShadow: "0 4px 20px oklch(0.80 0.18 162 / 0.35)",
+            }}
+          >
+            {saving ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                Salvando...
+              </span>
+            ) : (
+              "Finalizar 🏆"
+            )}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
   );
 }
