@@ -41,10 +41,11 @@ function buildStatusMap(primary: string[], secondary: string[]): Record<string, 
 }
 
 const PRIMARY_COLOR = "#22c55e";
-const SECONDARY_COLOR = "rgba(134,239,172,0.55)";
-const NEUTRAL_COLOR = "rgba(100,116,139,0.28)";
+const PRIMARY_STROKE = "#4ade80";
+const SECONDARY_COLOR = "rgba(134,239,172,0.5)";
+const NEUTRAL_COLOR = "rgba(100,116,139,0.25)";
 const BODY_COLOR = "rgba(51,65,85,0.55)";
-const OUTLINE = "rgba(148,163,184,0.18)";
+const OUTLINE = "rgba(148,163,184,0.16)";
 
 function color(s: MuscleStatus) {
   if (s === "primary") return PRIMARY_COLOR;
@@ -58,89 +59,95 @@ interface RegionProps {
   d: string;
 }
 
+// Região muscular individual, com leve brilho quando é o alvo primário do treino.
 function R({ id, statusMap, d }: RegionProps) {
   const s = statusMap[id] ?? "none";
   return (
     <motion.path
       d={d}
       fill={color(s)}
-      animate={{ fill: color(s) }}
-      transition={{ duration: 0.5 }}
+      stroke={s === "primary" ? PRIMARY_STROKE : "transparent"}
+      strokeWidth={s === "primary" ? 0.5 : 0}
+      strokeLinejoin="round"
+      initial={false}
+      animate={{
+        fill: color(s),
+        stroke: s === "primary" ? PRIMARY_STROKE : "rgba(74,222,128,0)",
+        filter: s === "primary" ? "drop-shadow(0 0 2.5px rgba(34,197,94,0.65))" : "drop-shadow(0 0 0px rgba(34,197,94,0))",
+      }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
     />
+  );
+}
+
+// ─── SILHUETA BASE (compartilhada entre frente e costas) ─────────────────────
+function BaseBody() {
+  return (
+    <g fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.6">
+      {/* Cabeça */}
+      <path d="M60 6 C67 6 72 12 72 20 C72 26 70 31 66 34 C66 34 66 37 68 39 C64 41 56 41 52 39 C54 37 54 34 54 34 C50 31 48 26 48 20 C48 12 53 6 60 6 Z" />
+      {/* Pescoço */}
+      <path d="M52 38 C54 40 57 41.5 60 41.5 C63 41.5 66 40 68 38 L69 45 C65 47.5 55 47.5 51 45 Z" />
+      {/* Tronco */}
+      <path
+        d="M60 44 C71 44 80 46.5 86 50 C88.5 58 89.5 68 89 78 C88.6 86 86.5 93 83 99 C83.6 106 83.8 112.5 83 118 C77.5 122.5 69 125 60 125 C51 125 42.5 122.5 37 118 C36.2 112.5 36.4 106 37 99 C33.5 93 31.4 86 31 78 C30.5 68 31.5 58 34 50 C40 46.5 49 44 60 44 Z"
+      />
+      {/* Braço esquerdo (completo, com mão) */}
+      <path
+        d="M37 50 C29 53.5 23.5 60 20.5 68.5 C18 75.5 17.5 83 18.5 90 C15.5 98 14 108 14.5 118 C14.7 123.5 15.7 128.5 17.5 132.5 C19.5 134.5 22.5 135 24.5 133 C23 128.5 22.3 123.5 22.3 118.5 C22.3 109.5 24 100.5 27 92.5 C26.3 85.5 26.8 78.5 29 71.5 C31 65 34.5 59.5 39.5 55.5 Z"
+      />
+      <ellipse cx="21" cy="139" rx="5.2" ry="7" />
+      {/* Braço direito */}
+      <path
+        d="M83 50 C91 53.5 96.5 60 99.5 68.5 C102 75.5 102.5 83 101.5 90 C104.5 98 106 108 105.5 118 C105.3 123.5 104.3 128.5 102.5 132.5 C100.5 134.5 97.5 135 95.5 133 C97 128.5 97.7 123.5 97.7 118.5 C97.7 109.5 96 100.5 93 92.5 C93.7 85.5 93.2 78.5 91 71.5 C89 65 85.5 59.5 80.5 55.5 Z"
+      />
+      <ellipse cx="99" cy="139" rx="5.2" ry="7" />
+      {/* Quadril */}
+      <path d="M37 118 C42.5 122.5 51 125 60 125 C69 125 77.5 122.5 83 118 L84.5 130 C77 135.5 68.5 138 60 138 C51.5 138 43 135.5 35.5 130 Z" />
+      {/* Perna esquerda (coxa + canela + pé) */}
+      <path
+        d="M35.5 130 C43 135.5 51.5 138 60 138 L58.5 196 C58.2 202 55.5 207 51 208 C46.5 209 42.7 206 41 201 C39.8 193 39 185 38.5 176 C38 163 37 148 35.5 130 Z"
+      />
+      <ellipse cx="49.5" cy="204" rx="8" ry="6" />
+      <path d="M42.5 205 C41.2 214 40.7 224 41 234 C41.2 240 43.5 244.5 47.5 245.5 C51.5 246.5 55 243.5 56 238.5 C57 229 57.5 218 57 208 Z" />
+      <path d="M42 238 C43 243 46 246 49.5 246.5 C53.5 247 56.5 244.5 57 240 L57.5 246 C57 250 53.5 253 49 253 C44.5 253 41.5 250.5 41 247 Z" />
+      {/* Perna direita */}
+      <path
+        d="M84.5 130 C77 135.5 68.5 138 60 138 L61.5 196 C61.8 202 64.5 207 69 208 C73.5 209 77.3 206 79 201 C80.2 193 81 185 81.5 176 C82 163 83 148 84.5 130 Z"
+      />
+      <ellipse cx="70.5" cy="204" rx="8" ry="6" />
+      <path d="M77.5 205 C78.8 214 79.3 224 79 234 C78.8 240 76.5 244.5 72.5 245.5 C68.5 246.5 65 243.5 64 238.5 C63 229 62.5 218 63 208 Z" />
+      <path d="M78 238 C77 243 74 246 70.5 246.5 C66.5 247 63.5 244.5 63 240 L62.5 246 C63 250 66.5 253 71 253 C75.5 253 78.5 250.5 79 247 Z" />
+    </g>
   );
 }
 
 // ─── FRENTE ───────────────────────────────────────────────────────────────────
 function BodyFront({ statusMap }: { statusMap: Record<string, MuscleStatus> }) {
   return (
-    <svg viewBox="0 0 120 260" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-      {/* --- SILHUETA BASE (corpo inteiro) --- */}
-      {/* Cabeça */}
-      <ellipse cx="60" cy="17" rx="12" ry="14" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.8"/>
-      {/* Pescoço */}
-      <path d="M55 29 Q57 32 60 33 Q63 32 65 29 L66 36 Q63 38 60 38.5 Q57 38 54 36Z" fill={BODY_COLOR}/>
-      {/* Tronco */}
-      <path d="M38 40 Q48 37 60 37 Q72 37 82 40 L86 82 Q83 90 80 95 L78 118 Q69 122 60 122 Q51 122 42 118 L40 95 Q37 90 34 82Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      {/* Braço esquerdo */}
-      <path d="M38 42 Q28 46 24 56 Q20 68 22 82 L28 80 Q27 68 30 58 Q33 50 40 47Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      {/* Antebraço esquerdo */}
-      <path d="M22 82 Q19 94 20 108 L26 108 Q25 96 28 84Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      {/* Mão esquerda */}
-      <ellipse cx="23" cy="111" rx="4" ry="5.5" fill={BODY_COLOR}/>
-      {/* Braço direito */}
-      <path d="M82 42 Q92 46 96 56 Q100 68 98 82 L92 80 Q93 68 90 58 Q87 50 80 47Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      {/* Antebraço direito */}
-      <path d="M98 82 Q101 94 100 108 L94 108 Q95 96 92 84Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      {/* Mão direita */}
-      <ellipse cx="97" cy="111" rx="4" ry="5.5" fill={BODY_COLOR}/>
-      {/* Quadril/cintura */}
-      <path d="M42 118 Q51 122 60 122 Q69 122 78 118 L80 128 Q70 133 60 133 Q50 133 40 128Z" fill={BODY_COLOR}/>
-      {/* Perna esquerda */}
-      <path d="M40 128 Q50 133 60 133 L58 185 Q55 192 52 192 L46 192 Q42 192 40 185Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      {/* Joelho esquerdo */}
-      <ellipse cx="49" cy="188" rx="7" ry="5" fill={BODY_COLOR}/>
-      {/* Canela esquerda */}
-      <path d="M42 192 Q43 210 44 224 Q47 228 50 228 Q53 228 55 224 Q56 210 57 192Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      {/* Pé esquerdo */}
-      <path d="M43 224 Q46 230 50 231 Q54 230 57 226 L56 232 Q52 236 48 234 Q44 232 43 228Z" fill={BODY_COLOR}/>
-      {/* Perna direita */}
-      <path d="M80 128 Q70 133 60 133 L62 185 Q65 192 68 192 L74 192 Q78 192 80 185Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      {/* Joelho direito */}
-      <ellipse cx="71" cy="188" rx="7" ry="5" fill={BODY_COLOR}/>
-      {/* Canela direita */}
-      <path d="M63 192 Q64 210 65 224 Q67 228 70 228 Q73 228 76 224 Q77 210 77 192Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      {/* Pé direito */}
-      <path d="M63 224 Q66 230 70 231 Q74 230 77 226 L76 232 Q72 236 68 234 Q64 232 63 228Z" fill={BODY_COLOR}/>
+    <svg viewBox="0 0 120 260" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full overflow-visible">
+      <BaseBody />
 
       {/* --- REGIÕES MUSCULARES --- */}
-      {/* Deltóide frente esquerdo */}
-      <R id="delt-front-l" statusMap={statusMap} d="M38 42 Q31 46 28 52 Q27 58 30 62 Q34 56 38 52 Q40 48 40 44Z"/>
-      {/* Deltóide frente direito */}
-      <R id="delt-front-r" statusMap={statusMap} d="M82 42 Q89 46 92 52 Q93 58 90 62 Q86 56 82 52 Q80 48 80 44Z"/>
-      {/* Peitoral esquerdo */}
-      <R id="chest-l" statusMap={statusMap} d="M40 47 Q48 44 58 45 L58 64 Q50 66 42 63 Q39 58 40 52Z"/>
-      {/* Peitoral direito */}
-      <R id="chest-r" statusMap={statusMap} d="M80 47 Q72 44 62 45 L62 64 Q70 66 78 63 Q81 58 80 52Z"/>
-      {/* Bícep esquerdo */}
-      <R id="bicep-l" statusMap={statusMap} d="M28 52 Q22 60 23 72 Q23 77 26 80 L30 78 Q28 72 28 64 Q28 58 31 54Z"/>
-      {/* Bícep direito */}
-      <R id="bicep-r" statusMap={statusMap} d="M92 52 Q98 60 97 72 Q97 77 94 80 L90 78 Q92 72 92 64 Q92 58 89 54Z"/>
-      {/* Antebraço esquerdo */}
-      <R id="forearm-l" statusMap={statusMap} d="M23 82 Q20 92 21 104 L25 104 Q25 93 27 83Z"/>
-      {/* Antebraço direito */}
-      <R id="forearm-r" statusMap={statusMap} d="M97 82 Q100 92 99 104 L95 104 Q95 93 93 83Z"/>
-      {/* Abdômen */}
-      <R id="abs" statusMap={statusMap} d="M44 67 Q52 65 60 65 Q68 65 76 67 L75 114 Q68 118 60 118 Q52 118 45 114Z"/>
-      {/* Quadríceps esquerdo */}
-      <R id="quad-l" statusMap={statusMap} d="M42 130 Q51 133 59 133 L57 182 Q54 187 49 185 Q44 182 42 176Z"/>
-      {/* Quadríceps direito */}
-      <R id="quad-r" statusMap={statusMap} d="M78 130 Q69 133 61 133 L63 182 Q66 187 71 185 Q76 182 78 176Z"/>
+      <R id="delt-front-l" statusMap={statusMap} d="M39.5 55.5 C35 58.5 31.5 63 29.5 68 C31.5 70 34 71 36.5 70.5 C37 65 38.5 60 41 56.5 Z" />
+      <R id="delt-front-r" statusMap={statusMap} d="M80.5 55.5 C85 58.5 88.5 63 90.5 68 C88.5 70 86 71 83.5 70.5 C83 65 81.5 60 79 56.5 Z" />
+      <R id="chest-l" statusMap={statusMap} d="M42 52 C47.5 49 53.5 48 59 48.5 L59 71 C53 72.5 47 71.5 42.5 68 C41 63 41 57 42 52 Z" />
+      <R id="chest-r" statusMap={statusMap} d="M78 52 C72.5 49 66.5 48 61 48.5 L61 71 C67 72.5 73 71.5 77.5 68 C79 63 79 57 78 52 Z" />
+      <R id="bicep-l" statusMap={statusMap} d="M29 71.5 C26 76.5 24.3 82.5 24 89 C23.8 93.5 24.3 97.5 25.5 100.5 L29.5 99 C28.5 95.5 28 91.5 28.2 87 C28.4 81.5 29.7 76.5 32 72.5 Z" />
+      <R id="bicep-r" statusMap={statusMap} d="M91 71.5 C94 76.5 95.7 82.5 96 89 C96.2 93.5 95.7 97.5 94.5 100.5 L90.5 99 C91.5 95.5 92 91.5 91.8 87 C91.6 81.5 90.3 76.5 88 72.5 Z" />
+      <R id="forearm-l" statusMap={statusMap} d="M22.5 102 C20.3 108 19.3 114.5 19.6 121 C19.8 125 20.5 128.5 21.7 131 L25.5 129.5 C24.6 126.5 24.1 123 24 119.5 C23.8 114 24.6 108.5 26.3 103.5 Z" />
+      <R id="forearm-r" statusMap={statusMap} d="M97.5 102 C99.7 108 100.7 114.5 100.4 121 C100.2 125 99.5 128.5 98.3 131 L94.5 129.5 C95.4 126.5 95.9 123 96 119.5 C96.2 114 95.4 108.5 93.7 103.5 Z" />
+      <R id="abs" statusMap={statusMap} d="M45 75 C50 73 55 72.3 60 72.3 C65 72.3 70 73 75 75 L74 113 C68 117 60 118.5 60 118.5 C60 118.5 52 117 46 113 Z" />
+      <R id="quad-l" statusMap={statusMap} d="M38.5 141 C43.5 144 49 146 55 146.5 L54 187 C51.5 193 46.5 194.5 43 191.5 C40.5 187 39.3 180 38.5 172 C37.7 162 38 151.5 38.5 141 Z" />
+      <R id="quad-r" statusMap={statusMap} d="M81.5 141 C76.5 144 71 146 65 146.5 L66 187 C68.5 193 73.5 194.5 77 191.5 C79.5 187 80.7 180 81.5 172 C82.3 162 82 151.5 81.5 141 Z" />
 
-      {/* Linha central e detalhes do abdômen */}
-      <line x1="60" y1="65" x2="60" y2="115" stroke="rgba(0,0,0,0.25)" strokeWidth="0.8"/>
-      <line x1="45" y1="80" x2="75" y2="80" stroke="rgba(0,0,0,0.18)" strokeWidth="0.6"/>
-      <line x1="45" y1="94" x2="75" y2="94" stroke="rgba(0,0,0,0.18)" strokeWidth="0.6"/>
-      <line x1="45" y1="107" x2="75" y2="107" stroke="rgba(0,0,0,0.18)" strokeWidth="0.6"/>
+      {/* Detalhes do abdômen */}
+      <g stroke="rgba(0,0,0,0.22)" strokeWidth="0.6" strokeLinecap="round">
+        <line x1="60" y1="73" x2="60" y2="117" />
+        <line x1="48" y1="85" x2="72" y2="85" />
+        <line x1="47" y1="97" x2="73" y2="97" />
+        <line x1="47.5" y1="108" x2="72.5" y2="108" />
+      </g>
     </svg>
   );
 }
@@ -148,61 +155,28 @@ function BodyFront({ statusMap }: { statusMap: Record<string, MuscleStatus> }) {
 // ─── COSTAS ───────────────────────────────────────────────────────────────────
 function BodyBack({ statusMap }: { statusMap: Record<string, MuscleStatus> }) {
   return (
-    <svg viewBox="0 0 120 260" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-      {/* --- SILHUETA BASE --- */}
-      <ellipse cx="60" cy="17" rx="12" ry="14" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.8"/>
-      <path d="M55 29 Q57 32 60 33 Q63 32 65 29 L66 36 Q63 38 60 38.5 Q57 38 54 36Z" fill={BODY_COLOR}/>
-      <path d="M38 40 Q48 37 60 37 Q72 37 82 40 L86 82 Q83 90 80 95 L78 118 Q69 122 60 122 Q51 122 42 118 L40 95 Q37 90 34 82Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      <path d="M38 42 Q28 46 24 56 Q20 68 22 82 L28 80 Q27 68 30 58 Q33 50 40 47Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      <path d="M22 82 Q19 94 20 108 L26 108 Q25 96 28 84Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      <ellipse cx="23" cy="111" rx="4" ry="5.5" fill={BODY_COLOR}/>
-      <path d="M82 42 Q92 46 96 56 Q100 68 98 82 L92 80 Q93 68 90 58 Q87 50 80 47Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      <path d="M98 82 Q101 94 100 108 L94 108 Q95 96 92 84Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      <ellipse cx="97" cy="111" rx="4" ry="5.5" fill={BODY_COLOR}/>
-      <path d="M42 118 Q51 122 60 122 Q69 122 78 118 L80 128 Q70 133 60 133 Q50 133 40 128Z" fill={BODY_COLOR}/>
-      <path d="M40 128 Q50 133 60 133 L58 185 Q55 192 52 192 L46 192 Q42 192 40 185Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      <ellipse cx="49" cy="188" rx="7" ry="5" fill={BODY_COLOR}/>
-      <path d="M42 192 Q43 210 44 224 Q47 228 50 228 Q53 228 55 224 Q56 210 57 192Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      <path d="M43 224 Q46 230 50 231 Q54 230 57 226 L56 232 Q52 236 48 234 Q44 232 43 228Z" fill={BODY_COLOR}/>
-      <path d="M80 128 Q70 133 60 133 L62 185 Q65 192 68 192 L74 192 Q78 192 80 185Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      <ellipse cx="71" cy="188" rx="7" ry="5" fill={BODY_COLOR}/>
-      <path d="M63 192 Q64 210 65 224 Q67 228 70 228 Q73 228 76 224 Q77 210 77 192Z" fill={BODY_COLOR} stroke={OUTLINE} strokeWidth="0.5"/>
-      <path d="M63 224 Q66 230 70 231 Q74 230 77 226 L76 232 Q72 236 68 234 Q64 232 63 228Z" fill={BODY_COLOR}/>
+    <svg viewBox="0 0 120 260" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full overflow-visible">
+      <BaseBody />
 
       {/* --- REGIÕES MUSCULARES --- */}
-      {/* Trapézio */}
-      <R id="traps" statusMap={statusMap} d="M44 38 Q52 36 60 36 Q68 36 76 38 L80 52 Q72 50 60 50 Q48 50 40 52Z"/>
-      {/* Deltóide costas esquerdo */}
-      <R id="delt-back-l" statusMap={statusMap} d="M38 42 Q30 46 27 53 Q26 60 29 64 Q33 58 38 54 Q40 50 40 45Z"/>
-      {/* Deltóide costas direito */}
-      <R id="delt-back-r" statusMap={statusMap} d="M82 42 Q90 46 93 53 Q94 60 91 64 Q87 58 82 54 Q80 50 80 45Z"/>
-      {/* Latíssimo esquerdo */}
-      <R id="lats-l" statusMap={statusMap} d="M40 52 Q36 62 35 74 Q34 86 37 94 L42 92 Q40 80 41 68 Q42 58 44 53Z"/>
-      {/* Latíssimo direito */}
-      <R id="lats-r" statusMap={statusMap} d="M80 52 Q84 62 85 74 Q86 86 83 94 L78 92 Q80 80 79 68 Q78 58 76 53Z"/>
-      {/* Trícep esquerdo */}
-      <R id="tricep-l" statusMap={statusMap} d="M28 52 Q23 60 22 72 Q22 78 25 82 L29 80 Q27 74 27 66 Q27 58 31 54Z"/>
-      {/* Trícep direito */}
-      <R id="tricep-r" statusMap={statusMap} d="M92 52 Q97 60 98 72 Q98 78 95 82 L91 80 Q93 74 93 66 Q93 58 89 54Z"/>
-      {/* Antebraço costas esq */}
-      <R id="forearm-back-l" statusMap={statusMap} d="M22 82 Q19 93 20 105 L24 105 Q24 94 26 83Z"/>
-      {/* Antebraço costas dir */}
-      <R id="forearm-back-r" statusMap={statusMap} d="M98 82 Q101 93 100 105 L96 105 Q96 94 94 83Z"/>
-      {/* Glúteo esquerdo */}
-      <R id="glute-l" statusMap={statusMap} d="M42 120 Q51 123 60 123 L59 142 Q53 144 48 140 Q42 135 41 128Z"/>
-      {/* Glúteo direito */}
-      <R id="glute-r" statusMap={statusMap} d="M78 120 Q69 123 60 123 L61 142 Q67 144 72 140 Q78 135 79 128Z"/>
-      {/* Isquiotibial esquerdo */}
-      <R id="hamstring-l" statusMap={statusMap} d="M41 142 Q49 146 59 145 L57 182 Q53 186 48 183 Q42 179 41 170Z"/>
-      {/* Isquiotibial direito */}
-      <R id="hamstring-r" statusMap={statusMap} d="M79 142 Q71 146 61 145 L63 182 Q67 186 72 183 Q78 179 79 170Z"/>
-      {/* Panturrilha esquerda */}
-      <R id="calf-l" statusMap={statusMap} d="M42 193 Q44 208 45 220 Q48 226 51 225 Q53 224 55 220 Q56 208 57 193Z"/>
-      {/* Panturrilha direita */}
-      <R id="calf-r" statusMap={statusMap} d="M63 193 Q64 208 65 220 Q68 226 70 225 Q73 224 75 220 Q76 208 77 193Z"/>
+      <R id="traps" statusMap={statusMap} d="M50 44.5 C53.5 43.5 57 43 60 43 C63 43 66.5 43.5 70 44.5 L74 55 C69.5 52.5 65 51.5 60 51.5 C55 51.5 50.5 52.5 46 55 Z" />
+      <R id="delt-back-l" statusMap={statusMap} d="M39.5 55.5 C35 58.5 31.5 63 29.5 68 C31.5 70 34 71 36.5 70.5 C37 65 38.5 60 41 56.5 Z" />
+      <R id="delt-back-r" statusMap={statusMap} d="M80.5 55.5 C85 58.5 88.5 63 90.5 68 C88.5 70 86 71 83.5 70.5 C83 65 81.5 60 79 56.5 Z" />
+      <R id="lats-l" statusMap={statusMap} d="M35.5 58 C33.5 65 32.3 73 32 81 C31.7 88 32.4 94 34 99 L39.5 96.5 C38.2 91 37.7 85 38 79 C38.3 71.5 39.5 64.5 41.5 58.5 Z" />
+      <R id="lats-r" statusMap={statusMap} d="M84.5 58 C86.5 65 87.7 73 88 81 C88.3 88 87.6 94 86 99 L80.5 96.5 C81.8 91 82.3 85 82 79 C81.7 71.5 80.5 64.5 78.5 58.5 Z" />
+      <R id="tricep-l" statusMap={statusMap} d="M29 71.5 C26 76.5 24.3 82.5 24 89 C23.8 93.5 24.3 97.5 25.5 100.5 L29.5 99 C28.5 95.5 28 91.5 28.2 87 C28.4 81.5 29.7 76.5 32 72.5 Z" />
+      <R id="tricep-r" statusMap={statusMap} d="M91 71.5 C94 76.5 95.7 82.5 96 89 C96.2 93.5 95.7 97.5 94.5 100.5 L90.5 99 C91.5 95.5 92 91.5 91.8 87 C91.6 81.5 90.3 76.5 88 72.5 Z" />
+      <R id="forearm-back-l" statusMap={statusMap} d="M22.5 102 C20.3 108 19.3 114.5 19.6 121 C19.8 125 20.5 128.5 21.7 131 L25.5 129.5 C24.6 126.5 24.1 123 24 119.5 C23.8 114 24.6 108.5 26.3 103.5 Z" />
+      <R id="forearm-back-r" statusMap={statusMap} d="M97.5 102 C99.7 108 100.7 114.5 100.4 121 C100.2 125 99.5 128.5 98.3 131 L94.5 129.5 C95.4 126.5 95.9 123 96 119.5 C96.2 114 95.4 108.5 93.7 103.5 Z" />
+      <R id="glute-l" statusMap={statusMap} d="M38.5 120.5 C44 123.7 51.5 126 59.5 126.3 L59 140 C54 142.5 47.5 141.5 43 137 C40 133.5 38.5 127.5 38.5 120.5 Z" />
+      <R id="glute-r" statusMap={statusMap} d="M81.5 120.5 C76 123.7 68.5 126 60.5 126.3 L61 140 C66 142.5 72.5 141.5 77 137 C80 133.5 81.5 127.5 81.5 120.5 Z" />
+      <R id="hamstring-l" statusMap={statusMap} d="M38.7 143 C43.7 145.7 49.2 147.3 55 147.7 L54 187 C51.5 193 46.5 194.5 43 191.5 C40.5 187 39.3 180 38.5 172 C38.2 162.3 38.3 152.5 38.7 143 Z" />
+      <R id="hamstring-r" statusMap={statusMap} d="M81.3 143 C76.3 145.7 70.8 147.3 65 147.7 L66 187 C68.5 193 73.5 194.5 77 191.5 C79.5 187 80.7 180 81.5 172 C81.8 162.3 81.7 152.5 81.3 143 Z" />
+      <R id="calf-l" statusMap={statusMap} d="M42.7 209 C41.6 216 41 224 41.2 232 C41.4 238 43.5 243 47.3 244.3 C51.2 245.5 54.8 242.6 55.8 237.5 C56.8 229 57.3 219 56.8 209.5 Z" />
+      <R id="calf-r" statusMap={statusMap} d="M77.3 209 C78.4 216 79 224 78.8 232 C78.6 238 76.5 243 72.7 244.3 C68.8 245.5 65.2 242.6 64.2 237.5 C63.2 229 62.7 219 63.2 209.5 Z" />
 
       {/* Coluna vertebral */}
-      <line x1="60" y1="38" x2="60" y2="120" stroke="rgba(0,0,0,0.3)" strokeWidth="1" strokeDasharray="2 3"/>
+      <line x1="60" y1="43" x2="60" y2="126" stroke="rgba(0,0,0,0.28)" strokeWidth="0.8" strokeDasharray="1.5 2.5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -221,15 +195,15 @@ export function MuscleMap({ primaryMuscles, secondaryMuscles }: MuscleMapProps) 
       {/* Legenda */}
       <div className="flex items-center justify-center gap-5 text-xs flex-wrap">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm shadow-sm" style={{ background: PRIMARY_COLOR }} />
+          <div className="w-3 h-3 rounded-full shadow-[0_0_6px_rgba(34,197,94,0.6)]" style={{ background: PRIMARY_COLOR }} />
           <span className="text-muted-foreground">Primário</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm" style={{ background: SECONDARY_COLOR }} />
+          <div className="w-3 h-3 rounded-full" style={{ background: SECONDARY_COLOR }} />
           <span className="text-muted-foreground">Secundário</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm" style={{ background: NEUTRAL_COLOR }} />
+          <div className="w-3 h-3 rounded-full" style={{ background: NEUTRAL_COLOR }} />
           <span className="text-muted-foreground">Não trabalhado</span>
         </div>
       </div>
