@@ -52,7 +52,7 @@ export async function requireUser(req: NextRequest): Promise<SelectedUser> {
  * informe o tipo do 2º argumento explicitamente:
  * `withErrorHandling<{ params: Promise<{ id: string }> }>("...", handler)`.
  */
-export function withErrorHandling<Ctx = undefined>(
+export function withErrorHandling<Ctx = any>(
   routeName: string,
   handler: (req: NextRequest, ctx: Ctx) => Promise<Response> | Response
 ) {
