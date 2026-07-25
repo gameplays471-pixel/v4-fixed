@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
+import { withErrorHandling } from "@/lib/api-error";
 
-export async function GET() {
+export const GET = withErrorHandling("GET /api", async () => {
   return NextResponse.json({ message: "Hello, world!" });
-}
+});

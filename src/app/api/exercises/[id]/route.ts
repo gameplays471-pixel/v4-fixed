@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { notFound, withErrorHandling } from "@/lib/api-error";
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
+export const GET = withErrorHandling<{ params: Promise<{ id: string }> }>(
+  "Get exercise",
+  async (_req: NextRequest, { params }) => {
     const { id } = await params;
     const exercise = await db.exercise.findUnique({
       where: { id },
@@ -15,12 +14,9 @@ export async function GET(
     });
 
     if (!exercise) {
-      return NextResponse.json({ error: "Exercício não encontrado" }, { status: 404 });
+      throw notFound("Exercício não encontrado");
     }
 
     return NextResponse.json({ exercise });
-  } catch (e) {
-    console.error("Get exercise error:", e);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
-}
+);

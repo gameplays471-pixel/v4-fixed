@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { notFound, requireUser, withErrorHandling } from "@/lib/api-error";
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
+export const GET = withErrorHandling<{ params: Promise<{ id: string }> }>(
+  "Get workout",
+  async (_req: NextRequest, { params }) => {
     const { id } = await params;
     const workout = await db.workout.findUnique({
       where: { id },
@@ -19,25 +17,17 @@ export async function GET(
     });
 
     if (!workout) {
-      return NextResponse.json({ error: "Treino não encontrado" }, { status: 404 });
+      throw notFound("Treino não encontrado");
     }
 
     return NextResponse.json({ workout });
-  } catch (e) {
-    console.error("Get workout error:", e);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
-}
+);
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
+export const PUT = withErrorHandling<{ params: Promise<{ id: string }> }>(
+  "Update workout",
+  async (req, { params }) => {
+    const user = await requireUser(req);
 
     const { id } = await params;
     const body = await req.json();
@@ -47,7 +37,7 @@ export async function PUT(
       where: { id, userId: user.id },
     });
     if (!existing) {
-      return NextResponse.json({ error: "Treino não encontrado" }, { status: 404 });
+      throw notFound("Treino não encontrado");
     }
 
     // Atualizar treino
@@ -89,34 +79,23 @@ export async function PUT(
     });
 
     return NextResponse.json({ workout: updated });
-  } catch (e) {
-    console.error("Update workout error:", e);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
+export const DELETE = withErrorHandling<{ params: Promise<{ id: string }> }>(
+  "Delete workout",
+  async (req, { params }) => {
+    const user = await requireUser(req);
 
     const { id } = await params;
     const existing = await db.workout.findFirst({
       where: { id, userId: user.id },
     });
     if (!existing) {
-      return NextResponse.json({ error: "Treino não encontrado" }, { status: 404 });
+      throw notFound("Treino não encontrado");
     }
 
     await db.workout.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch (e) {
-    console.error("Delete workout error:", e);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
-}
+);

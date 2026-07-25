@@ -198,7 +198,7 @@ export async function clearSessionCookie() {
   cookieStore.delete(SESSION_COOKIE);
 }
 
-type SelectedUser = {
+export type SelectedUser = {
   id: string;
   email: string;
   name: string;

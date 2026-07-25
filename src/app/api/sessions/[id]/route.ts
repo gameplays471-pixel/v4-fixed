@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { notFound, requireUser, withErrorHandling } from "@/lib/api-error";
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
+export const GET = withErrorHandling<{ params: Promise<{ id: string }> }>(
+  "Get session",
+  async (_req: NextRequest, { params }) => {
     const { id } = await params;
     const session = await db.workoutSession.findUnique({
       where: { id },
@@ -17,38 +15,27 @@ export async function GET(
     });
 
     if (!session) {
-      return NextResponse.json({ error: "Sessão não encontrada" }, { status: 404 });
+      throw notFound("Sessão não encontrada");
     }
 
     return NextResponse.json({ session });
-  } catch (e) {
-    console.error("Get session error:", e);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
+export const DELETE = withErrorHandling<{ params: Promise<{ id: string }> }>(
+  "Delete session",
+  async (req, { params }) => {
+    const user = await requireUser(req);
 
     const { id } = await params;
     const session = await db.workoutSession.findFirst({
       where: { id, userId: user.id },
     });
     if (!session) {
-      return NextResponse.json({ error: "Sessão não encontrada" }, { status: 404 });
+      throw notFound("Sessão não encontrada");
     }
 
     await db.workoutSession.delete({ where: { id } });
     return NextResponse.json({ success: true });
-  } catch (e) {
-    console.error("Delete session error:", e);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
-}
+);
