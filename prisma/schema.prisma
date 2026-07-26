@@ -22,6 +22,7 @@ model User {
   birthDate    DateTime?
   goal         String?
   avatarUrl    String?
+  role         String   @default("user") // "user" | "admin" | "support" — controla acesso ao painel /admin
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -181,6 +182,29 @@ model ProgressPhoto {
 
   @@index([userId])
   @@index([takenAt])
+}
+
+// Log de auditoria do painel administrativo — toda ação de escrita feita
+// por um admin (criar/editar/excluir exercício, alterar usuário, etc.)
+// grava uma linha aqui. Guardamos snapshots antes/depois como JSON string
+// (não um campo Json nativo, pra manter compatibilidade com o modo como o
+// resto do schema já representa dados semiestruturados como texto) —
+// permite reconstruir "o que mudou" sem depender de triggers no banco.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String   // id do admin que executou a ação
+  actorEmail String   // snapshot do e-mail no momento (sobrevive a troca de e-mail do admin)
+  action     String   // "create" | "update" | "delete"
+  entityType String   // "exercise" | "user" | "site_config" | ...
+  entityId   String
+  before     String?  // snapshot JSON do estado anterior (null em "create")
+  after      String?  // snapshot JSON do estado novo (null em "delete")
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([createdAt])
 }
 
 // Rate limiting de endpoints sensíveis (login, signup) contra brute force.

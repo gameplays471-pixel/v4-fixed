@@ -51,6 +51,7 @@ export const POST = withErrorHandling("Login", async (req: NextRequest) => {
     id: user.id,
     email: user.email,
     name: user.name,
+    role: user.role,
     token, // token também no body para localStorage (suporte cross-origin)
     rememberMe: !!rememberMe,
   });

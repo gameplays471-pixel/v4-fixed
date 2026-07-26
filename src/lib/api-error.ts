@@ -38,6 +38,21 @@ export async function requireUser(req: NextRequest): Promise<SelectedUser> {
 }
 
 /**
+ * Mesma ideia de `requireUser`, mas também exige `role === "admin"`.
+ * Uso em toda rota sob `/api/admin/*`:
+ *   const admin = await requireAdmin(req);
+ * Retorna 401 se não estiver logado, 403 se estiver logado mas sem ser admin
+ * — distinção importante pro frontend saber se deve mandar pro login ou
+ * só esconder a opção de admin.
+ */
+export async function requireAdmin(req: NextRequest): Promise<SelectedUser> {
+  const user = await getCurrentUser(req);
+  if (!user) throw unauthorized();
+  if (user.role !== "admin") throw forbidden("Acesso restrito a administradores");
+  return user;
+}
+
+/**
  * Envolve um handler de rota (GET/POST/PUT/DELETE) padronizando o
  * tratamento de erro:
  * - `ApiError` (lançado por um dos helpers acima, ou diretamente) vira a

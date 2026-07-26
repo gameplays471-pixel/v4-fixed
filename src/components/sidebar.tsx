@@ -5,7 +5,7 @@ import { LogOut, User } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface SidebarProps {
-  user: { name: string; email: string };
+  user: { name: string; email: string; role?: string };
   onLogout: () => void;
 }
 
@@ -117,6 +117,18 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           </div>
         </button>
+
+        {user.role === "admin" && (
+          <a
+            href="/admin"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all group"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4.5 h-4.5">
+              <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" />
+            </svg>
+            Painel admin
+          </a>
+        )}
 
         <button
           onClick={onLogout}

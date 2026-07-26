@@ -167,3 +167,32 @@ export const bodyWeightSchema = z.object({
   loggedAt: z.coerce.date().optional().nullable(),
   notes: optionalNullableString(500),
 });
+
+// ─── Admin: Exercícios ───────────────────────────────────────────────────────
+// `slug` é gerado no servidor a partir do nome (ver src/lib/search-utils.ts
+// ou slugify local abaixo) quando não informado — o admin não deveria
+// precisar pensar em slug ao cadastrar um exercício novo.
+
+export const exerciseSchema = z.object({
+  name: z.string().trim().min(2, "Nome muito curto").max(150),
+  slug: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9-]+$/, "Slug deve conter só letras minúsculas, números e hífen")
+    .max(150)
+    .optional(),
+  muscleGroup: z.string().trim().min(1, "Grupo muscular é obrigatório").max(50),
+  secondaryMuscles: optionalNullableString(200),
+  equipment: optionalNullableString(100),
+  category: z.string().trim().min(1, "Categoria é obrigatória").max(50),
+  equipmentType: optionalNullableString(50),
+  level: z.string().trim().min(1, "Nível é obrigatório").max(50),
+  description: optionalNullableString(2000),
+  executionSteps: optionalNullableString(4000),
+  commonMistakes: optionalNullableString(2000),
+  tips: optionalNullableString(2000),
+  images: z.array(z.string().trim().max(2000)).max(10).default([]),
+});
+
+export const exerciseUpdateSchema = exerciseSchema.partial();

@@ -17,7 +17,7 @@ import { getToken, setToken } from "@/lib/api";
 import { LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type AppUser = { name: string; email: string };
+type AppUser = { name: string; email: string; role?: string };
 
 function MobileTopbar({ user, onLogout }: { user: AppUser; onLogout: () => void }) {
   const setView = useAppStore((s) => s.setView);

@@ -209,6 +209,7 @@ export type SelectedUser = {
   birthDate: Date | null;
   goal: string | null;
   avatarUrl: string | null;
+  role: string;
   createdAt: Date;
 };
 
@@ -226,6 +227,7 @@ async function lookupUser(userId: string): Promise<SelectedUser | null> {
       birthDate: true,
       goal: true,
       avatarUrl: true,
+      role: true,
       createdAt: true,
     },
   });
