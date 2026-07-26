@@ -18,6 +18,9 @@ export type WorkoutSummaryData = {
   workoutName: string;
   durationSec: number;
   totalVolume: number;
+  // Data/hora em que o treino foi finalizado (ISO) — usada no card
+  // compartilhável e no PDF exportado (ver share-workout-card.tsx).
+  finishedAt: string;
   exercises: Array<{
     name: string;
     muscleGroup: string;

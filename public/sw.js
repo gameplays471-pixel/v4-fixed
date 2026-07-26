@@ -35,6 +35,7 @@ const API_READ_PATHS = [
   "/api/stats",
   "/api/profile",
   "/api/bodyweight",
+  "/api/progress-photos",
 ];
 
 self.addEventListener("install", (event) => {
@@ -202,4 +203,22 @@ self.addEventListener("message", (event) => {
   if (event.data === "SKIP_WAITING") {
     self.skipWaiting();
   }
+});
+
+// Ao tocar na notificação (ex.: "Descanso concluído!"), foca a aba do app já
+// aberta em vez de abrir uma nova — se não tiver nenhuma aberta, abre uma.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    (async () => {
+      const allClients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      for (const client of allClients) {
+        if ("focus" in client) {
+          await client.focus();
+          return;
+        }
+      }
+      await self.clients.openWindow("/");
+    })()
+  );
 });

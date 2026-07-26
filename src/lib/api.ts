@@ -93,12 +93,13 @@ export async function apiDelete<T>(url: string): Promise<T> {
     method: "DELETE",
     headers: authHeaders(),
   });
+  const data = await res.json().catch(() => ({}));
   if (res.status === 401) {
     handleUnauthorized();
-    throw new Error("Sessão expirada");
+    throw new Error(data.error || "Sessão expirada");
   }
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+  if (!res.ok) throw new Error(data.error || `API error: ${res.status}`);
+  return data;
 }
 
 // Utilitários

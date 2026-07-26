@@ -153,12 +153,13 @@ export function BodyView() {
   const handleDeletePhoto = async (id: string) => {
     try {
       await apiDelete(`/api/progress-photos/${id}`);
+      toast.success("Foto removida!");
       setLightboxPhoto(null);
       if (beforeId === id) setBeforeId("");
       if (afterId === id) setAfterId("");
       loadPhotos();
-    } catch {
-      toast.error("Erro ao remover foto");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao remover foto");
     }
   };
 

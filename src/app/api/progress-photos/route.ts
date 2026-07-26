@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { db } from "@/lib/db";
 import { badRequest, requireUser, withErrorHandling } from "@/lib/api-error";
+import { resolveBlobToken, describeBlobEnvState } from "@/lib/blob-token";
 
 // Folga confortável acima do que a compressão no cliente deve gerar
 // (fotos são redimensionadas + comprimidas em JPEG antes do upload).
@@ -25,11 +26,15 @@ export const GET = withErrorHandling("Get progress photos", async (req: NextRequ
 export const POST = withErrorHandling("Create progress photo", async (req: NextRequest) => {
   const user = await requireUser(req);
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  const blobToken = resolveBlobToken();
+  if (!blobToken) {
     // Mesmo espírito do SESSION_SECRET: falha alto e claro em vez de um
     // 500 genérico quando falta configurar a infraestrutura em produção.
+    // A mensagem inclui o que de fato foi encontrado nas env vars pra
+    // facilitar o diagnóstico (ex.: só metadados do store, sem o token).
     throw badRequest(
-      "Armazenamento de fotos não configurado neste ambiente. No painel da Vercel: Storage → Create Database → Blob, conecte ao projeto e redeploy (a variável BLOB_READ_WRITE_TOKEN é adicionada automaticamente)."
+      `Armazenamento de fotos não configurado neste ambiente. ${describeBlobEnvState()} ` +
+      "No painel da Vercel, abra o Blob Store → aba \"Quickstart\"/.env.local → clique em \"Show secret\" pra revelar o valor de BLOB_READ_WRITE_TOKEN, e adicione-o manualmente em Settings → Environment Variables do projeto (Production and Preview) — depois redeploy."
     );
   }
 
@@ -73,6 +78,7 @@ export const POST = withErrorHandling("Create progress photo", async (req: NextR
     access: "public",
     contentType: mimeType,
     addRandomSuffix: true,
+    token: blobToken,
   });
 
   const photo = await db.progressPhoto.create({

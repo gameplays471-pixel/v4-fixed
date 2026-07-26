@@ -18,9 +18,9 @@ export function ActiveWorkoutView() {
 
   const [lightboxExercise, setLightboxExercise] = useState<{ name: string; images: string[] } | null>(null);
 
-  const handleCompleteSet = (exerciseId: string, setIdx: number, restSeconds: number) => {
+  const handleCompleteSet = (exerciseId: string, setIdx: number, restSeconds: number, exerciseName: string) => {
     const justCompleted = session.toggleSetComplete(exerciseId, setIdx);
-    if (justCompleted) restTimer.start(restSeconds);
+    if (justCompleted) restTimer.start(restSeconds, exerciseName);
   };
 
   if (session.loading) {
@@ -93,7 +93,7 @@ export function ActiveWorkoutView() {
               onApplySuggestion={(weight) => session.applySuggestedWeight(ex.id, weight)}
               onAddSet={() => session.addSet(ex.id)}
               onRemoveSet={(setIdx) => session.removeSet(ex.id, setIdx)}
-              onCompleteSet={(setIdx) => handleCompleteSet(ex.id, setIdx, ex.restSeconds)}
+              onCompleteSet={(setIdx) => handleCompleteSet(ex.id, setIdx, ex.restSeconds, ex.exercise.name)}
               onUpdateCardio={(updates) => session.updateCardio(ex.id, updates)}
               onToggleCardioComplete={() => session.toggleCardioComplete(ex.id)}
             />

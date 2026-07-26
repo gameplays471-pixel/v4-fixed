@@ -100,11 +100,12 @@ function MobileBottomNav() {
     { key: "library" as const, label: "Exercícios", icon: <BookIcon /> },
     { key: "history" as const, label: "Histórico", icon: <HistoryIcon /> },
     { key: "stats" as const, label: "Stats", icon: <ChartIcon /> },
+    { key: "body" as const, label: "Corpo", icon: <BodyIcon /> },
   ];
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur-xl">
-      <div className="grid grid-cols-5 h-16 max-w-lg mx-auto px-1">
+      <div className="grid grid-cols-6 h-16 max-w-lg mx-auto px-1">
         {navItems.map((item) => {
           const active = view === item.key;
           return (
@@ -251,5 +252,10 @@ const HistoryIcon = () => (
 const ChartIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
     <path d="M3 3v18h18M7 16l4-8 4 4 6-9" />
+  </svg>
+);
+const BodyIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+    <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
   </svg>
 );

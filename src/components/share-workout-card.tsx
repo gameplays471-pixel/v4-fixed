@@ -1,0 +1,242 @@
+"use client";
+
+import { forwardRef } from "react";
+import { Dumbbell, Clock, Flame, Star, Trophy } from "lucide-react";
+import { MuscleSilhouette } from "@/components/muscle-map";
+import type { WorkoutSummaryData } from "@/lib/store";
+
+export type ShareFormat = "story" | "square";
+
+// Dimensões-base do nó capturado (em px). html-to-image usa pixelRatio: 2 na
+// exportação, então o PNG final sai em 1080×1920 (story) ou 1080×1080 (post)
+// — os dois formatos que WhatsApp Status e Instagram (stories/feed) esperam.
+export const SHARE_CARD_SIZE: Record<ShareFormat, { width: number; height: number }> = {
+  story: { width: 540, height: 960 },
+  square: { width: 540, height: 540 },
+};
+
+function fmtDuration(sec: number) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  if (h > 0) return `${h}h${m.toString().padStart(2, "0")}`;
+  return `${m}min`;
+}
+
+function fmtVolume(v: number) {
+  if (v >= 1000) return `${(v / 1000).toFixed(1)}k`;
+  return String(Math.round(v));
+}
+
+interface ShareWorkoutCardProps {
+  data: WorkoutSummaryData;
+  format: ShareFormat;
+}
+
+export const ShareWorkoutCard = forwardRef<HTMLDivElement, ShareWorkoutCardProps>(
+  function ShareWorkoutCard({ data, format }, ref) {
+    const { width, height } = SHARE_CARD_SIZE[format];
+    const isStory = format === "story";
+
+    const primaryMuscles: string[] = [];
+    const primarySet = new Set<string>();
+    const secondaryMuscles: string[] = [];
+    for (const ex of data.exercises) {
+      if (ex.category === "Cardio") {
+        if (!primarySet.has("Cardio")) { primarySet.add("Cardio"); primaryMuscles.push("Cardio"); }
+        continue;
+      }
+      if (ex.muscleGroup && !primarySet.has(ex.muscleGroup)) {
+        primarySet.add(ex.muscleGroup);
+        primaryMuscles.push(ex.muscleGroup);
+      }
+      if (ex.secondaryMuscles) {
+        for (const m of ex.secondaryMuscles.split(",")) {
+          const trimmed = m.trim();
+          if (trimmed && !primarySet.has(trimmed) && !secondaryMuscles.includes(trimmed)) {
+            secondaryMuscles.push(trimmed);
+          }
+        }
+      }
+    }
+    const filteredSecondary = secondaryMuscles.filter((m) => !primarySet.has(m));
+    const allMuscleChips = [...primaryMuscles, ...filteredSecondary].slice(0, isStory ? 8 : 6);
+
+    const totalSets = data.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
+    const prs = data.exercises.reduce((acc, ex) => acc + ex.sets.filter((s) => s.isPR).length, 0);
+
+    const stats = [
+      { icon: <Clock className="w-full h-full" />, value: fmtDuration(data.durationSec), label: "duração" },
+      { icon: <Dumbbell className="w-full h-full" />, value: `${fmtVolume(data.totalVolume)}kg`, label: "volume" },
+      { icon: <Flame className="w-full h-full" />, value: String(totalSets), label: "séries" },
+      { icon: <Star className="w-full h-full" />, value: prs > 0 ? String(prs) : String(data.exercises.length), label: prs > 0 ? "novos PRs" : "exercícios" },
+    ];
+
+    const dateLabel = new Date(data.finishedAt).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+    });
+
+    return (
+      <div
+        ref={ref}
+        style={{
+          width,
+          height,
+          position: "relative",
+          overflow: "hidden",
+          fontFamily: "var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif)",
+          background: "linear-gradient(160deg, #0a0c10 0%, #10131a 45%, #0b0f0d 100%)",
+          color: "#f5f5f5",
+        }}
+      >
+        {/* Glow decorativo */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            top: isStory ? -140 : -160,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 520,
+            height: 320,
+            borderRadius: "50%",
+            background: "radial-gradient(closest-side, rgba(34,197,94,0.35), transparent 70%)",
+            filter: "blur(2px)",
+          }}
+        />
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            bottom: -180,
+            right: -120,
+            width: 360,
+            height: 360,
+            borderRadius: "50%",
+            background: "radial-gradient(closest-side, rgba(34,197,94,0.12), transparent 70%)",
+          }}
+        />
+
+        <div style={{ position: "relative", height: "100%", display: "flex", flexDirection: "column", padding: isStory ? "36px 32px" : "28px 28px" }}>
+          {/* Header / brand */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{
+                width: 30, height: 30, borderRadius: 9,
+                background: "rgba(34,197,94,0.18)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <Dumbbell style={{ width: 16, height: 16, color: "#22c55e" }} />
+              </div>
+              <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: 0.5 }}>GEMgym</span>
+            </div>
+            <span style={{ fontSize: 12, color: "rgba(245,245,245,0.5)", fontWeight: 600, textTransform: "capitalize" }}>
+              {dateLabel}
+            </span>
+          </div>
+
+          {/* Hero */}
+          <div style={{ textAlign: "center", marginTop: isStory ? 28 : 14 }}>
+            <div style={{
+              width: isStory ? 64 : 52, height: isStory ? 64 : 52, borderRadius: 20,
+              background: "rgba(34,197,94,0.18)", margin: "0 auto",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 0 32px rgba(34,197,94,0.28)",
+            }}>
+              <Trophy style={{ width: isStory ? 32 : 26, height: isStory ? 32 : 26, color: "#22c55e" }} />
+            </div>
+            <p style={{
+              marginTop: 14, fontWeight: 900, fontSize: isStory ? 24 : 20,
+              letterSpacing: 0.5, lineHeight: 1.15,
+            }}>
+              TREINO CONCLUÍDO
+            </p>
+            <p style={{
+              marginTop: 4, fontSize: isStory ? 16 : 14, fontWeight: 600,
+              color: "rgba(245,245,245,0.68)",
+            }}>
+              {data.workoutName}
+            </p>
+
+            {prs > 0 && (
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                marginTop: 10, padding: "5px 12px", borderRadius: 999,
+                background: "rgba(250,204,21,0.15)", border: "1px solid rgba(250,204,21,0.35)",
+                color: "#facc15", fontWeight: 800, fontSize: 12,
+              }}>
+                <Star style={{ width: 12, height: 12, fill: "currentColor" }} />
+                {prs} novo{prs > 1 ? "s" : ""} recorde{prs > 1 ? "s" : ""} pessoal{prs > 1 ? "is" : ""}
+              </div>
+            )}
+          </div>
+
+          {/* Stats grid */}
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8,
+            marginTop: isStory ? 26 : 18,
+          }}>
+            {stats.map((s) => (
+              <div key={s.label} style={{
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 14, padding: "10px 4px",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+              }}>
+                <div style={{ width: 16, height: 16, color: "#22c55e" }}>{s.icon}</div>
+                <span style={{ fontWeight: 900, fontSize: isStory ? 16 : 14, lineHeight: 1 }}>{s.value}</span>
+                <span style={{ fontSize: 8.5, color: "rgba(245,245,245,0.5)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.4, textAlign: "center" }}>
+                  {s.label}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Silhueta muscular */}
+          <div style={{
+            flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+            marginTop: isStory ? 14 : 8, minHeight: 0,
+          }}>
+            <div style={{ height: "100%", maxHeight: isStory ? 300 : 170, aspectRatio: "724/1448" }}>
+              <MuscleSilhouette side="front" primaryMuscles={primaryMuscles} secondaryMuscles={filteredSecondary} />
+            </div>
+          </div>
+
+          {/* Chips de músculos */}
+          {allMuscleChips.length > 0 && (
+            <div style={{
+              display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 5,
+              marginTop: isStory ? 10 : 6,
+            }}>
+              {allMuscleChips.map((m) => {
+                const isPrimary = primarySet.has(m);
+                return (
+                  <span key={m} style={{
+                    fontSize: 10.5, fontWeight: 700, padding: "4px 10px", borderRadius: 999,
+                    background: isPrimary ? "rgba(34,197,94,0.16)" : "rgba(255,255,255,0.06)",
+                    color: isPrimary ? "#4ade80" : "rgba(245,245,245,0.6)",
+                    border: `1px solid ${isPrimary ? "rgba(34,197,94,0.3)" : "rgba(255,255,255,0.1)"}`,
+                  }}>
+                    {m}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Footer */}
+          <div style={{
+            marginTop: isStory ? 20 : 12, paddingTop: 12,
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            gap: 6,
+          }}>
+            <span style={{ fontSize: 11, color: "rgba(245,245,245,0.45)", fontWeight: 600 }}>
+              Feito no <span style={{ color: "#4ade80", fontWeight: 800 }}>GEMgym</span> 💪
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+);

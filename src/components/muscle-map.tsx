@@ -88,6 +88,33 @@ function BodySvg({ parts, outline, viewBox, statusMap }: BodySvgProps) {
   );
 }
 
+// ─── Figura única reaproveitável (usada também no card compartilhável) ──────
+interface MuscleSilhouetteProps {
+  side: "front" | "back";
+  primaryMuscles: string[];
+  secondaryMuscles: string[];
+}
+
+export function MuscleSilhouette({ side, primaryMuscles, secondaryMuscles }: MuscleSilhouetteProps) {
+  const statusMap = buildStatusMap(primaryMuscles, secondaryMuscles);
+  const parts = side === "front" ? FRONT_PARTS : BACK_PARTS;
+  const outline = side === "front" ? OUTLINE_FRONT : OUTLINE_BACK;
+  const viewBox = side === "front" ? "0 0 724 1448" : "724 0 724 1448";
+
+  return (
+    <svg viewBox={viewBox} xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <path d={outline} fill="none" stroke={OUTLINE} strokeWidth={3} vectorEffect="non-scaling-stroke" />
+      {Object.entries(parts).map(([slug, path]) => {
+        const s = slug as Slug;
+        const status = statusMap[s] ?? "none";
+        const fill = TRACKABLE_SET.has(s) ? colorFor(status) : BODY_COLOR;
+        const allPaths = [...(path?.common ?? []), ...(path?.left ?? []), ...(path?.right ?? [])];
+        return allPaths.map((d, i) => <path key={`${slug}-${i}`} d={d} fill={fill} />);
+      })}
+    </svg>
+  );
+}
+
 // ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 interface MuscleMapProps {
   primaryMuscles: string[];

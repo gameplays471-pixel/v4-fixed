@@ -420,6 +420,7 @@ export function useWorkoutSession() {
         workoutName: workout.name,
         durationSec: elapsed,
         totalVolume,
+        finishedAt: new Date().toISOString(),
         exercises: [...exerciseMap.values()].filter((e) => e.sets.length > 0),
       };
 

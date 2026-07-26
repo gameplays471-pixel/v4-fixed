@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { MuscleMap } from "@/components/muscle-map";
-import { Trophy, Clock, Dumbbell, Flame, ChevronRight, HeartPulse, Star } from "lucide-react";
+import { ShareWorkoutDialog } from "@/components/share-workout-dialog";
+import { Trophy, Clock, Dumbbell, Flame, ChevronRight, HeartPulse, Star, Share2 } from "lucide-react";
 
 function formatTime(s: number) {
   const h = Math.floor(s / 3600);
@@ -26,6 +28,7 @@ export function WorkoutSummaryView() {
   const setView = useAppStore((s) => s.setView);
   const data = useAppStore((s) => s.workoutSummaryData);
   const setWorkoutSummaryData = useAppStore((s) => s.setWorkoutSummaryData);
+  const [shareOpen, setShareOpen] = useState(false);
 
   if (!data) {
     return (
@@ -115,6 +118,18 @@ export function WorkoutSummaryView() {
             {prs} novo{prs > 1 ? "s" : ""} recorde{prs > 1 ? "s" : ""} pessoal{prs > 1 ? "is" : ""}!
           </motion.div>
         )}
+      </motion.div>
+
+      {/* Compartilhar */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <Button
+          variant="outline"
+          className="w-full h-12 rounded-xl font-bold gap-2 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary"
+          onClick={() => setShareOpen(true)}
+        >
+          <Share2 className="w-4 h-4" />
+          Compartilhar treino
+        </Button>
       </motion.div>
 
       {/* Stats */}
@@ -256,6 +271,8 @@ export function WorkoutSummaryView() {
           <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </motion.div>
+
+      <ShareWorkoutDialog data={data} open={shareOpen} onOpenChange={setShareOpen} />
     </div>
   );
 }

@@ -8,10 +8,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { apiGet, apiPut } from "@/lib/api";
 import { toast } from "sonner";
-import { User, Mail, Calendar, Target, Scale, Ruler, Save, LogOut, Shield } from "lucide-react";
+import { User, Mail, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppStore } from "@/lib/store";
 import { setToken } from "@/lib/api";
+import {
+  getNotificationPermission,
+  requestNotificationPermission,
+  isNotificationSupported,
+  type NotificationPermissionState,
+} from "@/lib/notifications";
 
 type UserProfile = {
   id: string; email: string; name: string; bio: string | null;
@@ -25,6 +31,11 @@ export function ProfileView() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: "", bio: "", weight: "", height: "", sex: "", birthDate: "", goal: "" });
+  const [notifPermission, setNotifPermission] = useState<NotificationPermissionState>("default");
+
+  useEffect(() => {
+    setNotifPermission(getNotificationPermission());
+  }, []);
 
   useEffect(() => {
     apiGet<{ user: UserProfile }>("/api/profile").then((d) => {
@@ -53,6 +64,16 @@ export function ProfileView() {
     setToken(null);
     setView("auth");
     window.location.reload();
+  };
+
+  const handleEnableNotifications = async () => {
+    const result = await requestNotificationPermission();
+    setNotifPermission(result);
+    if (result === "granted") {
+      toast.success("Notificações ativadas! Você será avisado quando o descanso acabar.");
+    } else if (result === "denied") {
+      toast.error("Notificações bloqueadas. Ative nas configurações do navegador/celular.");
+    }
   };
 
   if (loading) return (
@@ -176,6 +197,43 @@ export function ProfileView() {
           </div>
         </Card>
       </motion.div>
+
+      {/* Notificações */}
+      {isNotificationSupported() && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}>
+          <Card className="p-5">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                  {notifPermission === "granted" ? (
+                    <BellRing className="w-5 h-5 text-primary" />
+                  ) : notifPermission === "denied" ? (
+                    <BellOff className="w-5 h-5 text-muted-foreground" />
+                  ) : (
+                    <Bell className="w-5 h-5 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm">Notificações do timer</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {notifPermission === "granted"
+                      ? "Ativadas — você será avisado quando o descanso acabar."
+                      : notifPermission === "denied"
+                      ? "Bloqueadas no navegador. Ative nas configurações do site."
+                      : "Avisa quando o descanso acabar, mesmo trocando de aba."}
+                  </p>
+                </div>
+              </div>
+              {notifPermission !== "granted" && notifPermission !== "denied" && (
+                <Button variant="outline" onClick={handleEnableNotifications}
+                  className="h-10 px-4 rounded-xl font-semibold gap-2 shrink-0">
+                  <Bell className="w-4 h-4" /> Ativar
+                </Button>
+              )}
+            </div>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Logout */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>

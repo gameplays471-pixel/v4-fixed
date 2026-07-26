@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { del } from "@vercel/blob";
 import { db } from "@/lib/db";
 import { notFound, requireUser, withErrorHandling } from "@/lib/api-error";
+import { resolveBlobToken } from "@/lib/blob-token";
 
 export const DELETE = withErrorHandling<{ params: Promise<{ id: string }> }>(
   "Delete progress photo",
@@ -17,10 +18,15 @@ export const DELETE = withErrorHandling<{ params: Promise<{ id: string }> }>(
     // Remove do Blob Storage primeiro; se falhar (token ausente, rede, etc.),
     // ainda assim removemos o registro do banco — melhor um arquivo órfão
     // no storage do que travar o usuário de limpar sua própria galeria.
-    try {
-      await del(photo.pathname);
-    } catch (e) {
-      console.error("Erro ao deletar blob (arquivo pode ter ficado órfão):", e);
+    const blobToken = resolveBlobToken();
+    if (blobToken) {
+      try {
+        await del(photo.pathname, { token: blobToken });
+      } catch (e) {
+        console.error("Erro ao deletar blob (arquivo pode ter ficado órfão):", e);
+      }
+    } else {
+      console.warn("Token do Blob não configurado — pulando remoção do arquivo (só o registro no banco será removido).");
     }
 
     await db.progressPhoto.delete({ where: { id } });

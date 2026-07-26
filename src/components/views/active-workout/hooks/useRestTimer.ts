@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { RestTimerState } from "../types";
+import { notifyRestDone, requestNotificationPermission, getNotificationPermission } from "@/lib/notifications";
 
 /**
  * Encapsula o timer de descanso entre séries: contagem regressiva baseada em
@@ -19,6 +20,7 @@ export function useRestTimer() {
   // restEndRef guarda o timestamp (ms) em que o descanso termina
   const restEndRef = useRef<number | null>(null);
   const restPausedAtRef = useRef<number | null>(null); // ms restantes quando pausou
+  const exerciseNameRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!restTimer.active) {
@@ -42,12 +44,19 @@ export function useRestTimer() {
         if (soundOn) playBeep();
         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
         toast.success("Descanso concluído! 🔥");
+        // Dispara também a notificação do sistema — é a que realmente chega
+        // se o usuário trocou de aba/app nesse meio-tempo (o toast e o beep
+        // acima só valem se ele estiver olhando/ouvindo o app agora).
+        notifyRestDone(exerciseNameRef.current);
         setRestTimer({ active: false, remaining: 0, total: 0, paused: false });
       }
     };
 
+    // Intervalo de 500ms é o alvo, mas navegadores throttlam abas em segundo
+    // plano (tipicamente para ~1s) — o tick ainda roda, só com menos
+    // precisão, o que é suficiente pro aviso disparar dentro de ~1s do fim.
     tick(); // roda imediatamente
-    const interval = setInterval(tick, 500); // 500ms para maior precisão
+    const interval = setInterval(tick, 500);
     return () => clearInterval(interval);
   }, [restTimer.active, restTimer.paused, soundOn]); // sem restTimer.remaining nas deps!
 
@@ -67,7 +76,14 @@ export function useRestTimer() {
     } catch {}
   };
 
-  const start = (restSeconds: number) => {
+  const start = (restSeconds: number, exerciseName?: string) => {
+    exerciseNameRef.current = exerciseName;
+    // Pede permissão de notificação na primeira vez que um descanso começa —
+    // é o momento em que faz mais sentido pro usuário entender o motivo do
+    // pedido ("quero te avisar quando acabar"), sem interromper antes disso.
+    if (getNotificationPermission() === "default") {
+      requestNotificationPermission();
+    }
     setRestTimer({ active: true, remaining: restSeconds, total: restSeconds, paused: false });
   };
 
