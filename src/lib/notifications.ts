@@ -44,7 +44,15 @@ export async function notifyRestDone(exerciseName?: string): Promise<void> {
 
   const title = "Descanso concluído! 🔥";
   const body = exerciseName ? `Hora de voltar para ${exerciseName}` : "Hora de continuar o treino";
-  const options: NotificationOptions = {
+  // `renotify` e `vibrate` existem na spec (e em NotificationOptions do
+  // ServiceWorkerRegistration.showNotification), mas o lib.dom.d.ts usado
+  // pelo TypeScript no build da Vercel não os declara em `NotificationOptions`
+  // — por isso o tipo extendido abaixo, em vez de `NotificationOptions` puro.
+  type ExtendedNotificationOptions = NotificationOptions & {
+    renotify?: boolean;
+    vibrate?: number | number[];
+  };
+  const options: ExtendedNotificationOptions = {
     body,
     icon: "/icons/icon-192.png",
     badge: "/icons/icon-192.png",
