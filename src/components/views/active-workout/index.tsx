@@ -85,9 +85,12 @@ export function ActiveWorkoutView() {
               isCollapsed={isCollapsed}
               lastSets={session.lastSetsMap[ex.exerciseId]}
               lastSetsSummary={session.formatLastSets(ex.exerciseId)}
+              suggestion={session.suggestionsMap[ex.id]}
               onToggleCollapse={() => session.toggleCollapse(ex.id)}
               onOpenLightbox={() => setLightboxExercise({ name: ex.exercise.name, images: ex.exercise.images })}
               onUpdateSet={(setIdx, field, value) => session.updateSet(ex.id, setIdx, field, value)}
+              onUpdateSetRir={(setIdx, value) => session.updateSetRir(ex.id, setIdx, value)}
+              onApplySuggestion={(weight) => session.applySuggestedWeight(ex.id, weight)}
               onAddSet={() => session.addSet(ex.id)}
               onRemoveSet={(setIdx) => session.removeSet(ex.id, setIdx)}
               onCompleteSet={(setIdx) => handleCompleteSet(ex.id, setIdx, ex.restSeconds)}

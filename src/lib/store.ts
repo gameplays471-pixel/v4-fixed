@@ -10,6 +10,7 @@ export type ViewKey =
   | "workout-summary"
   | "history"
   | "stats"
+  | "body"
   | "profile"
   | "auth";
 

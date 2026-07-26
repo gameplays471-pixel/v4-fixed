@@ -11,6 +11,7 @@ import { WorkoutSummaryView } from "@/components/views/workout-summary";
 import { ActiveWorkoutView } from "@/components/views/active-workout";
 import { HistoryView } from "@/components/views/history";
 import { StatsView } from "@/components/views/stats";
+import { BodyView } from "@/components/views/body";
 import { ProfileView } from "@/components/views/profile";
 import { getToken, setToken } from "@/lib/api";
 import { LogOut, User } from "lucide-react";
@@ -214,6 +215,7 @@ export default function Home() {
                 {view === "workout-summary" && <WorkoutSummaryView />}
                 {view === "history" && <HistoryView />}
                 {view === "stats" && <StatsView />}
+                {view === "body" && <BodyView />}
                 {view === "profile" && <ProfileView />}
               </motion.div>
             </AnimatePresence>

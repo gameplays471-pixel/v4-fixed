@@ -29,6 +29,7 @@ model User {
   sessions  WorkoutSession[]
   favorites Favorite[]
   bodyWeightLogs BodyWeightLog[]
+  progressPhotos ProgressPhoto[]
 }
 
 model Exercise {
@@ -152,6 +153,7 @@ model BodyWeightLog {
   id        String   @id @default(cuid())
   userId    String
   weight    Float
+  bodyFatPercent Float? // % de gordura corporal (opcional, ex: bioimpedância, adipômetro)
   loggedAt  DateTime @default(now())
   notes     String?
   createdAt DateTime @default(now())
@@ -160,6 +162,25 @@ model BodyWeightLog {
 
   @@index([userId])
   @@index([loggedAt])
+}
+
+// Fotos de progresso — para comparação visual lado a lado ao longo do
+// tempo (complementa o BodyWeightLog, que é só o número). O arquivo em
+// si fica no Vercel Blob Storage; aqui só guardamos a URL pública.
+model ProgressPhoto {
+  id        String   @id @default(cuid())
+  userId    String
+  url       String
+  pathname  String   // caminho do blob, usado para deletar o arquivo depois
+  takenAt   DateTime @default(now())
+  weight    Float?   // peso do dia, se registrado (facilita o comparativo)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([takenAt])
 }
 
 // Rate limiting de endpoints sensíveis (login, signup) contra brute force.

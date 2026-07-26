@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { verifyPassword, needsRehash, hashPassword, createSession, setSessionCookie } from "@/lib/auth";
 import { checkRateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
-import { badRequest, unauthorized, withErrorHandling } from "@/lib/api-error";
+import { unauthorized, withErrorHandling } from "@/lib/api-error";
+import { parseBody, loginSchema } from "@/lib/validation";
 
 // Por IP: barra brute force vindo de uma única origem.
 const IP_LIMIT = { limit: 10, windowMs: 15 * 60 * 1000 }; // 10 tentativas / 15 min
@@ -12,18 +13,15 @@ const IP_LIMIT = { limit: 10, windowMs: 15 * 60 * 1000 }; // 10 tentativas / 15 
 const EMAIL_LIMIT = { limit: 15, windowMs: 15 * 60 * 1000 };
 
 export const POST = withErrorHandling("Login", async (req: NextRequest) => {
-  const body = await req.json();
-  const { email, password, rememberMe = true } = body;
-
-  if (!email || !password) {
-    throw badRequest("Email e senha são obrigatórios");
-  }
+  const parsed = await parseBody(req, loginSchema);
+  if (!parsed.success) return parsed.response;
+  const { email, password, rememberMe = true } = parsed.data;
 
   const ip = getClientIp(req);
   const ipCheck = await checkRateLimit(`login:ip:${ip}`, IP_LIMIT);
   if (!ipCheck.allowed) return rateLimitResponse(ipCheck);
 
-  const emailKey = `login:email:${String(email).toLowerCase().trim()}`;
+  const emailKey = `login:email:${email.toLowerCase()}`;
   const emailCheck = await checkRateLimit(emailKey, EMAIL_LIMIT);
   if (!emailCheck.allowed) return rateLimitResponse(emailCheck);
 

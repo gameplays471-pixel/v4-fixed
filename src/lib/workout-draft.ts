@@ -9,6 +9,10 @@ export type SetDraft = {
   weight: string;
   reps: string;
   completed: boolean;
+  // RIR (Reps in Reserve) opcional: quantas reps a mais a pessoa acha que
+  // conseguiria fazer. Alimenta a sugestão de carga do próximo treino
+  // (ver suggestNextLoad em components/views/active-workout/utils.ts).
+  rir?: string;
 };
 
 export type CardioDraft = {

@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { notFound, requireUser, withErrorHandling } from "@/lib/api-error";
+import { parseBody, workoutSchema } from "@/lib/validation";
 
 export const GET = withErrorHandling<{ params: Promise<{ id: string }> }>(
   "Get workout",
-  async (_req: NextRequest, { params }) => {
+  async (req: NextRequest, { params }) => {
+    const user = await requireUser(req);
+
     const { id } = await params;
-    const workout = await db.workout.findUnique({
-      where: { id },
+    const workout = await db.workout.findFirst({
+      where: { id, userId: user.id },
       include: {
         exercises: {
           include: { exercise: true },
@@ -30,8 +33,6 @@ export const PUT = withErrorHandling<{ params: Promise<{ id: string }> }>(
     const user = await requireUser(req);
 
     const { id } = await params;
-    const body = await req.json();
-    const { name, description, defaultRest, color, exercises } = body;
 
     const existing = await db.workout.findFirst({
       where: { id, userId: user.id },
@@ -39,6 +40,10 @@ export const PUT = withErrorHandling<{ params: Promise<{ id: string }> }>(
     if (!existing) {
       throw notFound("Treino não encontrado");
     }
+
+    const parsed = await parseBody(req, workoutSchema);
+    if (!parsed.success) return parsed.response;
+    const { name, description, defaultRest, color, exercises } = parsed.data;
 
     // Atualizar treino
     await db.workout.update({
@@ -56,20 +61,18 @@ export const PUT = withErrorHandling<{ params: Promise<{ id: string }> }>(
 
     if (exercises && exercises.length > 0) {
       await db.workoutExercise.createMany({
-        data: exercises.map(
-          (ex: { exerciseId: string; targetSets: number; targetReps: number; restSeconds: number; notes?: string; targetDurationSec?: number; targetDistanceKm?: number; targetIntensity?: string }, i: number) => ({
-            workoutId: id,
-            exerciseId: ex.exerciseId,
-            order: i + 1,
-            targetSets: ex.targetSets ?? 3,
-            targetReps: ex.targetReps ?? 10,
-            restSeconds: ex.restSeconds ?? 90,
-            notes: ex.notes || null,
-            targetDurationSec: ex.targetDurationSec ?? null,
-            targetDistanceKm: ex.targetDistanceKm ?? null,
-            targetIntensity: ex.targetIntensity ?? null,
-          })
-        ),
+        data: exercises.map((ex, i) => ({
+          workoutId: id,
+          exerciseId: ex.exerciseId,
+          order: i + 1,
+          targetSets: ex.targetSets ?? 3,
+          targetReps: ex.targetReps ?? 10,
+          restSeconds: ex.restSeconds ?? 90,
+          notes: ex.notes || null,
+          targetDurationSec: ex.targetDurationSec ?? null,
+          targetDistanceKm: ex.targetDistanceKm ?? null,
+          targetIntensity: ex.targetIntensity ?? null,
+        })),
       });
     }
 

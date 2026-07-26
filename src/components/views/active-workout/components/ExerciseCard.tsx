@@ -1,10 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronDown, ChevronUp, Plus, History, HeartPulse } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Plus, History, HeartPulse, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ExerciseThumb } from "@/components/exercise-media";
 import type { CardioState, SetState, WorkoutExercise } from "../types";
+import type { LoadSuggestion } from "../utils";
 import { SetRow } from "./SetRow";
 import { CardioForm } from "./CardioForm";
 
@@ -17,9 +18,12 @@ interface ExerciseCardProps {
   isCollapsed: boolean;
   lastSets: Array<{ weight: number; reps: number }> | undefined;
   lastSetsSummary: string | null;
+  suggestion?: LoadSuggestion | null;
   onToggleCollapse: () => void;
   onOpenLightbox: () => void;
   onUpdateSet: (setIdx: number, field: "weight" | "reps", value: string) => void;
+  onUpdateSetRir: (setIdx: number, value: string) => void;
+  onApplySuggestion?: (weight: number) => void;
   onAddSet: () => void;
   onRemoveSet: (setIdx: number) => void;
   onCompleteSet: (setIdx: number) => void;
@@ -36,9 +40,12 @@ export function ExerciseCard({
   isCollapsed,
   lastSets,
   lastSetsSummary,
+  suggestion,
   onToggleCollapse,
   onOpenLightbox,
   onUpdateSet,
+  onUpdateSetRir,
+  onApplySuggestion,
   onAddSet,
   onRemoveSet,
   onCompleteSet,
@@ -100,6 +107,28 @@ export function ExerciseCard({
               <ChevronUp className="w-4 h-4 text-muted-foreground" />
             )}
           </div>
+
+          {/* Sugestão de progressão de carga — baseada no RIR/reps da última
+              vez. Botão "usar" preenche o peso dos sets ainda não feitos. */}
+          {!isCardio && suggestion && completedCount === 0 && (
+            <div
+              className="mt-2 flex items-center gap-2 rounded-lg bg-primary/10 border border-primary/20 px-2.5 py-1.5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <TrendingUp className="w-3.5 h-3.5 text-primary shrink-0" />
+              <p className="text-[11px] text-foreground/90 flex-1 leading-snug">{suggestion.message}</p>
+              {onApplySuggestion && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="h-6 px-2 text-[10px] font-semibold shrink-0 bg-primary/20 hover:bg-primary/30 text-primary"
+                  onClick={() => onApplySuggestion(suggestion.weight)}
+                >
+                  Usar
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Conteúdo: cardio ou séries de força */}
@@ -133,6 +162,7 @@ export function ExerciseCard({
                           weightPlaceholder={weightPlaceholder}
                           repsPlaceholder={repsPlaceholder}
                           onUpdate={(field, value) => onUpdateSet(setIdx, field, value)}
+                          onUpdateRir={(value) => onUpdateSetRir(setIdx, value)}
                           onRemove={() => onRemoveSet(setIdx)}
                           onComplete={() => onCompleteSet(setIdx)}
                         />

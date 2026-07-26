@@ -31,6 +31,10 @@ const navItems: Array<{ key: ViewKey; label: string; emoji: string; icon: React.
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4.5 h-4.5"><path d="M3 3v18h18M7 16l4-8 4 4 6-9" /></svg>,
   },
   {
+    key: "body", label: "Corpo", emoji: "📸",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4.5 h-4.5"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" /></svg>,
+  },
+  {
     key: "profile", label: "Perfil", emoji: "👤",
     icon: <User className="w-4.5 h-4.5" />,
   },

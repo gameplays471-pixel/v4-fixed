@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Check, Minus } from "lucide-react";
 import type { SetState } from "../types";
 
+const RIR_OPTIONS = ["0", "1", "2", "3", "4+"];
+
 interface SetRowProps {
   set: SetState;
   setIdx: number;
@@ -10,11 +12,12 @@ interface SetRowProps {
   weightPlaceholder: string;
   repsPlaceholder: string;
   onUpdate: (field: "weight" | "reps", value: string) => void;
+  onUpdateRir: (value: string) => void;
   onRemove: () => void;
   onComplete: () => void;
 }
 
-export function SetRow({ set, setIdx, canRemove, weightPlaceholder, repsPlaceholder, onUpdate, onRemove, onComplete }: SetRowProps) {
+export function SetRow({ set, setIdx, canRemove, weightPlaceholder, repsPlaceholder, onUpdate, onUpdateRir, onRemove, onComplete }: SetRowProps) {
   return (
     <div
       className={`grid grid-cols-[1.75rem_1fr_1fr_auto] gap-2 items-center px-1.5 py-1.5 rounded-xl transition-all ${
@@ -63,6 +66,31 @@ export function SetRow({ set, setIdx, canRemove, weightPlaceholder, repsPlacehol
           <Check className={`w-4 h-4 ${set.completed ? "stroke-[3]" : ""}`} />
         </Button>
       </div>
+
+      {/* RIR (reps em reserva): opcional, só aparece depois de marcar a série
+          como feita. Alimenta a sugestão de carga do próximo treino — quanto
+          mais gente registrar, mais precisa a sugestão fica. */}
+      {set.completed && (
+        <div className="col-span-4 flex items-center gap-1.5 pl-8 -mt-0.5">
+          <span className="text-[10px] text-muted-foreground font-medium shrink-0">RIR</span>
+          <div className="flex items-center gap-1">
+            {RIR_OPTIONS.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => onUpdateRir(set.rir === opt ? "" : opt)}
+                className={`h-6 min-w-6 px-1.5 rounded-md text-[10px] font-bold transition-colors ${
+                  set.rir === opt
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

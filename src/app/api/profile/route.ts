@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { requireUser, withErrorHandling } from "@/lib/api-error";
+import { parseBody, profileSchema } from "@/lib/validation";
 
 export const GET = withErrorHandling("Get profile", async (req: NextRequest) => {
   const user = await getCurrentUser(req);
@@ -14,20 +15,21 @@ export const GET = withErrorHandling("Get profile", async (req: NextRequest) => 
 export const PUT = withErrorHandling("Update profile", async (req: NextRequest) => {
   const user = await requireUser(req);
 
-  const body = await req.json();
-  const { name, bio, weight, height, sex, birthDate, goal, avatarUrl } = body;
+  const parsed = await parseBody(req, profileSchema);
+  if (!parsed.success) return parsed.response;
+  const { name, bio, weight, height, sex, birthDate, goal, avatarUrl } = parsed.data;
 
   const updated = await db.user.update({
     where: { id: user.id },
     data: {
       name,
-      bio: bio || null,
-      weight: weight ? parseFloat(weight) : null,
-      height: height ? parseFloat(height) : null,
-      sex: sex || null,
-      birthDate: birthDate ? new Date(birthDate) : null,
-      goal: goal || null,
-      avatarUrl: avatarUrl || null,
+      bio: bio ?? null,
+      weight: weight ?? null,
+      height: height ?? null,
+      sex: sex ?? null,
+      birthDate: birthDate ?? null,
+      goal: goal ?? null,
+      avatarUrl: avatarUrl ?? null,
     },
     select: {
       id: true,

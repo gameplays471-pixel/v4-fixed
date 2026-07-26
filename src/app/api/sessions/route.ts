@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { requireUser, withErrorHandling } from "@/lib/api-error";
+import { parseBody, parseIntParam, sessionSchema } from "@/lib/validation";
 
 // Listar sessões do usuário
 export const GET = withErrorHandling("Get sessions", async (req: NextRequest) => {
@@ -11,7 +12,7 @@ export const GET = withErrorHandling("Get sessions", async (req: NextRequest) =>
   }
 
   const { searchParams } = new URL(req.url);
-  const limit = parseInt(searchParams.get("limit") || "50");
+  const limit = parseIntParam(searchParams.get("limit"), { default: 50, min: 1, max: 200 });
 
   const sessions = await db.workoutSession.findMany({
     where: { userId: user.id },
@@ -30,12 +31,13 @@ export const GET = withErrorHandling("Get sessions", async (req: NextRequest) =>
 export const POST = withErrorHandling("Create session", async (req: NextRequest) => {
   const user = await requireUser(req);
 
-  const body = await req.json();
-  const { workoutId, workoutName, startedAt, endedAt, durationSec, sets, notes } = body;
+  const parsed = await parseBody(req, sessionSchema);
+  if (!parsed.success) return parsed.response;
+  const { workoutId, workoutName, startedAt, endedAt, durationSec, sets, notes } = parsed.data;
 
   let totalVolume = 0;
-  for (const s of sets || []) {
-    totalVolume += (s.weight || 0) * (s.reps || 0);
+  for (const s of sets) {
+    totalVolume += s.weight * s.reps;
   }
 
   // Detectar PRs
@@ -46,17 +48,18 @@ export const POST = withErrorHandling("Create session", async (req: NextRequest)
     reps: number;
     restSeconds: number;
     isPR: boolean;
-    durationSec?: number;
-    distanceKm?: number;
-    avgBpm?: number;
-    intensity?: string;
+    rir?: number | null;
+    durationSec?: number | null;
+    distanceKm?: number | null;
+    avgBpm?: number | null;
+    intensity?: string | null;
   }> = [];
 
   // Detectar PRs — consulta o maior peso já registrado para o mesmo exercício
   // pelo usuário atual (via relação session -> userId). Exercícios de cardio
   // (identificados pela presença de durationSec) não entram nessa comparação,
   // já que não fazem sentido como "recorde de peso".
-  for (const s of sets || []) {
+  for (const s of sets) {
     const isCardio = s.durationSec != null;
     let isNewPR = false;
 
@@ -79,6 +82,7 @@ export const POST = withErrorHandling("Create session", async (req: NextRequest)
       reps: s.reps,
       restSeconds: s.restSeconds || 90,
       isPR: isNewPR,
+      rir: s.rir,
       durationSec: s.durationSec,
       distanceKm: s.distanceKm,
       avgBpm: s.avgBpm,
@@ -91,8 +95,8 @@ export const POST = withErrorHandling("Create session", async (req: NextRequest)
       userId: user.id,
       workoutId: workoutId || null,
       workoutName,
-      startedAt: new Date(startedAt),
-      endedAt: endedAt ? new Date(endedAt) : new Date(),
+      startedAt,
+      endedAt: endedAt || new Date(),
       durationSec: durationSec || 0,
       totalVolume,
       notes: notes || null,
@@ -103,6 +107,7 @@ export const POST = withErrorHandling("Create session", async (req: NextRequest)
           setNumber: i + 1,
           weight: s.weight,
           reps: s.reps,
+          rir: s.rir ?? null,
           restSeconds: s.restSeconds || 90,
           durationSec: s.durationSec ?? null,
           distanceKm: s.distanceKm ?? null,

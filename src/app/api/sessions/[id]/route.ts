@@ -4,10 +4,12 @@ import { notFound, requireUser, withErrorHandling } from "@/lib/api-error";
 
 export const GET = withErrorHandling<{ params: Promise<{ id: string }> }>(
   "Get session",
-  async (_req: NextRequest, { params }) => {
+  async (req: NextRequest, { params }) => {
+    const user = await requireUser(req);
+
     const { id } = await params;
-    const session = await db.workoutSession.findUnique({
-      where: { id },
+    const session = await db.workoutSession.findFirst({
+      where: { id, userId: user.id },
       include: {
         sets: true,
         workout: true,

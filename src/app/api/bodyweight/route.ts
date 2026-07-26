@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { badRequest, requireUser, withErrorHandling } from "@/lib/api-error";
+import { requireUser, withErrorHandling } from "@/lib/api-error";
+import { parseBody, bodyWeightSchema } from "@/lib/validation";
 
 // Listar histórico de peso corporal (mais recente primeiro)
 export const GET = withErrorHandling("Get body weight logs", async (req: NextRequest) => {
@@ -14,25 +15,23 @@ export const GET = withErrorHandling("Get body weight logs", async (req: NextReq
   return NextResponse.json({ logs });
 });
 
-// Registrar um novo peso. Também atualiza User.weight com o valor mais
-// recente, para manter o perfil sempre com o peso atual.
+// Registrar um novo peso (e opcionalmente % de gordura). Também atualiza
+// User.weight com o valor mais recente, para manter o perfil sempre com
+// o peso atual.
 export const POST = withErrorHandling("Create body weight log", async (req: NextRequest) => {
   const user = await requireUser(req);
 
-  const body = await req.json();
-  const { weight, loggedAt, notes } = body;
+  const parsed = await parseBody(req, bodyWeightSchema);
+  if (!parsed.success) return parsed.response;
+  const { weight: weightNum, bodyFatPercent: bodyFatNum, loggedAt, notes } = parsed.data;
 
-  const weightNum = Number(weight);
-  if (!weightNum || weightNum <= 0 || weightNum > 500) {
-    throw badRequest("Peso inválido");
-  }
-
-  const date = loggedAt ? new Date(loggedAt) : new Date();
+  const date = loggedAt || new Date();
 
   const log = await db.bodyWeightLog.create({
     data: {
       userId: user.id,
       weight: weightNum,
+      bodyFatPercent: bodyFatNum ?? null,
       loggedAt: date,
       notes: notes || null,
     },

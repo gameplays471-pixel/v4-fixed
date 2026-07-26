@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { requireUser, withErrorHandling } from "@/lib/api-error";
+import { parseBody, favoriteSchema } from "@/lib/validation";
 
 // Listar favoritos
 export const GET = withErrorHandling("Get favorites", async (req: NextRequest) => {
@@ -23,8 +24,9 @@ export const GET = withErrorHandling("Get favorites", async (req: NextRequest) =
 export const POST = withErrorHandling("Toggle favorite", async (req: NextRequest) => {
   const user = await requireUser(req);
 
-  const body = await req.json();
-  const { exerciseId } = body;
+  const parsed = await parseBody(req, favoriteSchema);
+  if (!parsed.success) return parsed.response;
+  const { exerciseId } = parsed.data;
 
   const existing = await db.favorite.findUnique({
     where: {

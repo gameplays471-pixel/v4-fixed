@@ -4,7 +4,7 @@ import { requireUser, withErrorHandling } from "@/lib/api-error";
 
 // Retorna os sets da última sessão em que cada exercício foi feito.
 // Query: ?exerciseIds=id1,id2,id3
-// Resposta: { lastSets: { [exerciseId]: [{ weight, reps }, ...] } }
+// Resposta: { lastSets: { [exerciseId]: [{ weight, reps, rir }, ...] } }
 //
 // A busca é por exerciseId (não por workoutId), de forma que o histórico
 // aparece mesmo quando o exercício está em outro treino.
@@ -24,7 +24,7 @@ export const GET = withErrorHandling("Get last sets", async (req: NextRequest) =
 
   // Para cada exerciseId, encontra a sessão mais recente do usuário
   // que o contém e retorna todos os sets daquele exercício dentro dela.
-  const lastSets: Record<string, Array<{ weight: number; reps: number }>> = {};
+  const lastSets: Record<string, Array<{ weight: number; reps: number; rir: number | null }>> = {};
 
   await Promise.all(
     exerciseIds.map(async (exerciseId) => {
@@ -47,12 +47,13 @@ export const GET = withErrorHandling("Get last sets", async (req: NextRequest) =
           sessionId: mostRecent.sessionId,
         },
         orderBy: { setNumber: "asc" },
-        select: { weight: true, reps: true },
+        select: { weight: true, reps: true, rir: true },
       });
 
       lastSets[exerciseId] = sets.map((s) => ({
         weight: s.weight,
         reps: s.reps,
+        rir: s.rir ?? null,
       }));
     })
   );

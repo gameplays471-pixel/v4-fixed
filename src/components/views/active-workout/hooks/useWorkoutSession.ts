@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppStore, type WorkoutSummaryData } from "@/lib/store";
 import { apiGet, apiPost } from "@/lib/api";
 import { toast } from "sonner";
@@ -8,6 +8,14 @@ import {
   clearWorkoutDraft,
 } from "@/lib/workout-draft";
 import type { CardioState, SetState, Workout } from "../types";
+import { suggestNextLoad, type LoadSuggestion } from "../utils";
+
+/** "4+" (opção do seletor de RIR) vira 4 pra fins de cálculo; o resto é parseFloat direto. */
+function parseRir(value: string | undefined): number | undefined {
+  if (!value) return undefined;
+  const parsed = parseFloat(value.replace("+", ""));
+  return Number.isNaN(parsed) ? undefined : parsed;
+}
 
 /**
  * Concentra todo o ciclo de vida de uma sessão de treino ativa: carregar o
@@ -39,7 +47,7 @@ export function useWorkoutSession() {
 
   // Últimos sets registrados para cada exerciseId (histórico do usuário)
   // Usado para mostrar como placeholder "última vez" nos inputs.
-  const [lastSetsMap, setLastSetsMap] = useState<Record<string, Array<{ weight: number; reps: number }>>>({});
+  const [lastSetsMap, setLastSetsMap] = useState<Record<string, Array<{ weight: number; reps: number; rir: number | null }>>>({});
 
   // Só começa a salvar o rascunho depois que o estado inicial (novo ou
   // restaurado) já foi montado, pra não sobrescrever o rascunho salvo com
@@ -113,7 +121,7 @@ export function useWorkoutSession() {
         const exerciseIds = data.workout.exercises.map((e) => e.exerciseId);
         if (exerciseIds.length > 0) {
           try {
-            const lastData = await apiGet<{ lastSets: Record<string, Array<{ weight: number; reps: number }>> }>(
+            const lastData = await apiGet<{ lastSets: Record<string, Array<{ weight: number; reps: number; rir: number | null }>> }>(
               `/api/sessions/last-sets?exerciseIds=${encodeURIComponent(exerciseIds.join(","))}`
             );
             if (!cancelled) setLastSetsMap(lastData.lastSets || {});
@@ -178,6 +186,22 @@ export function useWorkoutSession() {
     setSetsMap({ ...setsMap, [exerciseId]: updated });
   };
 
+  const updateSetRir = (exerciseId: string, setIdx: number, value: string) => {
+    const sets = setsMap[exerciseId];
+    if (!sets) return;
+    const updated = [...sets];
+    updated[setIdx] = { ...updated[setIdx], rir: value };
+    setSetsMap({ ...setsMap, [exerciseId]: updated });
+  };
+
+  /** Preenche o peso de todos os sets ainda não feitos com o valor sugerido. */
+  const applySuggestedWeight = (exerciseId: string, weight: number) => {
+    const sets = setsMap[exerciseId];
+    if (!sets) return;
+    const updated = sets.map((s) => (s.completed ? s : { ...s, weight: String(weight) }));
+    setSetsMap({ ...setsMap, [exerciseId]: updated });
+  };
+
   const addSet = (exerciseId: string) => {
     const sets = setsMap[exerciseId];
     if (!sets) return;
@@ -203,6 +227,20 @@ export function useWorkoutSession() {
     if (!last || last.length === 0) return null;
     return last.map((s) => `${s.weight}kg × ${s.reps}`).join(" · ");
   };
+
+  // Sugestão de progressão de carga por exercício do treino (chave = ex.id,
+  // não exerciseId, já que o mesmo exercício pode aparecer 2x num treino
+  // com metas de reps diferentes). Recalcula só quando o treino ou o
+  // histórico mudam — não a cada tecla digitada.
+  const suggestionsMap = useMemo(() => {
+    const map: Record<string, LoadSuggestion | null> = {};
+    if (!workout) return map;
+    for (const ex of workout.exercises) {
+      if (ex.exercise.category === "Cardio") continue;
+      map[ex.id] = suggestNextLoad(lastSetsMap[ex.exerciseId], ex.targetReps);
+    }
+    return map;
+  }, [workout, lastSetsMap]);
 
   const updateCardio = (exerciseId: string, updates: Partial<CardioState>) => {
     const current = cardioMap[exerciseId];
@@ -258,6 +296,7 @@ export function useWorkoutSession() {
       weight: number;
       reps: number;
       restSeconds: number;
+      rir?: number;
       durationSec?: number;
       distanceKm?: number;
       avgBpm?: number;
@@ -290,6 +329,7 @@ export function useWorkoutSession() {
             weight: parseFloat(set.weight) || 0,
             reps: parseInt(set.reps) || 0,
             restSeconds: ex.restSeconds,
+            rir: parseRir(set.rir),
           });
         }
       }
@@ -414,6 +454,7 @@ export function useWorkoutSession() {
     setsMap,
     cardioMap,
     lastSetsMap,
+    suggestionsMap,
     collapsedExercises,
 
     showFinishModal,
@@ -427,6 +468,8 @@ export function useWorkoutSession() {
 
     toggleSetComplete,
     updateSet,
+    updateSetRir,
+    applySuggestedWeight,
     addSet,
     removeSet,
     updateCardio,
