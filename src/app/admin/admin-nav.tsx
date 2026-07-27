@@ -10,7 +10,7 @@ interface AdminNavProps {
 
 const navItems: Array<{ href: string; label: string; enabled: boolean }> = [
   { href: "/admin/exercicios", label: "Exercícios", enabled: true },
-  { href: "/admin/usuarios", label: "Usuários", enabled: false },
+  { href: "/admin/usuarios", label: "Usuários", enabled: true },
   { href: "/admin/configuracoes", label: "Configurações", enabled: false },
 ];
 

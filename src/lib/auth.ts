@@ -214,7 +214,7 @@ export type SelectedUser = {
 };
 
 async function lookupUser(userId: string): Promise<SelectedUser | null> {
-  return db.user.findUnique({
+  const user = await db.user.findUnique({
     where: { id: userId },
     select: {
       id: true,
@@ -228,9 +228,13 @@ async function lookupUser(userId: string): Promise<SelectedUser | null> {
       goal: true,
       avatarUrl: true,
       role: true,
+      disabled: true,
       createdAt: true,
     },
   });
+  // Conta bloqueada pelo admin — trata como não autenticado.
+  if (user?.disabled) return null;
+  return user;
 }
 
 /**

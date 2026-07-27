@@ -23,6 +23,8 @@ model User {
   goal         String?
   avatarUrl    String?
   role         String   @default("user") // "user" | "admin" | "support" — controla acesso ao painel /admin
+  disabled     Boolean  @default(false) // admin pode bloquear acesso do usuário
+  disabledAt   DateTime? // quando foi bloqueado (para estatísticas)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
