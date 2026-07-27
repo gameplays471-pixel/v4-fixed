@@ -74,7 +74,7 @@ export function DashboardView() {
       {/* ── Hero header ── */}
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
         className="relative overflow-hidden rounded-3xl p-6 border border-border/40"
-        style={{ background: "linear-gradient(135deg, oklch(0.17 0.012 255) 0%, oklch(0.20 0.018 200) 100%)" }}>
+        style={{ background: "linear-gradient(135deg, var(--hero-gradient-from) 0%, var(--hero-gradient-to) 100%)" }}>
         <div className="absolute top-0 right-0 w-64 h-40 opacity-30 pointer-events-none" style={{ background: "radial-gradient(circle at 80% 20%, oklch(0.80 0.18 162 / 0.35), transparent 65%)" }} aria-hidden />
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>

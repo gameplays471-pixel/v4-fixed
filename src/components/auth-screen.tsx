@@ -74,12 +74,12 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
 
       <div className="w-full max-w-sm relative z-10">
 
-        {/* ── Logo ── */}
+        {/* Logo */}
         <div className="flex flex-col items-center mb-10">
           <div
             style={{
-              background: "linear-gradient(135deg, var(--card-bg) 0%, oklch(0.22 0.015 255) 100%)",
-              boxShadow: "0 0 0 1px oklch(1 0 0 / 0.12), 0 8px 32px oklch(0.80 0.18 162 / 0.18)",
+              background: "linear-gradient(135deg, var(--card-bg) 0%, var(--gradient-card-end) 100%)",
+              boxShadow: "0 0 0 1px var(--border), 0 8px 32px oklch(0.80 0.18 162 / 0.18)",
             }}
             className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
           >
@@ -91,19 +91,19 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
           </p>
         </div>
 
-        {/* ── Card ── */}
+        {/* Card */}
         <div
           style={{
             backgroundColor: "var(--card-bg)",
-            border: "1px solid oklch(1 0 0 / 0.10)",
-            boxShadow: "0 1px 3px oklch(0 0 0 / 0.3), 0 8px 40px oklch(0 0 0 / 0.25)",
+            border: "1px solid var(--border)",
+            boxShadow: "0 1px 3px oklch(0 0 0 / 0.08), 0 8px 40px oklch(0 0 0 / 0.12)",
           }}
           className="rounded-2xl p-6 space-y-5"
         >
 
           {/* Tab switcher */}
           <div
-            style={{ backgroundColor: "oklch(1 0 0 / 0.05)" }}
+            style={{ backgroundColor: "var(--muted)" }}
             className="flex gap-1 p-1 rounded-xl"
           >
             {(["login", "signup"] as const).map((m) => (
@@ -114,7 +114,7 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
                 style={{
                   backgroundColor: mode === m ? "var(--card-bg)" : "transparent",
                   color: mode === m ? "var(--fg)" : "var(--muted-fg)",
-                  boxShadow: mode === m ? "0 1px 4px oklch(0 0 0 / 0.25)" : "none",
+                  boxShadow: mode === m ? "0 1px 4px oklch(0 0 0 / 0.12)" : "none",
                 }}
                 className="flex-1 py-2 rounded-lg text-sm font-medium transition-all"
               >
@@ -136,7 +136,6 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
                   onChange={(e) => setName(e.target.value)}
                   required
                   className="h-11"
-                  style={{ backgroundColor: "oklch(1 0 0 / 0.04)", borderColor: "oklch(1 0 0 / 0.12)" }}
                 />
               </div>
             )}
@@ -151,7 +150,6 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="h-11"
-                style={{ backgroundColor: "oklch(1 0 0 / 0.04)", borderColor: "oklch(1 0 0 / 0.12)" }}
               />
             </div>
 
@@ -160,12 +158,11 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
               <Input
                 id="auth-password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="--------"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="h-11"
-                style={{ backgroundColor: "oklch(1 0 0 / 0.04)", borderColor: "oklch(1 0 0 / 0.12)" }}
               />
             </div>
 
@@ -207,9 +204,9 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
 
           {/* Divisor */}
           <div className="flex items-center gap-3">
-            <div style={{ flex: 1, height: "1px", backgroundColor: "oklch(1 0 0 / 0.08)" }} />
+            <div style={{ flex: 1, height: "1px", backgroundColor: "var(--border)" }} />
             <span style={{ color: "var(--muted-fg)" }} className="text-xs">ou</span>
-            <div style={{ flex: 1, height: "1px", backgroundColor: "oklch(1 0 0 / 0.08)" }} />
+            <div style={{ flex: 1, height: "1px", backgroundColor: "var(--border)" }} />
           </div>
 
           {/* Demo */}
@@ -218,9 +215,9 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
             onClick={handleDemo}
             disabled={loading}
             style={{
-              border: "1px solid oklch(1 0 0 / 0.12)",
+              border: "1px solid var(--border)",
               color: "var(--fg)",
-              backgroundColor: "oklch(1 0 0 / 0.04)",
+              backgroundColor: "var(--muted)",
             }}
             className="w-full h-11 rounded-xl text-sm font-medium transition-all hover:opacity-80 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -229,7 +226,7 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
         </div>
 
         <p style={{ color: "var(--muted-fg)" }} className="text-center text-xs mt-5">
-          Ao continuar, você concorda com os termos de uso.
+          Ao continuar, voce concorda com os termos de uso.
         </p>
       </div>
     </div>

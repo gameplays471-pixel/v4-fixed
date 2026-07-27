@@ -4,6 +4,7 @@ import { useAppStore, type WorkoutSummaryData } from "@/lib/store";
 import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
 import { clearWorkoutDraft } from "@/lib/workout-draft";
+import { addToQueue } from "@/lib/sync-queue";
 import { useSessionPersistence } from "./useSessionPersistence";
 import { useSetActions } from "./useSetActions";
 import { useCardioActions } from "./useCardioActions";
@@ -37,6 +38,22 @@ export function useWorkoutSession(workoutId: string) {
   const cardioActions = useCardioActions(persistence.cardioMap, persistence.setCardioMap);
 
   const { workout, startedAt, elapsed, setsMap, cardioMap, totalVolume } = persistence;
+
+  /** Encapsula a lógica de limpar draft + navegar para resumo (usado no caminho feliz e no offline). */
+  const finishWorkoutLocally = (params: {
+    workout: NonNullable<typeof workout>;
+    setsMap: typeof setsMap;
+    cardioMap: typeof cardioMap;
+    isPRBySetIndex: boolean[];
+    elapsed: number;
+    totalVolume: number;
+  }) => {
+    const summaryData: WorkoutSummaryData = buildSummaryData(params);
+    clearWorkoutDraft(params.workout.id);
+    setWorkoutSummaryData(summaryData);
+    setActiveWorkoutId(null);
+    router.push(`/treinos/${params.workout.id}/resumo`);
+  };
 
   const handleFinish = async () => {
     if (!workout) return;
@@ -76,22 +93,51 @@ export function useWorkoutSession(workoutId: string) {
       // Reconstrói o resumo por exercício, aproveitando as flags de PR
       // vindas da API (mesma ordem em que os sets foram enviados acima).
       const isPRBySetIndex = session.sets.map((s) => s.isPR);
-      const summaryData: WorkoutSummaryData = buildSummaryData({
-        workout,
-        setsMap,
-        cardioMap,
-        isPRBySetIndex,
-        elapsed,
-        totalVolume,
-      });
-
-      clearWorkoutDraft(workout.id);
-      setWorkoutSummaryData(summaryData);
-      setActiveWorkoutId(null);
-      router.push(`/treinos/${workout.id}/resumo`);
+      finishWorkoutLocally({ workout, setsMap, cardioMap, isPRBySetIndex, elapsed, totalVolume });
     } catch (e) {
-      toast.error("Erro ao salvar treino");
-      console.error(e);
+      // Detecta se é erro de rede (TypeError do fetch quando offline)
+      // vs erro de servidor (4xx/5xx com mensagem específica).
+      const isNetworkError =
+        e instanceof TypeError ||
+        (e instanceof Error &&
+          (e.message.includes("Failed to fetch") ||
+            e.message.includes("NetworkError") ||
+            e.message.includes("net::ERR_")));
+
+      if (isNetworkError) {
+        // Enfileira o payload para envio automático quando voltar online.
+        // O treino é finalizado localmente mesmo assim — o usuário vê o
+        // resumo e pode sair da academia. A sincronização roda em background.
+        const payload = {
+          workoutId: workout.id,
+          workoutName: workout.name,
+          startedAt: startedAt.toISOString(),
+          endedAt: new Date().toISOString(),
+          durationSec: elapsed,
+          sets: setsData,
+        };
+        addToQueue({ url: "/api/sessions", method: "POST", body: payload });
+
+        // Finaliza localmente sem PR flags (serão calculadas pelo servidor
+        // quando a sincronização acontecer; o resumo local é só visual).
+        finishWorkoutLocally({
+          workout,
+          setsMap,
+          cardioMap,
+          isPRBySetIndex: setsData.map(() => false),
+          elapsed,
+          totalVolume,
+        });
+
+        toast.warning(
+          "Sem conexão. Treino salvo localmente e será sincronizado automaticamente.",
+          { duration: 5000 }
+        );
+      } else {
+        // Erro de servidor (4xx/5xx) — não enfileira, mostra erro normal.
+        toast.error(e instanceof Error ? e.message : "Erro ao salvar treino");
+        console.error(e);
+      }
     } finally {
       setSaving(false);
       setShowFinishModal(false);

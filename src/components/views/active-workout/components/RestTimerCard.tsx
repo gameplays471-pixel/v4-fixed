@@ -26,7 +26,7 @@ export function RestTimerCard({ restTimer, soundOn, onTogglePause, onAdjust, onT
         >
           <Card
             className="p-4 border-primary/30"
-            style={{ background: "linear-gradient(135deg, oklch(0.17 0.012 255), oklch(0.20 0.020 162 / 0.5))" }}
+            style={{ background: "linear-gradient(135deg, var(--hero-gradient-from), color-mix(in oklch, var(--primary) 50%, var(--hero-gradient-to)))" }}
           >
             <div className="flex items-center justify-between gap-3">
               <div>

@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, apiPut } from "@/lib/api";
 import { toast } from "sonner";
-import { User, Mail, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing } from "lucide-react";
+import { User, Mail, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing, Palette } from "lucide-react";
 import { motion } from "framer-motion";
 import { setToken } from "@/lib/api";
 import {
@@ -18,6 +18,7 @@ import {
   isNotificationSupported,
   type NotificationPermissionState,
 } from "@/lib/notifications";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type UserProfile = {
   id: string; email: string; name: string; bio: string | null;
@@ -97,7 +98,7 @@ export function ProfileView() {
       {/* Hero card */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <Card className="p-6 relative overflow-hidden border-primary/20"
-          style={{ background: "linear-gradient(135deg, oklch(0.17 0.012 255) 0%, oklch(0.20 0.018 200) 100%)" }}>
+          style={{ background: "linear-gradient(135deg, var(--hero-gradient-from) 0%, var(--hero-gradient-to) 100%)" }}>
           <div className="absolute top-0 right-0 w-48 h-32 pointer-events-none" style={{ background: "radial-gradient(circle, oklch(0.80 0.18 162 / 0.20), transparent 70%)" }} aria-hidden />
           <div className="flex items-center gap-5 relative">
             <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}
@@ -192,6 +193,26 @@ export function ProfileView() {
               <Save className="w-4 h-4" />
               {saving ? "Salvando..." : "Salvar alterações"}
             </Button>
+          </div>
+        </Card>
+      </motion.div>
+
+      {/* Aparncia */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}>
+        <Card className="p-5">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Palette className="w-5 h-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-bold text-sm">Tema</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Alterne entre os modos claro e escuro.
+                </p>
+              </div>
+            </div>
+            <ThemeToggle />
           </div>
         </Card>
       </motion.div>

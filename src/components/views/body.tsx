@@ -290,22 +290,22 @@ export function BodyView() {
           ) : (
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 0.05)" vertical={false} />
-                <XAxis dataKey="date" stroke="oklch(0.60 0 0)" fontSize={11} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="date" stroke="var(--muted-fg)" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis
                   yAxisId="peso"
-                  stroke="oklch(0.60 0 0)" fontSize={11} tickLine={false} axisLine={false}
+                  stroke="var(--muted-fg)" fontSize={11} tickLine={false} axisLine={false}
                   domain={["dataMin - 2", "dataMax + 2"]} tickFormatter={(v) => `${v}kg`}
                 />
                 {hasBodyFatData && (
                   <YAxis
                     yAxisId="bf" orientation="right"
-                    stroke="oklch(0.60 0 0)" fontSize={11} tickLine={false} axisLine={false}
+                    stroke="var(--muted-fg)" fontSize={11} tickLine={false} axisLine={false}
                     domain={["dataMin - 2", "dataMax + 2"]} tickFormatter={(v) => `${v}%`}
                   />
                 )}
                 <Tooltip
-                  contentStyle={{ background: "oklch(0.18 0.012 255)", border: "1px solid oklch(1 0 0 / 0.10)", borderRadius: "0.75rem", color: "oklch(0.97 0 0)", fontSize: "12px" }}
+                  contentStyle={{ background: "var(--card-bg)", border: "1px solid var(--border)", borderRadius: "0.75rem", color: "var(--fg)", fontSize: "12px" }}
                   formatter={(v: number, name: string) =>
                     name === "bf" ? [`${v}%`, "% gordura"] : [`${v} kg`, "Peso"]
                   }

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
@@ -38,7 +39,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#04060a",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#04060a" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -55,15 +59,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
         <PwaRegister />
         <Toaster
           position="top-center"
           toastOptions={{
             style: {
-              background: "oklch(0.205 0 0)",
-              color: "oklch(0.985 0 0)",
-              border: "1px solid oklch(1 0 0 / 10%)",
+              background: "var(--card-bg)",
+              color: "var(--fg)",
+              border: "1px solid var(--border)",
             },
           }}
         />

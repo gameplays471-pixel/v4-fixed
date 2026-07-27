@@ -82,11 +82,11 @@ export function StatsView() {
           </div>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={stats.weeklyVolume} barSize={18}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 0.05)" vertical={false} />
-              <XAxis dataKey="week" stroke="oklch(0.60 0 0)" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="oklch(0.60 0 0)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => formatVolume(v)} />
-              <Tooltip contentStyle={{ background: "oklch(0.18 0.012 255)", border: "1px solid oklch(1 0 0 / 0.10)", borderRadius: "0.75rem", color: "oklch(0.97 0 0)", fontSize: "12px" }}
-                cursor={{ fill: "oklch(1 0 0 / 0.04)", radius: 6 }}
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+              <XAxis dataKey="week" stroke="var(--muted-fg)" fontSize={11} tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--muted-fg)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => formatVolume(v)} />
+              <Tooltip contentStyle={{ background: "var(--card-bg)", border: "1px solid var(--border)", borderRadius: "0.75rem", color: "var(--fg)", fontSize: "12px" }}
+                cursor={{ fill: "var(--muted)", radius: 6 }}
                 formatter={(v: number) => [`${formatVolume(v)} kg`, "Volume"]} />
               <Bar dataKey="volume" fill="oklch(0.80 0.18 162)" radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -103,12 +103,12 @@ export function StatsView() {
           </div>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={stats.weeklyVolume} barSize={18}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 0.05)" vertical={false} />
-              <XAxis dataKey="week" stroke="oklch(0.60 0 0)" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis stroke="oklch(0.60 0 0)" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
-              <Tooltip contentStyle={{ background: "oklch(0.18 0.012 255)", border: "1px solid oklch(1 0 0 / 0.10)", borderRadius: "0.75rem", color: "oklch(0.97 0 0)", fontSize: "12px" }}
-                cursor={{ fill: "oklch(1 0 0 / 0.04)", radius: 6 }}
-                formatter={(v: number) => [`${v} treino(s)`, "Sessões"]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+              <XAxis dataKey="week" stroke="var(--muted-fg)" fontSize={11} tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--muted-fg)" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
+              <Tooltip contentStyle={{ background: "var(--card-bg)", border: "1px solid var(--border)", borderRadius: "0.75rem", color: "var(--fg)", fontSize: "12px" }}
+                cursor={{ fill: "var(--muted)", radius: 6 }}
+                formatter={(v: number) => [`${v} treino(s)`, "Sessoes"]} />
               <Bar dataKey="sessions" fill="oklch(0.72 0.18 200)" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

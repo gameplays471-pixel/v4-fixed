@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Clock, Flame, Dumbbell, HeartPulse } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatTime } from "../utils";
+import { SyncBadge } from "./SyncIndicator";
 
 interface WorkoutHeaderProps {
   workoutName: string;
@@ -48,6 +49,7 @@ export function WorkoutHeader({
                 {totalCardioMin}min
               </span>
             )}
+            <SyncBadge />
           </div>
         </div>
         <div className="flex gap-2 shrink-0">

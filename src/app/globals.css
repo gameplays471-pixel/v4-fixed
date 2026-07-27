@@ -53,6 +53,18 @@
   --border:       oklch(1 0 0 / 0.09);
   --input-border: oklch(1 0 0 / 0.13);
   --sidebar-bg:   oklch(0.14 0.010 255);
+
+  /* Tokenes para utilities que precisam de transparência oposta por tema */
+  --shimmer-from: oklch(1 0 0 / 0.03);
+  --shimmer-mid:  oklch(1 0 0 / 0.08);
+  --shimmer-to:   oklch(1 0 0 / 0.03);
+  --glass-bg:     oklch(1 0 0 / 0.04);
+  --glass-border: oklch(1 0 0 / 0.10);
+  --scrollbar:    oklch(1 0 0 / 0.10);
+  --scrollbar-hover: oklch(1 0 0 / 0.20);
+  --gradient-card-end: oklch(0.20 0.014 255);
+  --hero-gradient-from: oklch(0.17 0.012 255);
+  --hero-gradient-to:   oklch(0.20 0.018 200);
 }
 
 .light {
@@ -70,6 +82,17 @@
   --border:       oklch(0.91 0.002 270);
   --input-border: oklch(0.91 0.002 270);
   --sidebar-bg:   oklch(0.97 0 0);
+
+  --shimmer-from: oklch(0 0 0 / 0.04);
+  --shimmer-mid:  oklch(0 0 0 / 0.09);
+  --shimmer-to:   oklch(0 0 0 / 0.04);
+  --glass-bg:     oklch(0 0 0 / 0.05);
+  --glass-border: oklch(0 0 0 / 0.09);
+  --scrollbar:    oklch(0 0 0 / 0.15);
+  --scrollbar-hover: oklch(0 0 0 / 0.28);
+  --gradient-card-end: oklch(0.94 0.003 270);
+  --hero-gradient-from: oklch(0.97 0.005 255);
+  --hero-gradient-to:   oklch(0.95 0.008 200);
 }
 
 @layer base {
@@ -90,10 +113,10 @@
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: oklch(1 0 0 / 0.10);
+    background: var(--scrollbar);
     border-radius: 6px;
   }
-  ::-webkit-scrollbar-thumb:hover { background: oklch(1 0 0 / 0.20); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
 }
 
 @layer utilities {
@@ -143,9 +166,9 @@
   .animate-shimmer {
     background: linear-gradient(
       90deg,
-      oklch(1 0 0 / 0.03) 0%,
-      oklch(1 0 0 / 0.08) 50%,
-      oklch(1 0 0 / 0.03) 100%
+      var(--shimmer-from) 0%,
+      var(--shimmer-mid) 50%,
+      var(--shimmer-to) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 1.8s ease-in-out infinite;
@@ -189,7 +212,7 @@
     background: linear-gradient(135deg, oklch(0.72 0.18 240), oklch(0.68 0.20 280));
   }
   .gradient-card {
-    background: linear-gradient(145deg, var(--card-bg), oklch(0.20 0.014 255));
+    background: linear-gradient(145deg, var(--card-bg), var(--gradient-card-end));
   }
 
   /* ── Glow text ── */
@@ -199,10 +222,10 @@
 
   /* ── Glass card ── */
   .glass {
-    background: oklch(1 0 0 / 0.04);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid oklch(1 0 0 / 0.10);
+    border: 1px solid var(--glass-border);
   }
 
   /* ── Stagger children delay helpers ── */
