@@ -807,9 +807,11 @@ export default function AdminUsuariosPage() {
               {roleTarget?.role === "admin" ? "Remover" : "Concedir"} acesso de admin
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {roleTarget?.role === "admin"
-                ? `${roleTarget?.name} perderá acesso ao painel administrativo."
-                : `${roleTarget?.name} terá acesso completo ao painel administrativo.`}
+{roleTarget?.role === "admin" ? (
+  <span>{roleTarget?.name} perderá acesso ao painel administrativo.</span>
+) : (
+  <span>{roleTarget?.name} terá acesso completo ao painel administrativo.</span>
+)}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

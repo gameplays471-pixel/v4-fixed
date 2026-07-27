@@ -58,9 +58,9 @@ export const GET = withErrorHandling(
         take: pageSize,
       }),
       // Sessões que contêm pelo menos um PR — agrupa por userId
-      db.$queryRaw<Array<{ userId: string; count: bigint }>>`
-        `SELECT ws."userId", COUNT(DISTINCT ss."sessionId")::bigint as count
-         FROM "SessionSet" ss
+db.$queryRaw<Array<{ userId: string; count: bigint }>>`
+  SELECT ws."userId", COUNT(DISTINCT ss."sessionId")::bigint as count
+  FROM "SessionSet" ss
          JOIN "WorkoutSession" ws ON ws."id" = ss."sessionId"
          WHERE ss."isPR" = true
          GROUP BY ws."userId"`,
