@@ -41,9 +41,6 @@ git push -u origin main
 4. Build command: `bun run vercel-build` (já configurado no `vercel.json`)
 5. Install command: `bun install` (já configurado)
 
-
-> ⚠️ **Não faça commit do `.env`** — ele está no `.gitignore`. As variáveis precisam ser cadastradas no Vercel.
-
 ### 4. Deploy
 
 Clique em **Deploy**. O build vai:
