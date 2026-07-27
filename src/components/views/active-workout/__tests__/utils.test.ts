@@ -57,7 +57,7 @@ describe("suggestNextLoad", () => {
     it("sugere subir peso baseado no top set (ignora sets mais leves)", () => {
       const lastSets: LastSetRecord[] = [
         { weight: 20, reps: 8 },
-        { weight: 20, reps: 12 }, // top set: média 10
+        { weight: 20, reps: 16 }, // top set: média 12 — atinge meta + 2
         { weight: 15, reps: 15 }, // peso menor, ignorado
       ];
       const result = suggestNextLoad(lastSets, targetReps);

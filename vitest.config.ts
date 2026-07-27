@@ -2,26 +2,15 @@ import { defineConfig } from "vitest/config";
 import path from "path";
 
 export default defineConfig({
-  // Usa a mesma resolução de caminhos do tsconfig.json
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
   test: {
-    // Ambiente padrão: node (suficiente pra lógica pura).
-    // Quando adicionar testes de componente, use:
-    //   // @vitest-environment jsdom
-    // no topo do arquivo ou configure 'environment: "jsdom"' aqui.
     environment: "node",
-
-    // Arquivos de teste
     include: ["src/**/*.test.{ts,tsx}"],
-
-    // Excluir pastas que não são de teste
-    exclude: ["node_modules", ".next", "public"],
-
-    // Cobertura (opcional — ativar com `vitest run --coverage`)
+    exclude: ["node_modules", ".next", "public", "upload", "skills"],
     coverage: {
       provider: "v8",
       include: [

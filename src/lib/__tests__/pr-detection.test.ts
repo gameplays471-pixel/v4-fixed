@@ -14,7 +14,7 @@ import { describe, it, expect } from "vitest";
 /** Replica a lógica exata do POST /api/sessions */
 function detectPR(currentWeight: number, previousMaxWeight: number | null, isCardio: boolean): boolean {
   if (isCardio) return false;
-  return !previousMax || currentWeight > previousMaxWeight;
+  return !previousMaxWeight || currentWeight > previousMaxWeight;
 }
 
 describe("Detecção de PR (Personal Record)", () => {

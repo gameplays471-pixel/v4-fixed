@@ -10,6 +10,24 @@ import { getToken, setToken } from "@/lib/api";
 import { LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const USER_CACHE_KEY = "gemgym:user-cache";
+
+function getCachedUser(): AppUser | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(USER_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function setCachedUser(u: AppUser | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (u) localStorage.setItem(USER_CACHE_KEY, JSON.stringify(u));
+    else localStorage.removeItem(USER_CACHE_KEY);
+  } catch {}
+}
+
 type AppUser = { name: string; email: string; role?: string };
 
 function MobileTopbar({ user, onLogout }: { user: AppUser; onLogout: () => void }) {
@@ -172,7 +190,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
   const router = useRouter();
   const pathname = usePathname();
   const activeWorkoutId = useAppStore((s) => s.activeWorkoutId);
-  const [user, setUser] = useState<AppUser | null>(null);
+  const [user, setUser] = useState<AppUser | null>(() => getCachedUser());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -181,10 +199,20 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       .then((r) => r.json())
       .then((data) => {
         setUser(data.user);
+        setCachedUser(data.user);
         setLoading(false);
         if (!data.user) setToken(null);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        // Se a rede caiu mas temos um token OU cache de usuário,
+        // não derrubar — o usuário pode estar no meio de um treino.
+        // O token será verificado quando a conexão voltar.
+        const cached = getCachedUser();
+        if (token || cached) {
+          if (cached && !user) setUser(cached);
+          setLoading(false);
+        }
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -206,6 +234,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
   };
 
   const handleLogout = async () => {
+    setCachedUser(null);
     await fetch("/api/auth/logout", { method: "POST" });
     setToken(null);
     setUser(null);
