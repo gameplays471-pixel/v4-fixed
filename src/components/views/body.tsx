@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -279,7 +280,7 @@ export function BodyView() {
           </div>
 
           {logsLoading ? (
-            <div className="h-48 bg-muted/30 rounded-xl animate-shimmer" />
+            <LoadingSkeleton className="h-48 rounded-xl animate-shimmer" />
           ) : chartData.length < 2 ? (
             <div className="text-center py-10 text-sm text-muted-foreground">
               {chartData.length === 0
@@ -354,11 +355,11 @@ export function BodyView() {
               className="h-10 rounded-xl bg-primary font-semibold gap-1.5 shadow-sm shadow-primary/20">
               <Upload className="w-4 h-4" /> {uploading ? "Enviando…" : "Adicionar foto"}
             </Button>
-            <input ref={fileInputRef} type="file" accept="image/*" capture="user" hidden onChange={handlePhotoSelected} />
+            <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handlePhotoSelected} />
           </div>
 
           {photosLoading ? (
-            <div className="h-32 bg-muted/30 rounded-xl animate-shimmer" />
+            <LoadingSkeleton className="h-32 rounded-xl animate-shimmer" />
           ) : photos.length === 0 ? (
             <div className="text-center py-10 text-sm text-muted-foreground">
               Adicione sua primeira foto pra começar a comparar sua evolução ao longo do tempo.

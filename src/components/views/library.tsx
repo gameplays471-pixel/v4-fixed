@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { Search, Heart, Filter } from "lucide-react";
 import { ExerciseDetail } from "@/components/exercise-detail";
 import { ExerciseThumb } from "@/components/exercise-media";
@@ -197,7 +198,7 @@ export function LibraryView() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-24 bg-card rounded-xl animate-pulse" />
+            <LoadingSkeleton key={i} className="h-24 rounded-xl" style={{ animationDelay: `${i*0.05}s` }} />
           ))}
         </div>
       ) : grouped.length === 0 ? (

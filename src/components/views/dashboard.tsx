@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, formatVolume, formatDuration, relativeTime } from "@/lib/api";
 import { Flame, Dumbbell, TrendingUp, Clock, Plus, Trophy, ArrowRight, Play, Zap } from "lucide-react";
 import { motion } from "framer-motion";
@@ -51,12 +52,12 @@ export function DashboardView() {
 
   if (loading) return (
     <div className="space-y-6 animate-fade-in">
-      <div className="h-32 bg-card rounded-3xl border border-border/60 animate-shimmer" />
+      <LoadingSkeleton className="h-32 rounded-3xl border border-border/60 animate-shimmer" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[0,1,2,3].map((i) => <div key={i} className="h-24 bg-card rounded-2xl border border-border/60 animate-shimmer" style={{ animationDelay: `${i*0.1}s` }} />)}
+        {[0,1,2,3].map((i) => <LoadingSkeleton key={i} className="h-24 rounded-2xl border border-border/60 animate-shimmer" style={{ animationDelay: `${i*0.1}s` }} />)}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {[0,1,2].map((i) => <div key={i} className="h-36 bg-card rounded-2xl border border-border/60 animate-shimmer" style={{ animationDelay: `${i*0.12}s` }} />)}
+        {[0,1,2].map((i) => <LoadingSkeleton key={i} className="h-36 rounded-2xl border border-border/60 animate-shimmer" style={{ animationDelay: `${i*0.12}s` }} />)}
       </div>
     </div>
   );

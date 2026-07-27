@@ -2,17 +2,18 @@
 
 import { cn } from "@/lib/utils";
 
-interface LoadingSkeletonProps {
+interface LoadingSkeletonProps extends React.ComponentProps<"div"> {
   className?: string;
 }
 
-export function LoadingSkeleton({ className }: LoadingSkeletonProps) {
+export function LoadingSkeleton({ className, ...props }: LoadingSkeletonProps) {
   return (
     <div
       className={cn(
         "animate-pulse-slow rounded-xl bg-muted/30",
         className
       )}
+      {...props}
     />
   );
 }

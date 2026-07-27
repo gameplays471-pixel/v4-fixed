@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, apiPut } from "@/lib/api";
 import { toast } from "sonner";
 import { User, Mail, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing } from "lucide-react";
@@ -78,7 +79,7 @@ export function ProfileView() {
 
   if (loading) return (
     <div className="space-y-4 max-w-2xl mx-auto">
-      {[0,1,2].map((i) => <div key={i} className="h-32 bg-card rounded-2xl border border-border/60 animate-shimmer" />)}
+      {[0,1,2].map((i) => <LoadingSkeleton key={i} className="h-32 rounded-2xl border border-border/60 animate-shimmer" style={{ animationDelay: `${i*0.1}s` }} />)}
     </div>
   );
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, formatVolume, formatDuration } from "@/lib/api";
 import { Trophy, Dumbbell, Clock, TrendingUp, Flame, Target, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -37,7 +38,7 @@ export function StatsView() {
     return (
       <div className="space-y-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-48 bg-card rounded-2xl border border-border/60 animate-shimmer" style={{ animationDelay: `${i*0.1}s` }} />
+          <LoadingSkeleton key={i} className="h-48 rounded-2xl border border-border/60 animate-shimmer" style={{ animationDelay: `${i*0.1}s` }} />
         ))}
       </div>
     );

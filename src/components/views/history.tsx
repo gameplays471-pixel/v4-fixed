@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, formatVolume, formatDuration, formatDate } from "@/lib/api";
 import { Dumbbell, Clock, ChevronRight, Calendar, X, Trophy, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -98,9 +99,9 @@ export function HistoryView() {
   if (loading) {
     return (
       <div className="space-y-4 animate-fade-in">
-        <div className="h-8 w-40 bg-card rounded-xl animate-shimmer" />
+        <LoadingSkeleton className="h-8 w-40 rounded-xl animate-shimmer" />
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-20 bg-card rounded-2xl border border-border/60 animate-shimmer" style={{ animationDelay: `${i * 0.1}s` }} />
+          <LoadingSkeleton key={i} className="h-20 rounded-2xl border border-border/60 animate-shimmer" style={{ animationDelay: `${i * 0.1}s` }} />
         ))}
       </div>
     );
