@@ -7,6 +7,15 @@ import type { WorkoutSummaryData } from "@/lib/store";
 
 export type ShareFormat = "story" | "square";
 
+/**
+ * "silhouette": card original, com o manequim muscular (sem as tags de
+ *   nome de músculo — removidas a pedido, ficavam poluídas).
+ * "silhouette-list": manequim + lista de exercícios com contagem de séries.
+ * "list": só a lista de exercícios com contagem (ex.: "3× Supino Inclinado"),
+ *   sem manequim — card mais compacto/direto.
+ */
+export type ShareVariant = "silhouette" | "silhouette-list" | "list";
+
 // Dimensões-base do nó capturado (em px). html-to-image usa pixelRatio: 2 na
 // exportação, então o PNG final sai em 1080×1920 (story) ou 1080×1080 (post)
 // — os dois formatos que WhatsApp Status e Instagram (stories/feed) esperam.
@@ -27,13 +36,82 @@ function fmtVolume(v: number) {
   return String(Math.round(v));
 }
 
+// Lista "3× Supino Inclinado" usada nas variantes silhouette-list e list.
+// `columns=2` (só na variante "list", que tem a área toda livre pro texto)
+// cabe bastante exercício sem estourar a altura do card; `maxItems` corta
+// o resto num "+N exercícios" em vez de deixar a imagem crescer/cortar.
+function ExerciseList({
+  exercises,
+  columns,
+  maxItems,
+}: {
+  exercises: WorkoutSummaryData["exercises"];
+  columns: 1 | 2;
+  maxItems: number;
+}) {
+  const shown = exercises.slice(0, maxItems);
+  const extra = exercises.length - shown.length;
+
+  return (
+    <div style={{ width: "100%", display: "grid", gridTemplateColumns: `repeat(${columns}, 1fr)`, gap: 7 }}>
+      {shown.map((ex, i) => (
+        <div
+          key={i}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 10,
+            padding: "8px 10px",
+            minWidth: 0,
+          }}
+        >
+          <span style={{ flexShrink: 0, fontWeight: 900, fontSize: 12.5, color: "#4ade80" }}>
+            {ex.sets.length}×
+          </span>
+          <span
+            style={{
+              fontWeight: 700,
+              fontSize: 12,
+              color: "rgba(245,245,245,0.9)",
+              lineHeight: 1.25,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {ex.name}
+          </span>
+        </div>
+      ))}
+      {extra > 0 && (
+        <div
+          style={{
+            gridColumn: `span ${columns}`,
+            textAlign: "center",
+            fontSize: 11,
+            color: "rgba(245,245,245,0.45)",
+            fontWeight: 700,
+            marginTop: 2,
+          }}
+        >
+          +{extra} exercício{extra > 1 ? "s" : ""}
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface ShareWorkoutCardProps {
   data: WorkoutSummaryData;
   format: ShareFormat;
+  variant: ShareVariant;
 }
 
 export const ShareWorkoutCard = forwardRef<HTMLDivElement, ShareWorkoutCardProps>(
-  function ShareWorkoutCard({ data, format }, ref) {
+  function ShareWorkoutCard({ data, format, variant }, ref) {
     const { width, height } = SHARE_CARD_SIZE[format];
     const isStory = format === "story";
 
@@ -59,7 +137,16 @@ export const ShareWorkoutCard = forwardRef<HTMLDivElement, ShareWorkoutCardProps
       }
     }
     const filteredSecondary = secondaryMuscles.filter((m) => !primarySet.has(m));
-    const allMuscleChips = [...primaryMuscles, ...filteredSecondary].slice(0, isStory ? 8 : 6);
+
+    const showSilhouette = variant !== "list";
+    const showList = variant !== "silhouette";
+    // Quando os dois (manequim + lista) dividem o espaço, o manequim fica
+    // bem menor pra sobrar altura de verdade pra lista — e a lista mostra
+    // menos itens (o resto vira "+N exercícios"). Na variante só-lista, o
+    // espaço todo do manequim é reaproveitado, então cabe muito mais.
+    const silhouetteMaxHeight = variant === "silhouette" ? (isStory ? 300 : 170) : isStory ? 168 : 96;
+    const listMaxItems = variant === "list" ? (isStory ? 12 : 8) : isStory ? 5 : 4;
+    const listColumns: 1 | 2 = variant === "list" ? 2 : 1;
 
     const totalSets = data.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
     const prs = data.exercises.reduce((acc, ex) => acc + ex.sets.filter((s) => s.isPR).length, 0);
@@ -192,37 +279,34 @@ export const ShareWorkoutCard = forwardRef<HTMLDivElement, ShareWorkoutCardProps
             ))}
           </div>
 
-          {/* Silhueta muscular */}
-          <div style={{
-            flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-            marginTop: isStory ? 14 : 8, minHeight: 0,
-          }}>
-            <div style={{ height: "100%", maxHeight: isStory ? 300 : 170, aspectRatio: "724/1448" }}>
-              <MuscleSilhouette side="front" primaryMuscles={primaryMuscles} secondaryMuscles={filteredSecondary} />
-            </div>
+          {/* Manequim muscular e/ou lista de exercícios, conforme a variante */}
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: variant === "silhouette-list" ? "flex-start" : "center",
+              gap: 10,
+              marginTop: isStory ? 14 : 8,
+              minHeight: 0,
+            }}
+          >
+            {showSilhouette && (
+              <div
+                style={
+                  variant === "silhouette"
+                    ? { height: "100%", maxHeight: silhouetteMaxHeight, aspectRatio: "724/1448" }
+                    : { height: silhouetteMaxHeight, aspectRatio: "724/1448" }
+                }
+              >
+                <MuscleSilhouette side="front" primaryMuscles={primaryMuscles} secondaryMuscles={filteredSecondary} />
+              </div>
+            )}
+            {showList && (
+              <ExerciseList exercises={data.exercises} columns={listColumns} maxItems={listMaxItems} />
+            )}
           </div>
-
-          {/* Chips de músculos */}
-          {allMuscleChips.length > 0 && (
-            <div style={{
-              display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 5,
-              marginTop: isStory ? 10 : 6,
-            }}>
-              {allMuscleChips.map((m) => {
-                const isPrimary = primarySet.has(m);
-                return (
-                  <span key={m} style={{
-                    fontSize: 10.5, fontWeight: 700, padding: "4px 10px", borderRadius: 999,
-                    background: isPrimary ? "rgba(34,197,94,0.16)" : "rgba(255,255,255,0.06)",
-                    color: isPrimary ? "#4ade80" : "rgba(245,245,245,0.6)",
-                    border: `1px solid ${isPrimary ? "rgba(34,197,94,0.3)" : "rgba(255,255,255,0.1)"}`,
-                  }}>
-                    {m}
-                  </span>
-                );
-              })}
-            </div>
-          )}
 
           {/* Footer */}
           <div style={{

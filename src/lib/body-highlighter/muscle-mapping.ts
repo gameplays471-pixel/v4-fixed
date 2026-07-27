@@ -91,3 +91,34 @@ export const TRACKABLE_SLUGS: Slug[] = [
   "gluteal",
   "hamstring",
 ];
+
+/**
+ * Nome amigável (PT-BR) por slug, usado no tooltip do diagrama corporal.
+ * Cobre todos os slugs (não só os treináveis) pra não faltar label caso o
+ * silhueta use alguma região só de preenchimento (cabeça, mãos, etc.).
+ */
+export const SLUG_LABELS: Record<Slug, string> = {
+  abs: "Abdômen",
+  adductors: "Adutores",
+  ankles: "Tornozelos",
+  biceps: "Bíceps",
+  calves: "Panturrilhas",
+  chest: "Peitoral",
+  deltoids: "Ombros",
+  feet: "Pés",
+  forearm: "Antebraço",
+  gluteal: "Glúteos",
+  hair: "Cabelo",
+  hamstring: "Posteriores de Coxa",
+  hands: "Mãos",
+  head: "Cabeça",
+  knees: "Joelhos",
+  "lower-back": "Lombar",
+  neck: "Pescoço",
+  obliques: "Oblíquos",
+  quadriceps: "Quadríceps",
+  tibialis: "Tibial Anterior",
+  trapezius: "Trapézio",
+  triceps: "Tríceps",
+  "upper-back": "Costas",
+};

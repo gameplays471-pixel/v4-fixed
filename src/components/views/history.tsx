@@ -6,8 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { apiGet, formatVolume, formatDuration, formatDate } from "@/lib/api";
-import { Dumbbell, Clock, ChevronRight, Calendar, X, Trophy } from "lucide-react";
+import { Dumbbell, Clock, ChevronRight, Calendar, X, Trophy, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { ShareWorkoutDialog } from "@/components/share-workout-dialog";
+import type { WorkoutSummaryData } from "@/lib/store";
 
 type Session = {
   id: string;
@@ -20,13 +22,56 @@ type Session = {
   workout: { id: string; color: string | null } | null;
   sets: Array<{
     id: string;
+    exerciseId: string;
     exerciseName: string;
     weight: number;
     reps: number;
     setNumber: number;
     isPR: boolean;
+    durationSec: number | null;
+    distanceKm: number | null;
+    avgBpm: number | null;
+    intensity: string | null;
+    exercise: { muscleGroup: string; category: string; secondaryMuscles: string | null };
   }>;
 };
+
+// Reconstrói o mesmo formato usado pela tela de resumo pós-treino
+// (WorkoutSummaryData), agrupando os sets (flat) de volta por exercício —
+// assim o mesmo ShareWorkoutDialog/ShareWorkoutCard funciona idêntico pra
+// um treino recém-finalizado e pra um treino antigo aberto no histórico.
+function sessionToSummaryData(session: Session): WorkoutSummaryData {
+  const exerciseMap = new Map<string, WorkoutSummaryData["exercises"][number]>();
+
+  for (const set of session.sets) {
+    if (!exerciseMap.has(set.exerciseId)) {
+      exerciseMap.set(set.exerciseId, {
+        name: set.exerciseName,
+        muscleGroup: set.exercise.muscleGroup,
+        secondaryMuscles: set.exercise.secondaryMuscles,
+        category: set.exercise.category,
+        sets: [],
+      });
+    }
+    exerciseMap.get(set.exerciseId)!.sets.push({
+      weight: set.weight,
+      reps: set.reps,
+      isPR: set.isPR,
+      durationSec: set.durationSec ?? undefined,
+      distanceKm: set.distanceKm ?? undefined,
+      avgBpm: set.avgBpm ?? undefined,
+      intensity: set.intensity ?? undefined,
+    });
+  }
+
+  return {
+    workoutName: session.workoutName,
+    durationSec: session.durationSec,
+    totalVolume: session.totalVolume,
+    finishedAt: session.endedAt ?? session.startedAt,
+    exercises: [...exerciseMap.values()],
+  };
+}
 
 type Stats = {
   heatmap: Array<{ date: string; sessions: number; volume: number }>;
@@ -221,6 +266,7 @@ function Heatmap({ data }: { data: Array<{ date: string; sessions: number; volum
 }
 
 function SessionModal({ session, onClose }: { session: Session; onClose: () => void }) {
+  const [shareOpen, setShareOpen] = useState(false);
   const byExercise: Record<string, typeof session.sets> = {};
   for (const set of session.sets) {
     if (!byExercise[set.exerciseName]) byExercise[set.exerciseName] = [];
@@ -229,6 +275,7 @@ function SessionModal({ session, onClose }: { session: Session; onClose: () => v
   const prCount = session.sets.filter(s => s.isPR).length;
 
   return (
+    <>
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -265,6 +312,17 @@ function SessionModal({ session, onClose }: { session: Session; onClose: () => v
           >
             <X className="w-4 h-4" />
           </button>
+        </div>
+
+        <div className="px-5 pt-4">
+          <Button
+            variant="outline"
+            className="w-full h-11 rounded-xl font-semibold gap-2"
+            onClick={() => setShareOpen(true)}
+          >
+            <Share2 className="w-4 h-4" />
+            Compartilhar treino
+          </Button>
         </div>
 
         <div className="p-5 space-y-5">
@@ -313,5 +371,7 @@ function SessionModal({ session, onClose }: { session: Session; onClose: () => v
         </div>
       </motion.div>
     </motion.div>
+    <ShareWorkoutDialog data={sessionToSummaryData(session)} open={shareOpen} onOpenChange={setShareOpen} />
+    </>
   );
 }

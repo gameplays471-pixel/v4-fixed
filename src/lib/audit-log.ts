@@ -11,6 +11,7 @@
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { getClientIp } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 export type AuditAction = "create" | "update" | "delete";
 
@@ -45,6 +46,10 @@ export async function recordAudit(input: RecordAuditInput): Promise<void> {
       },
     });
   } catch (e) {
-    console.error("[audit-log] falha ao gravar auditoria:", e);
+    logger.error("[audit-log] falha ao gravar auditoria", {
+      entityType: input.entityType,
+      entityId: input.entityId,
+      error: e instanceof Error ? e.message : String(e),
+    });
   }
 }

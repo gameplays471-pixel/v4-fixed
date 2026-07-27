@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Share2, Download, Copy, FileText, Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
-import { ShareWorkoutCard, SHARE_CARD_SIZE, type ShareFormat } from "@/components/share-workout-card";
+import { ShareWorkoutCard, SHARE_CARD_SIZE, type ShareFormat, type ShareVariant } from "@/components/share-workout-card";
 import { nodeToPngBlob, shareOrDownloadImage, copyImageToClipboard, downloadBlob, buildWorkoutPdf } from "@/lib/share-export";
 import type { WorkoutSummaryData } from "@/lib/store";
 
@@ -22,6 +22,7 @@ const PREVIEW_WIDTH = 220;
 
 export function ShareWorkoutDialog({ data, open, onOpenChange }: ShareWorkoutDialogProps) {
   const [format, setFormat] = useState<ShareFormat>("story");
+  const [variant, setVariant] = useState<ShareVariant>("silhouette");
   const [busy, setBusy] = useState<"share" | "download" | "copy" | "pdf" | null>(null);
   const [copied, setCopied] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -57,7 +58,7 @@ export function ShareWorkoutDialog({ data, open, onOpenChange }: ShareWorkoutDia
     setBusy("download");
     try {
       const blob = await getPngBlob();
-      downloadBlob(blob, `treino-${format}.png`);
+      downloadBlob(blob, `treino-${format}-${variant}.png`);
       toast.success("Imagem baixada!");
     } catch (e) {
       console.error(e);
@@ -125,6 +126,27 @@ export function ShareWorkoutDialog({ data, open, onOpenChange }: ShareWorkoutDia
           ))}
         </div>
 
+        {/* Alternância de variante do card */}
+        <div className="flex gap-2 p-1 rounded-xl bg-muted/50 border border-border/50">
+          {(
+            [
+              { value: "silhouette", label: "Corpo" },
+              { value: "silhouette-list", label: "Corpo + lista" },
+              { value: "list", label: "Só lista" },
+            ] as { value: ShareVariant; label: string }[]
+          ).map((v) => (
+            <button
+              key={v.value}
+              onClick={() => setVariant(v.value)}
+              className={`flex-1 h-9 rounded-lg text-[11px] font-bold transition-colors px-1 ${
+                variant === v.value ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-accent/50"
+              }`}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+
         {/* Preview */}
         <div className="flex justify-center py-2">
           <div
@@ -132,7 +154,7 @@ export function ShareWorkoutDialog({ data, open, onOpenChange }: ShareWorkoutDia
             className="shadow-2xl shadow-black/40 border border-white/10"
           >
             <div style={{ width, height, transform: `scale(${scale})`, transformOrigin: "top left" }}>
-              <ShareWorkoutCard ref={cardRef} data={data} format={format} />
+              <ShareWorkoutCard ref={cardRef} data={data} format={format} variant={variant} />
             </div>
           </div>
         </div>

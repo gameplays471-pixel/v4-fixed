@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { getCurrentUser, type SelectedUser } from "@/lib/auth";
+import { logger, newRequestId } from "@/lib/logger";
 
 /**
  * Erro "esperado" de uma rota de API — validação, autenticação, recurso não
@@ -56,11 +58,14 @@ export async function requireAdmin(req: NextRequest): Promise<SelectedUser> {
  * Envolve um handler de rota (GET/POST/PUT/DELETE) padronizando o
  * tratamento de erro:
  * - `ApiError` (lançado por um dos helpers acima, ou diretamente) vira a
- *   resposta `{ error: message }` com o status escolhido.
+ *   resposta `{ error: message }` com o status escolhido, e um log `warn`
+ *   estruturado (não vai pro Sentry — não é bug).
  * - `SyntaxError` (ex.: `await req.json()` com corpo malformado) vira 400.
- * - Qualquer outro erro (bug, falha do banco, etc.) é logado com o nome da
- *   rota via `console.error` e retorna 500 genérico — nunca vaza stack
- *   trace ou mensagem interna pro cliente.
+ * - Qualquer outro erro (bug, falha do banco, etc.) é logado em nível
+ *   `error` via `logger` e reportado ao Sentry com o nome da rota e um
+ *   `requestId`, que também volta na resposta 500 — nunca vaza stack
+ *   trace ou mensagem interna pro cliente, mas dá uma referência pra
+ *   achar o erro exato no Sentry/logs depois.
  *
  * `routeName` é só para identificar a origem do erro no log do servidor
  * (ex.: "GET /api/workouts"). Para rotas com segmento dinâmico (`[id]`),
@@ -76,13 +81,32 @@ export function withErrorHandling<Ctx = any>(
       return await handler(req, ctx);
     } catch (e) {
       if (e instanceof ApiError) {
+        // Erro esperado (validação, 404, permissão) — não é bug, não vai
+        // pro Sentry. Ainda assim vira uma linha de log em nível `warn`,
+        // útil pra notar padrões (ex.: muitos 409 num endpoint específico
+        // pode indicar um problema de UX, não só "usuário errou").
+        logger.warn(`${routeName} — ${e.status}`, { route: routeName, status: e.status, message: e.message });
         return NextResponse.json({ error: e.message }, { status: e.status });
       }
       if (e instanceof SyntaxError) {
         return NextResponse.json({ error: "JSON inválido no corpo da requisição" }, { status: 400 });
       }
-      console.error(`${routeName} error:`, e);
-      return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+
+      // Erro de verdade (bug, banco fora do ar, etc.): log estruturado +
+      // Sentry. O requestId volta pro cliente pra quem for reportar o
+      // problema (email de suporte, print) conseguir dar uma referência
+      // que você acha em segundos no log/Sentry, em vez de "tava dando
+      // erro ali, sei lá quando".
+      const requestId = newRequestId();
+      logger.error(`${routeName} — erro inesperado`, {
+        route: routeName,
+        requestId,
+        error: e instanceof Error ? e.message : String(e),
+        stack: e instanceof Error ? e.stack : undefined,
+      });
+      Sentry.captureException(e, { tags: { route: routeName, requestId } });
+
+      return NextResponse.json({ error: "Erro interno", requestId }, { status: 500 });
     }
   };
 }

@@ -17,7 +17,15 @@ export const GET = withErrorHandling("Get sessions", async (req: NextRequest) =>
   const sessions = await db.workoutSession.findMany({
     where: { userId: user.id },
     include: {
-      sets: true,
+      sets: {
+        include: {
+          // Precisa pra montar o card de compartilhamento a partir do
+          // histórico (agrupamento por músculo no manequim, detecção de
+          // "Cardio") — o SessionSet por si só só guarda o nome do
+          // exercício em texto, não o grupo muscular/categoria.
+          exercise: { select: { muscleGroup: true, category: true, secondaryMuscles: true } },
+        },
+      },
       workout: true,
     },
     orderBy: { startedAt: "desc" },
