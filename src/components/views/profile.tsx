@@ -11,7 +11,6 @@ import { apiGet, apiPut } from "@/lib/api";
 import { toast } from "sonner";
 import { User, Mail, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing } from "lucide-react";
 import { motion } from "framer-motion";
-import { useAppStore } from "@/lib/store";
 import { setToken } from "@/lib/api";
 import {
   getNotificationPermission,
@@ -27,7 +26,6 @@ type UserProfile = {
 };
 
 export function ProfileView() {
-  const setView = useAppStore((s) => s.setView);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -63,7 +61,6 @@ export function ProfileView() {
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     setToken(null);
-    setView("auth");
     window.location.reload();
   };
 

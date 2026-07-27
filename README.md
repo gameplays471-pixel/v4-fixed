@@ -41,14 +41,6 @@ git push -u origin main
 4. Build command: `bun run vercel-build` (já configurado no `vercel.json`)
 5. Install command: `bun install` (já configurado)
 
-### 3. Configurar variáveis de ambiente
-
-No Vercel → Settings → Environment Variables, adicionar:
-
-| Nome | Valor | Ambientes |
-|---|---|---|
-| `DATABASE_URL` | `postgresql://postgres.coyaqzvmpcdhxwtoowye:WLTM4q9FIquG1ItF@aws-1-us-west-2.pooler.supabase.com:6543/postgres?pgbouncer=true` | Production, Preview, Development |
-| `DIRECT_URL` | `postgresql://postgres.coyaqzvmpcdhxwtoowye:WLTM4q9FIquG1ItF@aws-1-us-west-2.pooler.supabase.com:5432/postgres` | Production, Preview, Development |
 
 > ⚠️ **Não faça commit do `.env`** — ele está no `.gitignore`. As variáveis precisam ser cadastradas no Vercel.
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,8 +25,16 @@ function formatVolume(v: number) {
   return String(Math.round(v));
 }
 
-export function WorkoutSummaryView() {
-  const setView = useAppStore((s) => s.setView);
+interface WorkoutSummaryViewProps {
+  // ID do treino cuja sessão acabou de ser finalizada. O resumo em si vem
+  // do estado em memória (workoutSummaryData) — se a página for recarregada
+  // (F5), esse estado se perde e mostramos o fallback abaixo, assim como
+  // acontecia antes da migração para rotas.
+  workoutId?: string;
+}
+
+export function WorkoutSummaryView(_props: WorkoutSummaryViewProps) {
+  const router = useRouter();
   const data = useAppStore((s) => s.workoutSummaryData);
   const setWorkoutSummaryData = useAppStore((s) => s.setWorkoutSummaryData);
   const [shareOpen, setShareOpen] = useState(false);
@@ -34,7 +43,7 @@ export function WorkoutSummaryView() {
     return (
       <Card className="p-8 text-center">
         <p className="text-muted-foreground">Sem dados de treino.</p>
-        <Button className="mt-4" onClick={() => setView("dashboard")}>Voltar ao início</Button>
+        <Button className="mt-4" onClick={() => router.push("/")}>Voltar ao início</Button>
       </Card>
     );
   }
@@ -67,8 +76,8 @@ export function WorkoutSummaryView() {
   const totalSets = data.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
   const prs = data.exercises.reduce((acc, ex) => acc + ex.sets.filter((s) => s.isPR).length, 0);
 
-  const handleGoHistory = () => { setWorkoutSummaryData(null); setView("history"); };
-  const handleGoDashboard = () => { setWorkoutSummaryData(null); setView("dashboard"); };
+  const handleGoHistory = () => { setWorkoutSummaryData(null); router.push("/historico"); };
+  const handleGoDashboard = () => { setWorkoutSummaryData(null); router.push("/"); };
 
   const statCards = [
     { icon: <Clock className="w-5 h-5" />, value: formatTime(data.durationSec), label: "duração", color: "text-sky-400", bg: "bg-sky-500/10" },

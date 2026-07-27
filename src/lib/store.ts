@@ -1,18 +1,9 @@
-// Store global para navegação entre views (sem router)
+// Store global para estado de UI que NÃO deveria estar na URL (ex.: qual
+// treino está sendo editado, dados temporários entre telas). A navegação
+// entre views principais foi migrada para rotas reais do App Router — ver
+// src/app/(app)/**. Este store não controla mais "qual tela está visível".
 import { create } from "zustand";
 import { getPersistedActiveWorkoutId, setPersistedActiveWorkoutId } from "@/lib/workout-draft";
-
-export type ViewKey =
-  | "dashboard"
-  | "library"
-  | "workouts"
-  | "active-workout"
-  | "workout-summary"
-  | "history"
-  | "stats"
-  | "body"
-  | "profile"
-  | "auth";
 
 export type WorkoutSummaryData = {
   workoutName: string;
@@ -40,10 +31,10 @@ export type WorkoutSummaryData = {
 };
 
 interface AppState {
-  view: ViewKey;
-  setView: (view: ViewKey) => void;
-
-  // Parâmetros para as views
+  // ID do treino em andamento (persistido em localStorage) — usado só para
+  // sabermos, ao abrir o app do zero (ex.: PWA), se devemos levar o usuário
+  // direto de volta para /treinos/[id]/ativo em vez do dashboard. A tela em
+  // si é sempre resolvida pela URL, não por este valor.
   activeWorkoutId: string | null;
   setActiveWorkoutId: (id: string | null) => void;
 
@@ -61,11 +52,9 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  view: "dashboard",
-  setView: (view) => set({ view }),
-
   // Restaura o treino ativo salvo no localStorage (se houver) já na
-  // inicialização, para o app conseguir decidir a tela certa ao carregar.
+  // inicialização, para o layout conseguir decidir se redireciona para a
+  // rota do treino em andamento.
   activeWorkoutId: getPersistedActiveWorkoutId(),
   setActiveWorkoutId: (id) => {
     setPersistedActiveWorkoutId(id);

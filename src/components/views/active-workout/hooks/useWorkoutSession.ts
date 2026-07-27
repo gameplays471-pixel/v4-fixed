@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAppStore, type WorkoutSummaryData } from "@/lib/store";
 import { apiGet, apiPost } from "@/lib/api";
 import { toast } from "sonner";
@@ -26,9 +27,8 @@ function parseRir(value: string | undefined): number | undefined {
  * preocupação independente (UI de contagem regressiva), acionada aqui só
  * através do valor de retorno de `toggleSetComplete`.
  */
-export function useWorkoutSession() {
-  const setView = useAppStore((s) => s.setView);
-  const activeWorkoutId = useAppStore((s) => s.activeWorkoutId);
+export function useWorkoutSession(workoutId: string) {
+  const router = useRouter();
   const setActiveWorkoutId = useAppStore((s) => s.setActiveWorkoutId);
   const setWorkoutSummaryData = useAppStore((s) => s.setWorkoutSummaryData);
 
@@ -54,10 +54,6 @@ export function useWorkoutSession() {
   // um estado vazio momentâneo durante o carregamento.
   const hydratedRef = useRef(false);
 
-  // Ref para evitar redirect ao workouts quando o treino for finalizado
-  // (nesse caso setView("workout-summary") já foi chamado)
-  const finishingRef = useRef(false);
-
   // Carregar treino + últimos sets do histórico
   useEffect(() => {
     // Guarda contra o double-invoke do React Strict Mode em dev (monta,
@@ -66,19 +62,15 @@ export function useWorkoutSession() {
     // além de duplicar o toast de "treino restaurado".
     let cancelled = false;
 
-    if (!activeWorkoutId) {
-      // Só redireciona se não estamos indo para o resumo
-      if (!finishingRef.current) {
-        setView("workouts");
-      }
-      return;
-    }
-    apiGet<{ workout: Workout }>(`/api/workouts/${activeWorkoutId}`)
+    apiGet<{ workout: Workout }>(`/api/workouts/${workoutId}`)
       .then(async (data) => {
         if (cancelled) return;
         setWorkout(data.workout);
+        // Marca este treino como "em andamento" (persistido), para que o
+        // app saiba levar o usuário de volta pra cá se ele reabrir na raiz.
+        setActiveWorkoutId(workoutId);
 
-        const draft = loadWorkoutDraft(activeWorkoutId);
+        const draft = loadWorkoutDraft(workoutId);
 
         // Inicializar sets/cardio (usa o rascunho salvo quando existir)
         const initial: Record<string, SetState[]> = {};
@@ -130,6 +122,15 @@ export function useWorkoutSession() {
           }
         }
       })
+      .catch((e) => {
+        if (cancelled) return;
+        // Treino não existe (ou pertence a outro usuário) — o backend
+        // responde 404 nos dois casos. Volta pra lista em vez de travar
+        // numa tela de treino que nunca vai carregar.
+        console.error("Erro ao carregar treino:", e);
+        toast.error("Treino não encontrado");
+        router.replace("/treinos");
+      })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
@@ -137,21 +138,22 @@ export function useWorkoutSession() {
     return () => {
       cancelled = true;
     };
-  }, [activeWorkoutId, setView]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workoutId]);
 
   // Autosave: salva o progresso no localStorage sempre que algo muda,
   // pra sobreviver a um reload/aba fechada sem querer.
   useEffect(() => {
-    if (!hydratedRef.current || !activeWorkoutId) return;
+    if (!hydratedRef.current) return;
     saveWorkoutDraft({
-      workoutId: activeWorkoutId,
+      workoutId,
       startedAt: startedAt.toISOString(),
       setsMap,
       cardioMap,
       collapsedExercises: Array.from(collapsedExercises),
       savedAt: new Date().toISOString(),
     });
-  }, [activeWorkoutId, setsMap, cardioMap, collapsedExercises, startedAt]);
+  }, [workoutId, setsMap, cardioMap, collapsedExercises, startedAt]);
 
   // Cronômetro de treino
   useEffect(() => {
@@ -426,9 +428,8 @@ export function useWorkoutSession() {
 
       clearWorkoutDraft(workout.id);
       setWorkoutSummaryData(summaryData);
-      finishingRef.current = true;
-      setView("workout-summary");
       setActiveWorkoutId(null);
+      router.push(`/treinos/${workout.id}/resumo`);
     } catch (e) {
       toast.error("Erro ao salvar treino");
       console.error(e);
@@ -442,7 +443,7 @@ export function useWorkoutSession() {
     if (confirm("Cancelar treino? O progresso salvo será apagado.")) {
       if (workout) clearWorkoutDraft(workout.id);
       setActiveWorkoutId(null);
-      setView("workouts");
+      router.push("/treinos");
     }
   };
 
@@ -450,7 +451,6 @@ export function useWorkoutSession() {
     workout,
     loading,
     elapsed,
-    setView,
 
     setsMap,
     cardioMap,

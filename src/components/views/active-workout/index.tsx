@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExerciseImageDialog } from "@/components/exercise-media";
@@ -12,8 +13,13 @@ import { RestTimerCard } from "./components/RestTimerCard";
 import { ExerciseCard } from "./components/ExerciseCard";
 import { FinishModal } from "./components/FinishModal";
 
-export function ActiveWorkoutView() {
-  const session = useWorkoutSession();
+interface ActiveWorkoutViewProps {
+  workoutId: string;
+}
+
+export function ActiveWorkoutView({ workoutId }: ActiveWorkoutViewProps) {
+  const router = useRouter();
+  const session = useWorkoutSession(workoutId);
   const restTimer = useRestTimer();
 
   const [lightboxExercise, setLightboxExercise] = useState<{ name: string; images: string[] } | null>(null);
@@ -37,7 +43,7 @@ export function ActiveWorkoutView() {
     return (
       <Card className="p-8 text-center">
         <p className="text-muted-foreground">Treino não encontrado</p>
-        <Button onClick={() => session.setView("workouts")} className="mt-4">
+        <Button onClick={() => router.push("/treinos")} className="mt-4">
           Voltar
         </Button>
       </Card>

@@ -177,7 +177,7 @@ export async function setSessionCookie(token: string, remember: boolean = true) 
     expires.setDate(expires.getDate() + SESSION_EXPIRY_DAYS);
     cookieStore.set(SESSION_COOKIE, token, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       expires,
       path: "/",
@@ -186,7 +186,7 @@ export async function setSessionCookie(token: string, remember: boolean = true) 
     // Sem "manter conectado": cookie de sessão, expira ao fechar o navegador.
     cookieStore.set(SESSION_COOKIE, token, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
     });

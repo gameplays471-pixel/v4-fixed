@@ -1,7 +1,7 @@
 "use client";
-"use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,8 +38,7 @@ const COLOR_OPTIONS = ["#ef4444","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ec489
 const INTENSITY_OPTIONS = ["Leve","Moderada","Intensa"];
 
 export function WorkoutsView() {
-  const setView = useAppStore((s) => s.setView);
-  const setActiveWorkoutId = useAppStore((s) => s.setActiveWorkoutId);
+  const router = useRouter();
   const editingWorkoutId = useAppStore((s) => s.editingWorkoutId);
   const setEditingWorkoutId = useAppStore((s) => s.setEditingWorkoutId);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -136,7 +135,7 @@ export function WorkoutsView() {
                     </>
                   )}
                 </div>
-                <Button onClick={() => { setActiveWorkoutId(w.id); setView("active-workout"); }}
+                <Button onClick={() => router.push(`/treinos/${w.id}/ativo`)}
                   className="w-full h-10 rounded-xl font-semibold gap-2" style={{ background: w.color || "var(--primary)", boxShadow: `0 4px 16px ${w.color || "var(--primary)"}30` }}>
                   <Play className="w-4 h-4 fill-current" /> Iniciar treino
                 </Button>

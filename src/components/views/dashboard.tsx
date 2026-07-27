@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAppStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
@@ -24,8 +24,7 @@ type Workout = {
 type Session = { id: string; workoutName: string; startedAt: string; durationSec: number; totalVolume: number; };
 
 export function DashboardView() {
-  const setView = useAppStore((s) => s.setView);
-  const setActiveWorkoutId = useAppStore((s) => s.setActiveWorkoutId);
+  const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [recentSessions, setRecentSessions] = useState<Session[]>([]);
@@ -41,7 +40,7 @@ export function DashboardView() {
     }).finally(() => setLoading(false));
   }, []);
 
-  const startWorkout = (id: string) => { setActiveWorkoutId(id); setView("active-workout"); };
+  const startWorkout = (id: string) => { router.push(`/treinos/${id}/ativo`); };
 
   const greet = () => {
     const h = new Date().getHours();
@@ -94,7 +93,7 @@ export function DashboardView() {
               <p className="text-sm text-muted-foreground mt-1">Pronto para treinar hoje?</p>
             )}
           </div>
-          <Button onClick={() => setView("workouts")}
+          <Button onClick={() => router.push("/treinos")}
             className="self-start sm:self-auto rounded-xl h-11 px-5 gap-2 bg-primary font-semibold shadow-lg shadow-primary/30 hover:opacity-90 transition-opacity shrink-0">
             <Plus className="w-4 h-4" /> Novo treino
           </Button>
@@ -122,7 +121,7 @@ export function DashboardView() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-black text-lg">Meus treinos</h2>
-          <button onClick={() => setView("workouts")} className="text-xs text-primary flex items-center gap-1 font-semibold hover:opacity-80 transition-opacity">
+          <button onClick={() => router.push("/treinos")} className="text-xs text-primary flex items-center gap-1 font-semibold hover:opacity-80 transition-opacity">
             Ver todos <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -131,7 +130,7 @@ export function DashboardView() {
           <Card className="p-8 text-center border-dashed">
             <Dumbbell className="w-10 h-10 mx-auto mb-3 text-muted-foreground/40" />
             <p className="text-sm text-muted-foreground mb-4">Você ainda não criou nenhum treino.</p>
-            <Button onClick={() => setView("workouts")} size="sm" className="bg-primary shadow-lg shadow-primary/20">
+            <Button onClick={() => router.push("/treinos")} size="sm" className="bg-primary shadow-lg shadow-primary/20">
               Criar primeiro treino
             </Button>
           </Card>
@@ -176,7 +175,7 @@ export function DashboardView() {
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-black text-base">Recentes</h2>
-            <button onClick={() => setView("history")} className="text-xs text-primary flex items-center gap-1 font-semibold hover:opacity-80 transition-opacity">
+            <button onClick={() => router.push("/historico")} className="text-xs text-primary flex items-center gap-1 font-semibold hover:opacity-80 transition-opacity">
               Ver histórico <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -215,7 +214,7 @@ export function DashboardView() {
             <h2 className="font-black text-base flex items-center gap-2">
               <Trophy className="w-4 h-4 text-yellow-400" /> Recordes
             </h2>
-            <button onClick={() => setView("stats")} className="text-xs text-primary flex items-center gap-1 font-semibold hover:opacity-80 transition-opacity">
+            <button onClick={() => router.push("/stats")} className="text-xs text-primary flex items-center gap-1 font-semibold hover:opacity-80 transition-opacity">
               Ver stats <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
