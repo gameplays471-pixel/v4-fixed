@@ -13,7 +13,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     // Logar erro crítico para serviço de monitoramento
-    console.error('Global Error:', error)
+    console.error('Erro Global:', error)
   }, [error])
 
   return (

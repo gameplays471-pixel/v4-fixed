@@ -14,7 +14,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // Logar o erro para serviço de monitoramento
-    console.error('Route Error:', error)
+    console.error('Erro de Rota:', error)
   }, [error])
 
   return (
@@ -39,7 +39,7 @@ export default function Error({
           
           {error.digest && (
             <p className="text-xs text-muted-foreground text-center">
-              Error ID: {error.digest}
+              ID do Erro: {error.digest}
             </p>
           )}
 

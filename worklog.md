@@ -81,3 +81,35 @@ Stage Summary:
 - Persistência em localStorage (não mostra novamente após completar)
 - Botão "Ver Tour Novamente" para reiniciar
 - Design responsivo com Dialog do shadcn/ui
+
+---
+Task ID: 4
+Agent: Main Agent
+Task: Corrigir todos os textos em inglês/chinês para português
+
+Work Log:
+- Verificou todos os arquivos .ts/.tsx do projeto em busca de texto em inglês
+- Corrigiu `/src/app/layout.tsx`:
+  - `lang="en"` → `lang="pt-BR"`
+  - Title, description, keywords, OpenGraph e Twitter cards para português
+- Corrigiu `/src/hooks/use-react-query.ts`:
+  - `[API Error]` → `[Erro de API]`
+  - `[Mutation Error]` → `[Erro de Mutação]`
+  - `@deprecated Use ... instead` → `@deprecated Use ... em vez disso`
+- Corrigiu `/src/app/page.tsx`:
+  - Labels de erro demo (Bad Request → Requisição Inválida, etc.)
+  - Footer text para português
+- Corrigiu `/src/app/api/route.ts`:
+  - `Hello, world!` → `Olá, mundo!`
+- Corrigiu `/src/app/error.tsx`:
+  - `Route Error:` → `Erro de Rota:`
+  - `Error ID:` → `ID do Erro:`
+- Corrigiu `/src/app/global-error.tsx`:
+  - `Global Error:` → `Erro Global:`
+- Verificou com ESLint (sem erros)
+
+Stage Summary:
+- Todos os textos visíveis e comentários corrigidos para português
+- Apenas termos técnicos padrão mantidos (React, TypeScript, etc.)
+- Metadata SEO agora em português
+- Console logs padronizados em português

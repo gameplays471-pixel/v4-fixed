@@ -215,7 +215,7 @@ export function useApiQuery<TData>(
       })
 
       // Log padronizado no console
-      console.error(`[API Error] ${title}:`, {
+      console.error(`[Erro de API] ${title}:`, {
         url,
         queryKey,
         error: query.error,
@@ -323,7 +323,7 @@ export function useApiMutation<TVariables = unknown, TResponse = unknown>(
       })
 
       // Log padronizado
-      console.error(`[Mutation Error] ${title}:`, {
+      console.error(`[Erro de Mutação] ${title}:`, {
         url,
         method,
         error,
@@ -398,7 +398,7 @@ export function usePrefetch<TData>() {
 // HOOKS LEGADOS (compatibilidade)
 // ============================================
 
-/** @deprecated Use useApiQuery instead */
+/** @deprecated Use useApiQuery em vez disso */
 export function useApiData<T>(
   url: string | null,
   queryKey: string[],
@@ -411,7 +411,7 @@ export function useApiData<T>(
   return useApiQuery<T>(url, queryKey, options as UseApiQueryOptions<T>)
 }
 
-/** @deprecated Use usePaginatedQuery instead */
+/** @deprecated Use usePaginatedQuery em vez disso */
 export function usePaginatedData<T>(
   baseUrl: string,
   queryKey: string[],
@@ -422,7 +422,7 @@ export function usePaginatedData<T>(
   return usePaginatedQuery<T>(baseUrl, queryKey, page, pageSize, options as UseApiQueryOptions<PaginatedResponse<T>>)
 }
 
-/** @deprecated Use useApiMutation instead */
+/** @deprecated Use useApiMutation em vez disso */
 export function useMutationApi<TVariables = unknown, TResponse = unknown>(
   url: string,
   invalidationKeys: string[][],
