@@ -104,9 +104,19 @@ export async function processSyncQueue(): Promise<{
   const queue = loadQueue();
   let synced = 0;
   let failed = 0;
+  // Itens que continuam pendentes ao final desta rodada (ainda vão
+  // falhar/repetir, mas não bateram o MAX_RETRIES). Construído do zero e
+  // salvo uma única vez no final — ver nota abaixo sobre o bug antigo.
+  const remaining: SyncQueueItem[] = [];
 
   for (const item of queue) {
-    if (!navigator.onLine) break; // caiu de novo no meio
+    if (!navigator.onLine) {
+      // Caiu de novo no meio: este e todos os itens ainda não
+      // processados voltam pra fila intactos (não incrementa retryCount,
+      // já que nem chegou a tentar).
+      remaining.push(item);
+      continue;
+    }
 
     try {
       const token = getToken();
@@ -120,33 +130,40 @@ export async function processSyncQueue(): Promise<{
       });
 
       if (res.ok) {
-        removeFromQueue(item.id);
         synced++;
       } else if (res.status === 401) {
         // Token expirado — não adianta retry, remove da fila
-        removeFromQueue(item.id);
         failed++;
       } else {
         // 4xx/5xx — marca retry, mas continua tentando os outros
         item.retryCount++;
         if (item.retryCount >= MAX_RETRIES) {
-          removeFromQueue(item.id);
           failed++;
           console.error(`[sync-queue] Descartado após ${MAX_RETRIES} tentativas:`, item.url);
+        } else {
+          remaining.push(item);
         }
       }
     } catch {
       // Erro de rede (TypeError) — não remove, vai tentar na próxima
       item.retryCount++;
       if (item.retryCount >= MAX_RETRIES) {
-        removeFromQueue(item.id);
         failed++;
+      } else {
+        remaining.push(item);
       }
     }
   }
 
-  // Persiste retry counts atualizados
-  saveQueue(loadQueue());
+  // Salva a fila atualizada (com retryCount incrementado) numa única
+  // escrita. Antes disso era `saveQueue(loadQueue())` — recarregava o que
+  // já estava salvo (sem os incrementos feitos em memória acima, que
+  // nunca chegavam a ser persistidos) e regravava o mesmo valor: um
+  // no-op. Na prática o `retryCount` nunca avançava de verdade, então
+  // MAX_RETRIES nunca era atingido e um item permanentemente quebrado
+  // (ex.: workout apagado nesse meio tempo) ficava tentando de novo pra
+  // sempre, a cada 30s/reconexão.
+  saveQueue(remaining);
   processing = false;
   dispatchSyncEvent();
   return { synced, failed };

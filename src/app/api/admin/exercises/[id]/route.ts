@@ -27,7 +27,7 @@ export const PUT = withErrorHandling<{ params: Promise<{ id: string }> }>(
     const before = await db.exercise.findUnique({ where: { id } });
     if (!before) throw notFound("Exercício não encontrado");
 
-    const parsed = await parseBody(req, exerciseUpdateSchema);
+    const parsed = await parseBody(req, exerciseUpdateSchema, "PUT /api/admin/exercises/[id]");
     if (!parsed.success) return parsed.response;
     const data = parsed.data;
 

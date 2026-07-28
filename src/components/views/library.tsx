@@ -12,6 +12,7 @@ import { ExerciseThumb } from "@/components/exercise-media";
 import { apiGet, apiPost } from "@/lib/api";
 import { muscleGroups, equipmentTypes, levels } from "@/lib/exercises-data";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 type Exercise = {
   id: string;
@@ -58,6 +59,10 @@ export function LibraryView() {
     
     apiGet<{ exercises: Exercise[] }>(`/api/exercises?${params.toString()}`)
       .then((data) => setExercises(data.exercises))
+      .catch((e) => {
+        console.error("Erro ao carregar exercícios:", e);
+        toast.error("Não foi possível carregar a biblioteca de exercícios.");
+      })
       .finally(() => setLoading(false));
   }, [search, filterMuscles, filterEquipment, filterLevel]);
 
@@ -65,6 +70,12 @@ export function LibraryView() {
   useEffect(() => {
     apiGet<{ favorites: Favorite[] }>("/api/exercises/favorites").then((data) => {
       setFavorites(new Set(data.favorites.map((f) => f.exerciseId)));
+    }).catch((e) => {
+      // Não bloqueia a tela (favoritos são um "extra" sobre a lista já
+      // carregada acima) — só evita a rejeição de promise não tratada e
+      // deixa registrado o motivo caso o usuário reclame de favoritos
+      // sumindo/não marcando.
+      console.error("Erro ao carregar favoritos:", e);
     });
   }, []);
 

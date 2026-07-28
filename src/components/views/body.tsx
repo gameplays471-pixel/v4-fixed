@@ -60,6 +60,10 @@ export function BodyView() {
     setLogsLoading(true);
     apiGet<{ logs: BodyWeightLog[] }>("/api/bodyweight")
       .then((d) => setLogs(d.logs))
+      .catch((e) => {
+        console.error("Erro ao carregar registros de peso:", e);
+        toast.error("Não foi possível carregar seu histórico de peso.");
+      })
       .finally(() => setLogsLoading(false));
   };
 
@@ -74,6 +78,10 @@ export function BodyView() {
           setBeforeId((prev) => prev || d.photos[d.photos.length - 1].id);
           setAfterId((prev) => prev || d.photos[0].id);
         }
+      })
+      .catch((e) => {
+        console.error("Erro ao carregar fotos de progresso:", e);
+        toast.error("Não foi possível carregar suas fotos de progresso.");
       })
       .finally(() => setPhotosLoading(false));
   };

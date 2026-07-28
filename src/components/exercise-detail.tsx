@@ -45,13 +45,25 @@ function splitLines(text: string): string[] {
 export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClose }: ExerciseDetailProps) {
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
 
-  useEffect(() => {
+  const load = () => {
     setLoading(true);
+    setLoadFailed(false);
     apiGet<{ exercise: Exercise }>(`/api/exercises/${exerciseId}`)
       .then((data) => setExercise(data.exercise))
+      .catch((e) => {
+        // Antes, qualquer falha aqui (rede, 500 transitório) caía no mesmo
+        // "else" de exercise=null que o 404 real usa, mostrando "Exercício
+        // não encontrado" — mensagem enganosa quando o problema era só de
+        // carregamento, não de o exercício não existir.
+        console.error("Erro ao carregar exercício:", e);
+        setLoadFailed(true);
+      })
       .finally(() => setLoading(false));
-  }, [exerciseId]);
+  };
+
+  useEffect(load, [exerciseId]);
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -170,7 +182,16 @@ export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClo
             </div>
           </div>
         ) : (
-          <p className="text-center text-muted-foreground py-8">Exercício não encontrado.</p>
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">
+              {loadFailed ? "Não foi possível carregar este exercício." : "Exercício não encontrado."}
+            </p>
+            {loadFailed && (
+              <button onClick={load} className="mt-3 text-sm text-primary font-semibold hover:opacity-80">
+                Tentar de novo
+              </button>
+            )}
+          </div>
         )}
       </DialogContent>
     </Dialog>

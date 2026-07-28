@@ -12,6 +12,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 // ─── Helper genérico ────────────────────────────────────────────────────────
 
@@ -26,12 +27,14 @@ type ParseResult<T> = { success: true; data: T } | { success: false; response: N
  */
 export async function parseBody<S extends z.ZodTypeAny>(
   req: NextRequest,
-  schema: S
+  schema: S,
+  routeName = "unknown route"
 ): Promise<ParseResult<z.infer<S>>> {
   let json: unknown;
   try {
     json = await req.json();
   } catch {
+    logger.warn(`${routeName} — 400 (JSON malformado)`, { route: routeName });
     return {
       success: false,
       response: NextResponse.json({ error: "Corpo da requisição inválido (JSON malformado)" }, { status: 400 }),
@@ -40,18 +43,22 @@ export async function parseBody<S extends z.ZodTypeAny>(
 
   const result = schema.safeParse(json);
   if (!result.success) {
+    const details = result.error.issues.map((issue) => ({
+      path: issue.path.join("."),
+      message: issue.message,
+    }));
+
+    // Antes essa falha nunca era logada: como o handler faz `return`
+    // (em vez de `throw`), ela nunca passava pelo catch de
+    // `withErrorHandling`, que é o único lugar que chamava `logger.warn`.
+    // Resultado: um 400 de validação no Vercel sem nenhuma linha de log
+    // correspondente, tornando impossível saber qual campo falhou depois
+    // do fato. Logamos aqui, na origem, com o campo e o motivo exatos.
+    logger.warn(`${routeName} — 400 (dados inválidos)`, { route: routeName, details });
+
     return {
       success: false,
-      response: NextResponse.json(
-        {
-          error: "Dados inválidos",
-          details: result.error.issues.map((issue) => ({
-            path: issue.path.join("."),
-            message: issue.message,
-          })),
-        },
-        { status: 400 }
-      ),
+      response: NextResponse.json({ error: "Dados inválidos", details }, { status: 400 }),
     };
   }
 
@@ -76,13 +83,13 @@ const optionalNullableString = (max: number) => z.string().trim().max(max).optio
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 export const signupSchema = z.object({
-  email: z.string().trim().email("Email inválido").max(200),
+  email: z.string().trim().toLowerCase().email("Email inválido").max(200),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").max(200),
   name: z.string().trim().min(1).max(100).optional(),
 });
 
 export const loginSchema = z.object({
-  email: z.string().trim().email("Email inválido").max(200),
+  email: z.string().trim().toLowerCase().email("Email inválido").max(200),
   password: z.string().min(1, "Senha é obrigatória").max(200),
   rememberMe: z.boolean().optional(),
 });

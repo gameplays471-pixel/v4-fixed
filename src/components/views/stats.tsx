@@ -7,6 +7,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, formatVolume, formatDuration } from "@/lib/api";
 import { Trophy, Dumbbell, Clock, TrendingUp, Flame, Target, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
@@ -31,6 +32,10 @@ export function StatsView() {
   useEffect(() => {
     apiGet<{ stats: Stats }>("/api/stats")
       .then((d) => setStats(d.stats))
+      .catch((e) => {
+        console.error("Erro ao carregar estatísticas:", e);
+        toast.error("Não foi possível carregar suas estatísticas.");
+      })
       .finally(() => setLoading(false));
   }, []);
 

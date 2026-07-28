@@ -39,7 +39,7 @@ export const GET = withErrorHandling("Get sessions", async (req: NextRequest) =>
 export const POST = withErrorHandling("Create session", async (req: NextRequest) => {
   const user = await requireUser(req);
 
-  const parsed = await parseBody(req, sessionSchema);
+  const parsed = await parseBody(req, sessionSchema, "POST /api/sessions");
   if (!parsed.success) return parsed.response;
   const { workoutId, workoutName, startedAt, endedAt, durationSec, sets, notes } = parsed.data;
 

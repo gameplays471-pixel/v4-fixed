@@ -28,11 +28,28 @@ export function useRestTimer() {
       restPausedAtRef.current = null;
       return;
     }
-    if (restTimer.paused) return;
+    if (restTimer.paused) {
+      // BUG CORRIGIDO: antes, pausar só parava o setInterval (a UI
+      // congelava), mas `restEndRef.current` (timestamp absoluto de
+      // término) continuava intocado. Ao despausar, o tempo que passou
+      // durante a pausa já tinha sido "descontado" de uma vez, fazendo o
+      // timer pular pra frente. Agora guardamos quanto faltava (em ms) em
+      // `restPausedAtRef` e limpamos `restEndRef`, pra recalcular o
+      // término a partir de agora quando despausar.
+      if (restEndRef.current !== null) {
+        restPausedAtRef.current = Math.max(0, restEndRef.current - Date.now());
+        restEndRef.current = null;
+      }
+      return;
+    }
 
-    // Na primeira vez que o timer fica ativo e não pausado, define o endTime
+    // Na primeira vez que o timer fica ativo e não pausado, define o
+    // endTime — a partir do tempo restante salvo ao pausar, se houver,
+    // senão a partir do `remaining` atual do estado.
     if (restEndRef.current === null) {
-      restEndRef.current = Date.now() + restTimer.remaining * 1000;
+      const remainingMs = restPausedAtRef.current ?? restTimer.remaining * 1000;
+      restEndRef.current = Date.now() + remainingMs;
+      restPausedAtRef.current = null;
     }
 
     const tick = () => {

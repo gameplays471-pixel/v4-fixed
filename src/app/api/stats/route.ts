@@ -12,7 +12,15 @@ export const GET = withErrorHandling("Get stats", async (req: NextRequest) => {
 
   const sessions = await db.workoutSession.findMany({
     where: { userId: user.id },
-    include: { sets: true },
+    include: {
+      // `exercise` incluído aqui pra evitar N+1: antes, o bloco de
+      // "grupo muscular mais treinado" fazia 1 query por sessão dentro de
+      // um loop (`db.sessionSet.findMany` para cada `s of sessions`),
+      // multiplicando o número de round-trips ao banco pelo número de
+      // treinos do usuário. Trazendo `exercise` junto de uma vez só, o
+      // mesmo resultado é obtido com uma única query.
+      sets: { include: { exercise: { select: { muscleGroup: true } } } },
+    },
     orderBy: { startedAt: "asc" },
   });
 
@@ -22,30 +30,30 @@ export const GET = withErrorHandling("Get stats", async (req: NextRequest) => {
   const avgDuration = totalSessions > 0 ? totalDuration / totalSessions : 0;
 
   // Dias consecutivos
-  const uniqueDates = new Set(
+  //
+  // BUG CORRIGIDO: a versão anterior comparava `currentDate` (com a hora
+  // atual, ex. 14h32) contra `sessionDate` (sempre meia-noite, vindo de uma
+  // string "YYYY-MM-DD"). Misturar datas "com hora" e "à meia-noite" no
+  // Math.floor(diff / 86400000) dava diffDays errado na maior parte do dia,
+  // fazendo sequências reais sumirem e sequências quebradas serem contadas
+  // como contínuas. A correção normaliza tudo pra meia-noite e caminha por
+  // um Set de dias — mesma abordagem (correta) já usada em
+  // src/app/api/admin/users/[id]/route.ts para o mesmo cálculo.
+  const daySet = new Set(
     sessions.map((s) => new Date(s.startedAt).toISOString().split("T")[0])
   );
-  const sortedDates = Array.from(uniqueDates).sort().reverse();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = today.toISOString().split("T")[0];
+  const yesterdayStr = new Date(today.getTime() - 86400000).toISOString().split("T")[0];
 
   let streak = 0;
-  let currentDate = new Date();
-  for (let i = 0; i < sortedDates.length; i++) {
-    const sessionDate = new Date(sortedDates[i]);
-    const diffDays = Math.floor(
-      (currentDate.getTime() - sessionDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-
-    if (i === 0 && diffDays > 1) break;
-    if (i === 0 && diffDays === 0) {
-      streak = 1;
-      currentDate.setDate(currentDate.getDate() - 1);
-      continue;
-    }
-    if (diffDays === streak) {
+  if (daySet.has(todayStr) || daySet.has(yesterdayStr)) {
+    let checkDate = daySet.has(todayStr) ? today : new Date(today.getTime() - 86400000);
+    while (daySet.has(checkDate.toISOString().split("T")[0])) {
       streak++;
-      currentDate.setDate(currentDate.getDate() - 1);
-    } else {
-      break;
+      checkDate = new Date(checkDate.getTime() - 86400000);
     }
   }
 
@@ -78,10 +86,7 @@ export const GET = withErrorHandling("Get stats", async (req: NextRequest) => {
   const allSetsData: Array<{ exerciseName: string; weight: number; reps: number; exercise: { muscleGroup: string } }> = [];
 
   for (const s of sessions) {
-    const setsWithExercise = await db.sessionSet.findMany({
-      where: { sessionId: s.id },
-      include: { exercise: { select: { muscleGroup: true } } },
-    });
+    const setsWithExercise = s.sets;
     const seenExercises = new Set<string>();
     for (const set of setsWithExercise) {
       const mg = set.exercise.muscleGroup;

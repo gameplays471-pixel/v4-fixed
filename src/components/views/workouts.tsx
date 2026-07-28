@@ -47,7 +47,13 @@ export function WorkoutsView() {
 
   const load = () => {
     setLoading(true);
-    apiGet<{ workouts: Workout[] }>("/api/workouts").then((d) => setWorkouts(d.workouts)).finally(() => setLoading(false));
+    apiGet<{ workouts: Workout[] }>("/api/workouts")
+      .then((d) => setWorkouts(d.workouts))
+      .catch((e) => {
+        console.error("Erro ao carregar treinos:", e);
+        toast.error("Não foi possível carregar seus treinos.");
+      })
+      .finally(() => setLoading(false));
   };
   useEffect(() => { load(); }, []);
   useEffect(() => { if (editingWorkoutId) setShowEditor(true); }, [editingWorkoutId]);
@@ -166,6 +172,14 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
     apiGet<{ workout: Workout }>(`/api/workouts/${workoutId}`).then(({ workout: w }) => {
       setName(w.name); setDescription(w.description || ""); setColor(w.color || COLOR_OPTIONS[0]);
       setDefaultRest(w.defaultRest); setExercises(w.exercises);
+    }).catch((e) => {
+      // Sem catch, uma falha aqui abria o editor de edição totalmente
+      // vazio (nome "", 0 exercícios) sem indicar que o treino original
+      // não carregou — risco de o usuário "salvar" por cima e apagar os
+      // exercícios de um treino existente sem perceber.
+      console.error("Erro ao carregar treino para edição:", e);
+      toast.error("Não foi possível carregar este treino para edição.");
+      onClose();
     }).finally(() => setLoading(false));
   }, [workoutId]);
 
@@ -341,6 +355,10 @@ function ExercisePickerContent({
     if (filterMuscles.length) p.set("muscleGroup", filterMuscles.join(","));
     apiGet<{ exercises: Exercise[] }>(`/api/exercises?${p}`)
       .then((d) => setExercises(d.exercises))
+      .catch((e) => {
+        console.error("Erro ao carregar exercícios:", e);
+        toast.error("Não foi possível carregar a lista de exercícios.");
+      })
       .finally(() => setLoading(false));
   }, [search, filterMuscles]);
 

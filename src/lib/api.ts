@@ -69,7 +69,15 @@ export async function apiPost<T>(url: string, body?: unknown): Promise<T> {
     handleUnauthorized();
     throw new Error(data.error || "Sessão expirada");
   }
-  if (!res.ok) throw new Error(data.error || `API error: ${res.status}`);
+  if (!res.ok) {
+    // Em 400 de validação (zod), o backend manda `details` (campo + motivo
+    // exato) além de `error` (mensagem genérica "Dados inválidos"). Antes
+    // isso era descartado e só sobrava o texto genérico no toast — sem
+    // nenhum jeito de saber, nem no console do navegador, qual campo
+    // reprovou. Logamos aqui pra facilitar diagnóstico.
+    if (data.details) console.error(`API ${res.status} em ${url}:`, data.details);
+    throw new Error(data.error || `API error: ${res.status}`);
+  }
   return data;
 }
 
@@ -84,7 +92,10 @@ export async function apiPut<T>(url: string, body?: unknown): Promise<T> {
     handleUnauthorized();
     throw new Error(data.error || "Sessão expirada");
   }
-  if (!res.ok) throw new Error(data.error || `API error: ${res.status}`);
+  if (!res.ok) {
+    if (data.details) console.error(`API ${res.status} em ${url}:`, data.details);
+    throw new Error(data.error || `API error: ${res.status}`);
+  }
   return data;
 }
 

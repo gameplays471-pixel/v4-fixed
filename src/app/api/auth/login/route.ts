@@ -13,7 +13,7 @@ const IP_LIMIT = { limit: 10, windowMs: 15 * 60 * 1000 }; // 10 tentativas / 15 
 const EMAIL_LIMIT = { limit: 15, windowMs: 15 * 60 * 1000 };
 
 export const POST = withErrorHandling("Login", async (req: NextRequest) => {
-  const parsed = await parseBody(req, loginSchema);
+  const parsed = await parseBody(req, loginSchema, "POST /api/auth/login");
   if (!parsed.success) return parsed.response;
   const { email, password, rememberMe = true } = parsed.data;
 

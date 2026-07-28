@@ -24,7 +24,7 @@ export const GET = withErrorHandling("Get favorites", async (req: NextRequest) =
 export const POST = withErrorHandling("Toggle favorite", async (req: NextRequest) => {
   const user = await requireUser(req);
 
-  const parsed = await parseBody(req, favoriteSchema);
+  const parsed = await parseBody(req, favoriteSchema, "POST /api/exercises/favorites");
   if (!parsed.success) return parsed.response;
   const { exerciseId } = parsed.data;
 

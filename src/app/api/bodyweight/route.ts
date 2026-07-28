@@ -21,7 +21,7 @@ export const GET = withErrorHandling("Get body weight logs", async (req: NextReq
 export const POST = withErrorHandling("Create body weight log", async (req: NextRequest) => {
   const user = await requireUser(req);
 
-  const parsed = await parseBody(req, bodyWeightSchema);
+  const parsed = await parseBody(req, bodyWeightSchema, "POST /api/bodyweight");
   if (!parsed.success) return parsed.response;
   const { weight: weightNum, bodyFatPercent: bodyFatNum, loggedAt, notes } = parsed.data;
 

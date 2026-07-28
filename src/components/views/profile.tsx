@@ -47,6 +47,13 @@ export function ProfileView() {
         birthDate: d.user.birthDate ? new Date(d.user.birthDate).toISOString().split("T")[0] : "",
         goal: d.user.goal || "",
       });
+    }).catch((e) => {
+      // Sem isso, uma falha aqui deixava `loading=false` e `user=null` —
+      // e o componente faz `if (!user) return null`, ou seja, tela
+      // completamente em branco, sem nenhuma mensagem de erro nem forma
+      // de tentar de novo além de recarregar a página manualmente.
+      console.error("Erro ao carregar perfil:", e);
+      toast.error("Não foi possível carregar seu perfil. Recarregue a página.");
     }).finally(() => setLoading(false));
   }, []);
 

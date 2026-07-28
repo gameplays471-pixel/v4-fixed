@@ -1,5 +1,4 @@
 "use client";
-"use client";
 
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, formatVolume, formatDuration, formatDate } from "@/lib/api";
 import { Dumbbell, Clock, ChevronRight, Calendar, X, Trophy, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { ShareWorkoutDialog } from "@/components/share-workout-dialog";
 import type { WorkoutSummaryData } from "@/lib/store";
 
@@ -92,6 +92,10 @@ export function HistoryView() {
       .then(([s, st]) => {
         setSessions(s.sessions);
         setStats(st.stats);
+      })
+      .catch((e) => {
+        console.error("Erro ao carregar histórico:", e);
+        toast.error("Não foi possível carregar seu histórico. Tente novamente.");
       })
       .finally(() => setLoading(false));
   }, []);

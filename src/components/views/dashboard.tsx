@@ -8,6 +8,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, formatVolume, formatDuration, relativeTime } from "@/lib/api";
 import { Flame, Dumbbell, TrendingUp, Clock, Plus, Trophy, ArrowRight, Play, Zap } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 type Stats = {
   totalSessions: number; totalVolume: number; totalWeightLifted: number;
@@ -37,6 +38,15 @@ export function DashboardView() {
       apiGet<{ sessions: Session[] }>("/api/sessions?limit=5"),
     ]).then(([s, w, sess]) => {
       setStats(s.stats); setWorkouts(w.workouts); setRecentSessions(sess.sessions);
+    }).catch((e) => {
+      // Antes não havia .catch aqui: se qualquer uma das 3 chamadas
+      // falhasse (erro de rede, 401/500 transitório), a promise rejeitada
+      // não tratada deixava stats/workouts/sessions nos valores iniciais
+      // (vazios) — a tela renderizava normalmente os estados de "você
+      // ainda não tem treinos/registros", passando a falsa impressão de
+      // conta vazia quando na verdade era um erro de carregamento.
+      console.error("Erro ao carregar dashboard:", e);
+      toast.error("Não foi possível carregar seus dados. Puxe para atualizar ou tente novamente.");
     }).finally(() => setLoading(false));
   }, []);
 

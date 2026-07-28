@@ -9,7 +9,7 @@ import { parseBody, signupSchema } from "@/lib/validation";
 const SIGNUP_IP_LIMIT = { limit: 5, windowMs: 60 * 60 * 1000 }; // 5 cadastros / hora
 
 export const POST = withErrorHandling("Signup", async (req: NextRequest) => {
-  const parsed = await parseBody(req, signupSchema);
+  const parsed = await parseBody(req, signupSchema, "POST /api/auth/signup");
   if (!parsed.success) return parsed.response;
   const { email, password, name } = parsed.data;
 

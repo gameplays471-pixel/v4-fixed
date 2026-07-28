@@ -24,7 +24,7 @@ export const GET = withErrorHandling("Get workouts", async (req: NextRequest) =>
 export const POST = withErrorHandling("Create workout", async (req: NextRequest) => {
   const user = await requireUser(req);
 
-  const parsed = await parseBody(req, workoutSchema);
+  const parsed = await parseBody(req, workoutSchema, "POST/PUT /api/workouts");
   if (!parsed.success) return parsed.response;
   const { name, description, defaultRest, color, exercises } = parsed.data;
 

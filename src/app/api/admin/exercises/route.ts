@@ -56,7 +56,7 @@ export const GET = withErrorHandling("Admin: list exercises", async (req: NextRe
 export const POST = withErrorHandling("Admin: create exercise", async (req: NextRequest) => {
   const admin = await requireAdmin(req);
 
-  const parsed = await parseBody(req, exerciseSchema);
+  const parsed = await parseBody(req, exerciseSchema, "POST /api/admin/exercises");
   if (!parsed.success) return parsed.response;
   const data = parsed.data;
 

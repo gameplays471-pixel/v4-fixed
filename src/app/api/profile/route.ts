@@ -15,7 +15,7 @@ export const GET = withErrorHandling("Get profile", async (req: NextRequest) => 
 export const PUT = withErrorHandling("Update profile", async (req: NextRequest) => {
   const user = await requireUser(req);
 
-  const parsed = await parseBody(req, profileSchema);
+  const parsed = await parseBody(req, profileSchema, "PUT /api/profile");
   if (!parsed.success) return parsed.response;
   const { name, bio, weight, height, sex, birthDate, goal, avatarUrl } = parsed.data;
 
