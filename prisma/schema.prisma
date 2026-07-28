@@ -1,222 +1,32 @@
-// GEMgym - Prisma Schema
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  name         String
-  passwordHash String
-  bio          String?
-  weight       Float?
-  height       Float?
-  sex          String?  // "M" | "F" | "Outro"
-  birthDate    DateTime?
-  goal         String?
-  avatarUrl    String?
-  role         String   @default("user") // "user" | "admin" | "support" — controla acesso ao painel /admin
-  disabled     Boolean  @default(false) // admin pode bloquear acesso do usuário
-  disabledAt   DateTime? // quando foi bloqueado (para estatísticas)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  workouts  Workout[]
-  sessions  WorkoutSession[]
-  favorites Favorite[]
-  bodyWeightLogs BodyWeightLog[]
-  progressPhotos ProgressPhoto[]
-}
-
-model Exercise {
-  id              String   @id @default(cuid())
-  name            String
-  slug            String   @unique
-  muscleGroup     String   // grupo muscular primário
-  secondaryMuscles String? // músculos secundários (separados por vírgula)
-  equipment       String?  // equipamento principal
-  category        String   // categoria: "Força", "Hipertrofia", "Cardio", "Mobilidade"
-  equipmentType   String?  // "Livre", "Máquina", "Cabo", "Halteres", "Peso do corpo"
-  level           String   // "Iniciante", "Intermediário", "Avançado"
-  description     String?
-  executionSteps  String?  // passo a passo (separado por \n)
-  commonMistakes  String?
-  tips            String?
-  images          String[] @default([]) // URLs das imagens/gif de demonstração (posição inicial e final)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  workoutExercises WorkoutExercise[]
-  sessionSets     SessionSet[]
-  favorites       Favorite[]
-}
-
-model Workout {
-  id          String   @id @default(cuid())
-  userId      String
-  name        String   // "Treino A", "Push", "Upper", etc.
-  description String?
-  defaultRest Int      @default(90) // descanso padrão em segundos
-  color       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercises WorkoutExercise[]
-  sessions  WorkoutSession[]
-
-  @@index([userId])
-}
-
-model WorkoutExercise {
-  id          String  @id @default(cuid())
-  workoutId   String
-  exerciseId  String
-  order       Int
-  targetSets  Int     @default(3)
-  targetReps  Int     @default(10)
-  restSeconds Int     @default(90)
-  notes       String?
-  targetDurationSec Int?   // exercícios de cardio: duração alvo em segundos
-  targetDistanceKm  Float? // exercícios de cardio: distância alvo em km (opcional)
-  targetIntensity   String? // exercícios de cardio: "Leve" | "Moderada" | "Intensa"
-
-  workout  Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
-  exercise Exercise @relation(fields: [exerciseId], references: [id])
-
-  @@index([workoutId])
-}
-
-model WorkoutSession {
-  id           String   @id @default(cuid())
-  userId       String
-  workoutId    String?
-  workoutName  String
-  startedAt    DateTime @default(now())
-  endedAt      DateTime?
-  durationSec  Int      @default(0)
-  totalVolume  Float    @default(0)
-  notes        String?
-
-  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workout Workout?     @relation(fields: [workoutId], references: [id])
-  sets    SessionSet[]
-
-  @@index([userId])
-  @@index([startedAt])
-}
-
-model SessionSet {
-  id          String  @id @default(cuid())
-  sessionId   String
-  exerciseId  String
-  exerciseName String
-  setNumber   Int
-  weight      Float
-  reps        Int
-  rpe         Float?
-  rir         Float?
-  restSeconds Int     @default(90)
-  completedAt DateTime @default(now())
-  isPR        Boolean @default(false)
-  durationSec Int?    // exercícios de cardio: duração real em segundos
-  distanceKm  Float?  // exercícios de cardio: distância percorrida
-  avgBpm      Int?    // exercícios de cardio: batimento médio
-  intensity   String? // exercícios de cardio: "Leve" | "Moderada" | "Intensa"
-
-  session  WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  exercise Exercise       @relation(fields: [exerciseId], references: [id])
-
-  @@index([sessionId])
-  @@index([exerciseId])
-}
-
-model Favorite {
-  id         String   @id @default(cuid())
-  userId     String
-  exerciseId String
-  createdAt  DateTime @default(now())
-
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, exerciseId])
-}
-
-// Histórico de peso corporal — permite registrar a evolução do peso ao
-// longo do tempo (diferente do User.weight, que é só o valor "atual").
-model BodyWeightLog {
   id        String   @id @default(cuid())
-  userId    String
-  weight    Float
-  bodyFatPercent Float? // % de gordura corporal (opcional, ex: bioimpedância, adipômetro)
-  loggedAt  DateTime @default(now())
-  notes     String?
+  email     String   @unique
+  name      String?
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([loggedAt])
+  updatedAt DateTime @updatedAt
 }
 
-// Fotos de progresso — para comparação visual lado a lado ao longo do
-// tempo (complementa o BodyWeightLog, que é só o número). O arquivo em
-// si fica no Vercel Blob Storage; aqui só guardamos a URL pública.
-model ProgressPhoto {
+model Post {
   id        String   @id @default(cuid())
-  userId    String
-  url       String
-  pathname  String   // caminho do blob, usado para deletar o arquivo depois
-  takenAt   DateTime @default(now())
-  weight    Float?   // peso do dia, se registrado (facilita o comparativo)
-  notes     String?
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  String
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([takenAt])
-}
-
-// Log de auditoria do painel administrativo — toda ação de escrita feita
-// por um admin (criar/editar/excluir exercício, alterar usuário, etc.)
-// grava uma linha aqui. Guardamos snapshots antes/depois como JSON string
-// (não um campo Json nativo, pra manter compatibilidade com o modo como o
-// resto do schema já representa dados semiestruturados como texto) —
-// permite reconstruir "o que mudou" sem depender de triggers no banco.
-model AuditLog {
-  id         String   @id @default(cuid())
-  actorId    String   // id do admin que executou a ação
-  actorEmail String   // snapshot do e-mail no momento (sobrevive a troca de e-mail do admin)
-  action     String   // "create" | "update" | "delete"
-  entityType String   // "exercise" | "user" | "site_config" | ...
-  entityId   String
-  before     String?  // snapshot JSON do estado anterior (null em "create")
-  after      String?  // snapshot JSON do estado novo (null em "delete")
-  ip         String?
-  createdAt  DateTime @default(now())
-
-  @@index([entityType, entityId])
-  @@index([actorId])
-  @@index([createdAt])
-}
-
-// Rate limiting de endpoints sensíveis (login, signup) contra brute force.
-// Cada tentativa (bem ou mal sucedida) grava uma linha; a contagem de
-// linhas dentro da janela de tempo decide se a próxima tentativa é
-// bloqueada. Ver src/lib/rate-limit.ts.
-model RateLimitAttempt {
-  id        String   @id @default(cuid())
-  key       String   // ex: "login:ip:203.0.113.4" | "login:email:foo@bar.com" | "signup:ip:203.0.113.4"
-  createdAt DateTime @default(now())
-
-  @@index([key, createdAt])
+  updatedAt DateTime @updatedAt
 }

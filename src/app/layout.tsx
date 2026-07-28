@@ -1,11 +1,8 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "next-themes";
-import { Toaster } from "@/components/ui/sonner";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/next";
-import { PwaRegister } from "@/components/pwa-register";
+import { Toaster } from "@/components/ui/toaster";
+import { QueryProvider } from "@/components/providers/query-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,35 +15,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GEMgym — Treinos de Musculação",
-  description:
-    "Aplicação web para registro de treinos de musculação, controle de evolução e biblioteca de exercícios.",
-  keywords: ["musculação", "treino", "exercícios", "academia", "gemgym"],
-  manifest: "/manifest.json",
+  title: "Z.ai Code Scaffold - AI-Powered Development",
+  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
+  keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
+  authors: [{ name: "Z.ai Team" }],
   icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
   },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "GEMgym",
+  openGraph: {
+    title: "Z.ai Code Scaffold",
+    description: "AI-powered development with modern React stack",
+    url: "https://chat.z.ai",
+    siteName: "Z.ai",
+    type: "website",
   },
-};
-
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
-    { media: "(prefers-color-scheme: dark)", color: "#04060a" },
-  ],
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  viewportFit: "cover",
+  twitter: {
+    card: "summary_large_image",
+    title: "Z.ai Code Scaffold",
+    description: "AI-powered development with modern React stack",
+  },
 };
 
 export default function RootLayout({
@@ -55,26 +42,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+        <QueryProvider>
           {children}
-        </ThemeProvider>
-        <PwaRegister />
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            style: {
-              background: "var(--card-bg)",
-              color: "var(--fg)",
-              border: "1px solid var(--border)",
-            },
-          }}
-        />
-        <SpeedInsights />
-        <Analytics />
+          <Toaster />
+        </QueryProvider>
       </body>
     </html>
   );
