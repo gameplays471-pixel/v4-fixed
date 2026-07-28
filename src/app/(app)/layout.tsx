@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAppStore } from "@/lib/store";
@@ -42,7 +43,7 @@ function MobileTopbar({ user, onLogout }: { user: AppUser; onLogout: () => void 
       <header className="md:hidden sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-xl">
         <div className="flex items-center justify-between px-4 h-14">
           <Link href="/" className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="GEMgym" className="w-8 h-8 rounded-xl object-cover ring-1 ring-primary/20 shadow-md shadow-primary/20" />
+            <Image src="/logo.png" alt="GEMgym" width={32} height={32} priority className="w-8 h-8 rounded-xl object-cover ring-1 ring-primary/20 shadow-md shadow-primary/20" />
             <span className="font-black text-base tracking-tight">GEMgym</span>
           </Link>
 

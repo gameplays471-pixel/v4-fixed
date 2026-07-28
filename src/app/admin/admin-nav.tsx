@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 
@@ -27,7 +28,7 @@ export function AdminNav({ user }: AdminNavProps) {
     <div className="flex flex-col w-full h-screen sticky top-0">
       <div className="p-5 pb-4">
         <Link href="/" className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="GEMgym" className="w-8 h-8 rounded-xl object-cover ring-1 ring-primary/25" />
+          <Image src="/logo.png" alt="GEMgym" width={32} height={32} className="w-8 h-8 rounded-xl object-cover ring-1 ring-primary/25" />
           <div className="flex flex-col leading-tight">
             <span className="font-black text-sm tracking-tight">GEMgym</span>
             <span className="text-[9px] font-mono tracking-[0.18em] uppercase text-primary/80">Admin</span>

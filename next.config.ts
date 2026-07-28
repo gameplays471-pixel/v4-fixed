@@ -12,6 +12,22 @@ const nextConfig: NextConfig = {
     "*.space-z.ai",
     "preview-*.space-z.ai",
   ],
+  images: {
+    // Necessário pro `next/image` conseguir otimizar imagens que não são
+    // servidas pelo próprio domínio do app. Hoje só existem duas origens
+    // externas reais em uso:
+    //  - raw.githubusercontent.com: imagens dos exercícios (ver
+    //    scripts/exercise-images-update.sql, importadas do free-exercise-db)
+    //  - *.public.blob.vercel-storage.com: fotos de progresso do usuário
+    //    (upload via @vercel/blob, ver src/lib/blob-token.ts)
+    // Se o admin cadastrar imagem de exercício em outro domínio pelo painel,
+    // adicione o hostname aqui — por segurança não usamos um wildcard `**`
+    // liberando qualquer host.
+    remotePatterns: [
+      { protocol: "https", hostname: "raw.githubusercontent.com" },
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+    ],
+  },
   async headers() {
     return [
       {

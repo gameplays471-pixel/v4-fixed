@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { LogOut, User } from "lucide-react";
 import { motion } from "framer-motion";
@@ -56,7 +57,7 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
       <div className="p-5 pb-4">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <img src="/logo.png" alt="GEMgym"
+            <Image src="/logo.png" alt="GEMgym" width={40} height={40}
               className="w-10 h-10 rounded-2xl object-cover shadow-lg ring-1 ring-primary/25 animate-glow" />
           </div>
           <div className="flex flex-col">

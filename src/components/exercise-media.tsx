@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Dumbbell, ZoomIn } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
@@ -34,12 +35,17 @@ export function ExerciseThumb({
     );
   }
 
+  // `fill` em vez de w-full/h-full: o tamanho real vem do container (via
+  // `className`, que varia bastante conforme o lugar de uso — 56px numa
+  // lista, maior num card), então a imagem só precisa preencher o pai
+  // (que já é `relative` + `overflow-hidden` nos dois ramos abaixo).
   const img = (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <Image
       src={src}
       alt={name}
-      className="w-full h-full object-cover"
+      fill
+      sizes="96px"
+      className="object-cover"
       loading="lazy"
       onError={() => setFailed(true)}
     />
@@ -65,7 +71,7 @@ export function ExerciseThumb({
   }
 
   return (
-    <div className={`${className} overflow-hidden shrink-0 bg-muted`}>
+    <div className={`${className} relative overflow-hidden shrink-0 bg-muted`}>
       {img}
     </div>
   );
@@ -109,11 +115,15 @@ export function ExerciseMedia({
 
   return (
     <div className={`${className} overflow-hidden border border-border bg-muted relative`}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={images![frame]}
         alt={name}
-        className="w-full h-full object-contain"
+        fill
+        sizes="(max-width: 640px) 100vw, 480px"
+        className="object-contain"
+        // Prioridade só na primeira imagem visível — é o banner principal
+        // da tela de detalhe, geralmente acima da dobra.
+        priority={frame === 0}
         onError={() => setFailed(true)}
       />
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -375,14 +376,13 @@ export function BodyView() {
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
               {photos.map((photo) => (
-                // eslint-disable-next-line @next/next/no-img-element
                 <button
                   key={photo.id}
                   type="button"
                   onClick={() => setLightboxPhoto(photo)}
                   className="relative aspect-[3/4] rounded-lg overflow-hidden bg-muted border border-border/60 hover:border-primary/40 transition-colors group"
                 >
-                  <img src={photo.url} alt={formatDate(photo.takenAt)} className="w-full h-full object-cover" loading="lazy" />
+                  <Image src={photo.url} alt={formatDate(photo.takenAt)} fill sizes="(max-width: 640px) 33vw, 16vw" className="object-cover" loading="lazy" />
                   <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[10px] py-0.5 text-center">
                     {formatDate(photo.takenAt)}
                   </span>
@@ -429,8 +429,7 @@ export function BodyView() {
               {[beforePhoto, afterPhoto].map((photo, i) => (
                 <div key={i} className="rounded-xl overflow-hidden bg-muted border border-border/60 aspect-[3/4] relative">
                   {photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={photo.url} alt={formatDate(photo.takenAt)} className="w-full h-full object-cover" />
+                    <Image src={photo.url} alt={formatDate(photo.takenAt)} fill sizes="(max-width: 640px) 50vw, 320px" className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
                       Selecione uma foto
@@ -476,9 +475,14 @@ export function BodyView() {
           </DialogTitle>
           {lightboxPhoto && (
             <>
-              <div className="rounded-lg overflow-hidden bg-muted">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={lightboxPhoto.url} alt={formatDate(lightboxPhoto.takenAt)} className="w-full h-auto object-contain max-h-[70vh]" />
+              <div className="relative w-full h-[70vh] max-h-[70vh] rounded-lg overflow-hidden bg-muted">
+                <Image
+                  src={lightboxPhoto.url}
+                  alt={formatDate(lightboxPhoto.takenAt)}
+                  fill
+                  sizes="480px"
+                  className="object-contain"
+                />
               </div>
               <Button
                 variant="outline"

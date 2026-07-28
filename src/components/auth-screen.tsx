@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,7 +84,7 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
             }}
             className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
           >
-            <img src="/logo.png" alt="GEMgym" className="w-12 h-12 object-contain" />
+            <Image src="/logo.png" alt="GEMgym" width={48} height={48} priority className="w-12 h-12 object-contain" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight">GEMgym</h1>
           <p style={{ color: "var(--muted-fg)" }} className="text-sm mt-1.5">
