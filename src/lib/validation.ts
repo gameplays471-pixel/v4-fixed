@@ -82,10 +82,20 @@ const optionalNullableString = (max: number) => z.string().trim().max(max).optio
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
+// Aceita com ou sem formatação: "11987654321", "(11) 98765-4321", "11 98765-4321".
+// Exige DDD (2 dígitos) + 8 ou 9 dígitos do número — cobre fixo e celular.
+const phoneRegex = /^\D*(\d{2})\D*(\d{4,5})\D*(\d{4})\D*$/;
+
 export const signupSchema = z.object({
   email: z.string().trim().toLowerCase().email("Email inválido").max(200),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").max(200),
   name: z.string().trim().min(1).max(100).optional(),
+  phone: z
+    .string()
+    .trim()
+    .min(1, "Celular é obrigatório")
+    .regex(phoneRegex, "Celular inválido — informe DDD + número")
+    .max(30),
 });
 
 export const loginSchema = z.object({
@@ -157,6 +167,7 @@ const emptyToNull = (v: unknown) => (v === "" || v === undefined ? null : v);
 
 export const profileSchema = z.object({
   name: z.string().trim().min(1, "Nome não pode ser vazio").max(100).optional(),
+  phone: z.preprocess(emptyToNull, z.string().trim().regex(phoneRegex, "Celular inválido — informe DDD + número").max(30).nullable()).optional(),
   bio: z.preprocess(emptyToNull, z.string().trim().max(1000).nullable()).optional(),
   weight: z.preprocess(emptyToNull, z.coerce.number().positive("Peso inválido").max(500).nullable()).optional(),
   height: z.preprocess(emptyToNull, z.coerce.number().positive("Altura inválida").max(300).nullable()).optional(),

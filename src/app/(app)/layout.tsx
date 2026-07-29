@@ -7,11 +7,13 @@ import Link from "next/link";
 import { useAppStore } from "@/lib/store";
 import { AuthScreen } from "@/components/auth-screen";
 import { Sidebar } from "@/components/sidebar";
+import { OnboardingTour } from "@/components/onboarding-tour";
 import { getToken, setToken, apiPost } from "@/lib/api";
 import { LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { PENDING_CLONE_KEY } from "@/app/w/[slug]/clone-workout-button";
+import { hasSeenOnboarding, markOnboardingSeen } from "@/lib/onboarding";
 
 const USER_CACHE_KEY = "gemgym:user-cache";
 
@@ -193,8 +195,16 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
   const router = useRouter();
   const pathname = usePathname();
   const activeWorkoutId = useAppStore((s) => s.activeWorkoutId);
+  const showOnboarding = useAppStore((s) => s.showOnboarding);
+  const setShowOnboarding = useAppStore((s) => s.setShowOnboarding);
   const [user, setUser] = useState<AppUser | null>(() => getCachedUser());
   const [loading, setLoading] = useState(true);
+  // true só quando o tour foi aberto automaticamente pelo signup — nesse
+  // caso, ao fechar (pular ou concluir), ainda precisamos completar o
+  // fluxo original e mandar a pessoa pra /perfil. Quando reaberto
+  // manualmente (ex.: botão "Rever tour" em Perfil), fechar não deve
+  // disparar nenhuma navegação extra.
+  const [onboardingFromSignup, setOnboardingFromSignup] = useState(false);
 
   useEffect(() => {
     const token = getToken();
@@ -230,7 +240,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, activeWorkoutId, pathname]);
 
-  const handleAuth = (u: unknown, token?: string, rememberMe = true) => {
+  const handleAuth = (u: unknown, token?: string, rememberMe = true, isSignup = false) => {
     if (token) setToken(token, rememberMe);
     setUser(u as AppUser);
 
@@ -254,7 +264,33 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       return;
     }
 
+    // Primeiro acesso (conta recém-criada): mostra o tour de 3 telas
+    // ("crie → execute → veja o histórico") em vez de já cair direto no
+    // dashboard ou no perfil vazios. O redirecionamento pro perfil
+    // acontece só depois, quando o tour for fechado (handleOnboardingClose).
+    if (isSignup && !hasSeenOnboarding()) {
+      setOnboardingFromSignup(true);
+      setShowOnboarding(true);
+      return;
+    }
+
+    if (isSignup) {
+      toast.message("Complete seu perfil para uma experiência personalizada.");
+      router.push("/perfil");
+      return;
+    }
+
     router.push("/");
+  };
+
+  const handleOnboardingClose = () => {
+    markOnboardingSeen();
+    setShowOnboarding(false);
+    if (onboardingFromSignup) {
+      setOnboardingFromSignup(false);
+      toast.message("Complete seu perfil para uma experiência personalizada.");
+      router.push("/perfil");
+    }
   };
 
   const handleLogout = async () => {
@@ -306,6 +342,12 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       </main>
 
       <MobileBottomNav />
+
+      <OnboardingTour
+        open={showOnboarding}
+        onSkip={handleOnboardingClose}
+        onFinish={handleOnboardingClose}
+      />
     </div>
   );
 }

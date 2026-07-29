@@ -11,7 +11,7 @@ const SIGNUP_IP_LIMIT = { limit: 5, windowMs: 60 * 60 * 1000 }; // 5 cadastros /
 export const POST = withErrorHandling("Signup", async (req: NextRequest) => {
   const parsed = await parseBody(req, signupSchema, "POST /api/auth/signup");
   if (!parsed.success) return parsed.response;
-  const { email, password, name } = parsed.data;
+  const { email, password, name, phone } = parsed.data;
 
   const ip = getClientIp(req);
   const ipCheck = await checkRateLimit(`signup:ip:${ip}`, SIGNUP_IP_LIMIT);
@@ -26,6 +26,7 @@ export const POST = withErrorHandling("Signup", async (req: NextRequest) => {
     data: {
       email,
       name: name || email.split("@")[0],
+      phone,
       passwordHash: await hashPassword(password),
     },
   });

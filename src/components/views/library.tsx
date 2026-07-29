@@ -33,6 +33,17 @@ type Favorite = {
   exerciseId: string;
 };
 
+// Remove acentos e caixa (maiúscula/minúscula) para permitir busca
+// "sem acento, minúsculo, etc" — mesmo comportamento que a API tinha.
+// Ex: "peito" === "Peito" === "péíto".
+function normalize(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 export function LibraryView() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -48,23 +59,19 @@ export function LibraryView() {
     setFilterMuscles((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]));
   };
 
-  // Carregar exercícios
+  // Carregar exercícios uma única vez (a lista inteira cabe em memória —
+  // ~180 exercícios). Busca e filtros são aplicados no cliente, então
+  // digitar/filtrar não dispara nenhuma requisição nova.
   useEffect(() => {
     setLoading(true);
-    const params = new URLSearchParams();
-    if (search) params.set("search", search);
-    if (filterMuscles.length > 0) params.set("muscleGroup", filterMuscles.join(","));
-    if (filterEquipment) params.set("equipmentType", filterEquipment);
-    if (filterLevel) params.set("level", filterLevel);
-    
-    apiGet<{ exercises: Exercise[] }>(`/api/exercises?${params.toString()}`)
+    apiGet<{ exercises: Exercise[] }>("/api/exercises")
       .then((data) => setExercises(data.exercises))
       .catch((e) => {
         console.error("Erro ao carregar exercícios:", e);
         toast.error("Não foi possível carregar a biblioteca de exercícios.");
       })
       .finally(() => setLoading(false));
-  }, [search, filterMuscles, filterEquipment, filterLevel]);
+  }, []);
 
   // Carregar favoritos
   useEffect(() => {
@@ -79,15 +86,35 @@ export function LibraryView() {
     });
   }, []);
 
-  // Agrupar por grupo muscular
+  // Filtrar (busca + filtros) e agrupar por grupo muscular — tudo no
+  // cliente, instantâneo e sem rede.
   const grouped = useMemo(() => {
+    const term = normalize(search);
+
+    const filtered = exercises.filter((ex) => {
+      if (filterMuscles.length > 0 && !filterMuscles.includes(ex.muscleGroup)) return false;
+      if (filterEquipment && ex.equipmentType !== filterEquipment) return false;
+      if (filterLevel && ex.level !== filterLevel) return false;
+
+      if (term) {
+        const haystack = normalize(
+          [ex.name, ex.muscleGroup, ex.secondaryMuscles, ex.equipment, ex.equipmentType]
+            .filter(Boolean)
+            .join(" ")
+        );
+        if (!haystack.includes(term)) return false;
+      }
+
+      return true;
+    });
+
     const map = new Map<string, Exercise[]>();
-    for (const ex of exercises) {
+    for (const ex of filtered) {
       if (!map.has(ex.muscleGroup)) map.set(ex.muscleGroup, []);
       map.get(ex.muscleGroup)!.push(ex);
     }
     return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-  }, [exercises]);
+  }, [exercises, search, filterMuscles, filterEquipment, filterLevel]);
 
   const toggleFavorite = async (exerciseId: string) => {
     const newFavs = new Set(favorites);

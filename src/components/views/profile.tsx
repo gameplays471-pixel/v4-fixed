@@ -9,9 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, apiPost, apiPut } from "@/lib/api";
 import { toast } from "sonner";
-import { User, Mail, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing, Palette, Camera, Loader2 } from "lucide-react";
+import { User, Mail, Phone, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing, Palette, Camera, Loader2, Compass } from "lucide-react";
 import { motion } from "framer-motion";
 import { setToken } from "@/lib/api";
+import { useAppStore } from "@/lib/store";
 import { compressImage } from "@/lib/progress-photo";
 import {
   getNotificationPermission,
@@ -22,16 +23,17 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 
 type UserProfile = {
-  id: string; email: string; name: string; bio: string | null;
+  id: string; email: string; name: string; phone: string | null; bio: string | null;
   weight: number | null; height: number | null; sex: string | null;
   birthDate: string | null; goal: string | null; avatarUrl: string | null;
 };
 
 export function ProfileView() {
+  const setShowOnboarding = useAppStore((s) => s.setShowOnboarding);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: "", bio: "", weight: "", height: "", sex: "", birthDate: "", goal: "" });
+  const [form, setForm] = useState({ name: "", phone: "", bio: "", weight: "", height: "", sex: "", birthDate: "", goal: "" });
   const [notifPermission, setNotifPermission] = useState<NotificationPermissionState>("default");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -44,7 +46,7 @@ export function ProfileView() {
     apiGet<{ user: UserProfile }>("/api/profile").then((d) => {
       setUser(d.user);
       if (d.user) setForm({
-        name: d.user.name || "", bio: d.user.bio || "",
+        name: d.user.name || "", phone: d.user.phone || "", bio: d.user.bio || "",
         weight: d.user.weight?.toString() || "", height: d.user.height?.toString() || "",
         sex: d.user.sex || "",
         birthDate: d.user.birthDate ? new Date(d.user.birthDate).toISOString().split("T")[0] : "",
@@ -207,6 +209,10 @@ export function ProfileView() {
               <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="h-11" />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="phone" className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> Celular</Label>
+              <Input id="phone" type="tel" inputMode="numeric" placeholder="(11) 91234-5678" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="h-11" />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="sex">Sexo</Label>
               <select id="sex" value={form.sex} onChange={(e) => setForm({ ...form, sex: e.target.value })}
                 className="w-full h-11 px-3 rounded-xl bg-background border border-border text-sm">
@@ -313,6 +319,29 @@ export function ProfileView() {
           </Card>
         </motion.div>
       )}
+
+      {/* Tour de boas-vindas */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.19 }}>
+        <Card className="p-5">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Compass className="w-5 h-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-bold text-sm">Tour de boas-vindas</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Reveja como criar treinos, registrar séries e acompanhar sua evolução.
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" onClick={() => setShowOnboarding(true)}
+              className="h-10 px-4 rounded-xl font-semibold gap-2 shrink-0">
+              Rever
+            </Button>
+          </div>
+        </Card>
+      </motion.div>
 
       {/* Logout */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>

@@ -202,6 +202,7 @@ export type SelectedUser = {
   id: string;
   email: string;
   name: string;
+  phone: string | null;
   bio: string | null;
   weight: number | null;
   height: number | null;
@@ -220,6 +221,7 @@ async function lookupUser(userId: string): Promise<SelectedUser | null> {
       id: true,
       email: true,
       name: true,
+      phone: true,
       bio: true,
       weight: true,
       height: true,

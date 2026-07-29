@@ -49,6 +49,12 @@ interface AppState {
 
   workoutSummaryData: WorkoutSummaryData | null;
   setWorkoutSummaryData: (data: WorkoutSummaryData | null) => void;
+
+  // Controla o tour de boas-vindas (ver components/onboarding-tour.tsx).
+  // Fica no store (em vez de estado local do layout) pra outras telas —
+  // como o card "Rever tour" em Perfil — poderem reabri-lo também.
+  showOnboarding: boolean;
+  setShowOnboarding: (show: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -72,4 +78,7 @@ export const useAppStore = create<AppState>((set) => ({
 
   workoutSummaryData: null,
   setWorkoutSummaryData: (data) => set({ workoutSummaryData: data }),
+
+  showOnboarding: false,
+  setShowOnboarding: (show) => set({ showOnboarding: show }),
 }));

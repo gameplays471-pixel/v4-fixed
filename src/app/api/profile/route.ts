@@ -17,12 +17,13 @@ export const PUT = withErrorHandling("Update profile", async (req: NextRequest) 
 
   const parsed = await parseBody(req, profileSchema, "PUT /api/profile");
   if (!parsed.success) return parsed.response;
-  const { name, bio, weight, height, sex, birthDate, goal, avatarUrl } = parsed.data;
+  const { name, phone, bio, weight, height, sex, birthDate, goal, avatarUrl } = parsed.data;
 
   const updated = await db.user.update({
     where: { id: user.id },
     data: {
       name,
+      phone: phone ?? null,
       bio: bio ?? null,
       weight: weight ?? null,
       height: height ?? null,
@@ -35,6 +36,7 @@ export const PUT = withErrorHandling("Update profile", async (req: NextRequest) 
       id: true,
       email: true,
       name: true,
+      phone: true,
       bio: true,
       weight: true,
       height: true,

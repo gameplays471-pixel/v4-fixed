@@ -8,7 +8,39 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 interface AuthScreenProps {
-  onAuth: (user: unknown, token?: string, rememberMe?: boolean) => void;
+  onAuth: (user: unknown, token?: string, rememberMe?: boolean, isSignup?: boolean) => void;
+}
+
+// Nomes de campo amigáveis para os `path` que o zod devolve em `details`
+// (ex.: "password" -> "Senha"), usados só quando a mensagem do issue não
+// deixa claro por si só a qual campo ela se refere.
+const fieldLabels: Record<string, string> = {
+  email: "Email",
+  password: "Senha",
+  name: "Nome",
+  phone: "Celular",
+};
+
+// A API de signup/login devolve `{ error }` para erros gerais (ex.: "Email
+// já cadastrado", "Credenciais inválidas") e `{ error, details }` para
+// falhas de validação de campo (zod), onde `details` é uma lista de
+// `{ path, message }` — uma por campo inválido. Antes o formulário só
+// mostrava `error`, que nesse segundo caso é sempre o texto genérico
+// "Dados inválidos", escondendo qual campo (e por quê) falhou.
+function formatAuthError(data: { error?: string; details?: { path: string; message: string }[] }): string {
+  if (data.details && data.details.length > 0) {
+    return data.details
+      .map((d) => {
+        const label = fieldLabels[d.path];
+        // Mensagens já específicas (a maioria) falam por si; só prefixamos
+        // com o nome do campo quando isso ajuda a identificar onde corrigir.
+        return label && !d.message.toLowerCase().includes(label.toLowerCase())
+          ? `${label}: ${d.message}`
+          : d.message;
+      })
+      .join(" · ");
+  }
+  return data.error || "Erro ao autenticar";
 }
 
 export function AuthScreen({ onAuth }: AuthScreenProps) {
@@ -16,8 +48,22 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  // Formata enquanto digita: (11) 91234-5678 — só cosmético, a validação
+  // de verdade (obrigatório + formato) é feita no schema do servidor.
+  const handlePhoneChange = (raw: string) => {
+    const digits = raw.replace(/\D/g, "").slice(0, 11);
+    let formatted = digits;
+    if (digits.length > 2) formatted = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length > 7) {
+      const splitAt = digits.length > 10 ? 7 : 6;
+      formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, splitAt)}-${digits.slice(splitAt)}`;
+    }
+    setPhone(formatted);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,16 +72,16 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
       const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
       const body = mode === "login"
         ? { email, password, rememberMe }
-        : { email, password, name };
+        : { email, password, name, phone };
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!res.ok) { toast.error(data.error || "Erro ao autenticar"); return; }
+      if (!res.ok) { toast.error(formatAuthError(data)); return; }
       toast.success(mode === "login" ? "Bem-vindo de volta!" : "Conta criada!");
-      onAuth(data, data.token, mode === "login" ? rememberMe : true);
+      onAuth(data, data.token, mode === "login" ? rememberMe : true, mode === "signup");
     } catch { toast.error("Erro de conexão"); } finally { setLoading(false); }
   };
 
@@ -135,6 +181,22 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
                   placeholder="Seu nome"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  required
+                  className="h-11"
+                />
+              </div>
+            )}
+
+            {mode === "signup" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="auth-phone" style={{ color: "var(--fg)" }}>Celular</Label>
+                <Input
+                  id="auth-phone"
+                  type="tel"
+                  inputMode="numeric"
+                  placeholder="(11) 91234-5678"
+                  value={phone}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
                   required
                   className="h-11"
                 />
