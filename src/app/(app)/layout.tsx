@@ -15,7 +15,7 @@ import { LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { PENDING_CLONE_KEY } from "@/app/w/[slug]/clone-workout-button";
-import { hasSeenOnboarding, markOnboardingSeen } from "@/lib/onboarding";
+import { hasOptedOutOnboarding, markOnboardingOptOut } from "@/lib/onboarding";
 
 const USER_CACHE_KEY = "gemgym:user-cache";
 
@@ -268,13 +268,19 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       return;
     }
 
-    // Primeiro acesso (conta recém-criada): mostra o tour de 3 telas
-    // ("crie → execute → veja o histórico") em vez de já cair direto no
-    // dashboard ou no perfil vazios. O redirecionamento pro perfil
-    // acontece só depois, quando o tour for fechado (handleOnboardingClose).
-    if (isSignup && !hasSeenOnboarding()) {
-      setOnboardingFromSignup(true);
+    // Tour de boas-vindas: aparece em TODO login/cadastro, a menos que a
+    // pessoa já tenha clicado em "Não mostrar novamente" alguma vez. Não é
+    // mais "só na primeira vez" — isso causava o bug de nunca mais
+    // aparecer depois da primeira visualização (bastava ter visto uma vez,
+    // em qualquer sessão anterior, pra ficar suprimido pra sempre).
+    if (!hasOptedOutOnboarding()) {
+      setOnboardingFromSignup(isSignup);
       setShowOnboarding(true);
+      if (!isSignup) {
+        // Login normal: já manda pro dashboard normalmente: o tour
+        // aparece por cima, como overlay, sem bloquear a navegação.
+        router.push("/");
+      }
       return;
     }
 
@@ -288,13 +294,17 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
   };
 
   const handleOnboardingClose = () => {
-    markOnboardingSeen();
     setShowOnboarding(false);
     if (onboardingFromSignup) {
       setOnboardingFromSignup(false);
       toast.message("Complete seu perfil para uma experiência personalizada.");
       router.push("/perfil");
     }
+  };
+
+  const handleOnboardingOptOut = () => {
+    markOnboardingOptOut();
+    handleOnboardingClose();
   };
 
   const handleLogout = async () => {
@@ -351,6 +361,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
         open={showOnboarding}
         onSkip={handleOnboardingClose}
         onFinish={handleOnboardingClose}
+        onNeverShowAgain={handleOnboardingOptOut}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { formatPhoneInput } from "@/lib/api";
 
 interface AuthScreenProps {
   onAuth: (user: unknown, token?: string, rememberMe?: boolean, isSignup?: boolean) => void;
@@ -54,16 +55,7 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
 
   // Formata enquanto digita: (11) 91234-5678 — só cosmético, a validação
   // de verdade (obrigatório + formato) é feita no schema do servidor.
-  const handlePhoneChange = (raw: string) => {
-    const digits = raw.replace(/\D/g, "").slice(0, 11);
-    let formatted = digits;
-    if (digits.length > 2) formatted = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    if (digits.length > 7) {
-      const splitAt = digits.length > 10 ? 7 : 6;
-      formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, splitAt)}-${digits.slice(splitAt)}`;
-    }
-    setPhone(formatted);
-  };
+  const handlePhoneChange = (raw: string) => setPhone(formatPhoneInput(raw));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

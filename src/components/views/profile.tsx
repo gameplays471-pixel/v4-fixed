@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
-import { apiGet, apiPost, apiPut } from "@/lib/api";
+import { apiGet, apiPost, apiPut, formatPhoneInput } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { toast } from "sonner";
 import { User, Mail, Phone, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing, Palette, Camera, Loader2, Compass } from "lucide-react";
@@ -226,7 +226,7 @@ export function ProfileView() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone" className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> Celular</Label>
-              <Input id="phone" type="tel" inputMode="numeric" placeholder="(11) 91234-5678" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="h-11" />
+              <Input id="phone" type="tel" inputMode="numeric" placeholder="(11) 91234-5678" value={form.phone} onChange={(e) => setForm({ ...form, phone: formatPhoneInput(e.target.value) })} className="h-11" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="sex">Sexo</Label>

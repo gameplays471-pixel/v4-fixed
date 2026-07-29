@@ -339,6 +339,13 @@ export default function AdminUsuariosPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Copia o ID do usuário — usado pra criar treinos direto no banco (ex.:
+  // scripts/sql/*.sql) sem precisar consultar a tabela User manualmente.
+  const copyUserId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    toast.success("ID copiado!");
+  };
+
   // ─── Render ─────────────────────────────────────────────────────────────
 
   return (
@@ -456,6 +463,15 @@ export default function AdminUsuariosPage() {
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                        <button
+                          type="button"
+                          onClick={() => copyUserId(u.id)}
+                          title="Copiar ID completo do usuário"
+                          className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground/70 hover:text-foreground transition-colors mt-0.5"
+                        >
+                          <Copy className="w-2.5 h-2.5 shrink-0" />
+                          <span className="truncate max-w-[9rem]">{u.id}</span>
+                        </button>
                       </div>
                     </div>
                   </TableCell>
@@ -529,6 +545,15 @@ export default function AdminUsuariosPage() {
                   <div className="text-left">
                     <p className="font-black text-lg leading-tight">{detailUser.user.name}</p>
                     <p className="text-sm text-muted-foreground">{detailUser.user.email}</p>
+                    <button
+                      type="button"
+                      onClick={() => copyUserId(detailUser.user.id)}
+                      title="Copiar ID do usuário"
+                      className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground/70 hover:text-foreground transition-colors mt-1"
+                    >
+                      <Copy className="w-3 h-3 shrink-0" />
+                      {detailUser.user.id}
+                    </button>
                   </div>
                 </SheetTitle>
               </SheetHeader>

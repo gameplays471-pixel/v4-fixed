@@ -119,6 +119,20 @@ export function formatVolume(vol: number): string {
   return Math.round(vol).toString();
 }
 
+// Aplica a máscara (11) 91234-5678 enquanto a pessoa digita — usado tanto
+// no cadastro (auth-screen.tsx) quanto na edição de perfil (profile.tsx).
+// Centralizado aqui pra evitar as duas telas divergirem com o tempo.
+export function formatPhoneInput(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 11);
+  let formatted = digits;
+  if (digits.length > 2) formatted = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length > 7) {
+    const splitAt = digits.length > 10 ? 7 : 6;
+    formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, splitAt)}-${digits.slice(splitAt)}`;
+  }
+  return formatted;
+}
+
 export function formatDuration(sec: number): string {
   const h = Math.floor(sec / 3600);
   const m = Math.floor((sec % 3600) / 60);

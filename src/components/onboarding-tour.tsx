@@ -18,10 +18,15 @@ import {
 
 interface OnboardingTourProps {
   open: boolean;
-  /** Fechar sem concluir (botão "Pular" ou X) */
+  /** Fechar sem concluir (botão "Pular" ou X) — some por agora, mas volta a
+   *  aparecer no próximo login. */
   onSkip: () => void;
-  /** Concluir o tour normalmente, pelo último botão */
+  /** Concluir o tour normalmente, pelo último botão — mesmo assim volta a
+   *  aparecer no próximo login. */
   onFinish: () => void;
+  /** Opt-out permanente: só essa ação impede o tour de aparecer nos
+   *  próximos logins. */
+  onNeverShowAgain: () => void;
 }
 
 // ── Mockups ilustrativos de cada etapa ────────────────────────────────
@@ -174,7 +179,7 @@ const slides = [
   },
 ];
 
-export function OnboardingTour({ open, onSkip, onFinish }: OnboardingTourProps) {
+export function OnboardingTour({ open, onSkip, onFinish, onNeverShowAgain }: OnboardingTourProps) {
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(0);
 
@@ -287,13 +292,23 @@ export function OnboardingTour({ open, onSkip, onFinish }: OnboardingTourProps) 
         </div>
 
         {step === 0 && (
-          <button
-            type="button"
-            onClick={onSkip}
-            className="w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors mt-4"
-          >
-            Pular tour
-          </button>
+          <div className="flex items-center justify-center gap-1.5 mt-4 text-xs">
+            <button
+              type="button"
+              onClick={onSkip}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Pular tour
+            </button>
+            <span className="text-muted-foreground/40">·</span>
+            <button
+              type="button"
+              onClick={onNeverShowAgain}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Não mostrar novamente
+            </button>
+          </div>
         )}
       </div>
     </div>,
