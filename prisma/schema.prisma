@@ -65,6 +65,7 @@ model Workout {
   description String?
   defaultRest Int      @default(90) // descanso padrão em segundos
   color       String?
+  shareSlug   String?  @unique // token opaco pro link público de compartilhamento (/w/[slug]); gerado sob demanda, fixo por treino
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

@@ -81,7 +81,7 @@ export function buildSetsPayload(
           restSeconds: 0,
           durationSec: (parseInt(c.durationMin) || 0) * 60,
           distanceKm: c.distanceKm ? parseFloat(c.distanceKm) : undefined,
-          avgBpm: c.avgBpm ? parseInt(c.avgBpm) : undefined,
+          avgBpm: parseInt(c.avgBpm) > 0 ? parseInt(c.avgBpm) : undefined,
           intensity: c.intensity,
         });
       }
@@ -147,7 +147,7 @@ export function buildSummaryData(params: {
           isPR: isPRBySetIndex[setIdx] ?? false,
           durationSec: (parseInt(c.durationMin) || 0) * 60,
           distanceKm: c.distanceKm ? parseFloat(c.distanceKm) : undefined,
-          avgBpm: c.avgBpm ? parseInt(c.avgBpm) : undefined,
+          avgBpm: parseInt(c.avgBpm) > 0 ? parseInt(c.avgBpm) : undefined,
           intensity: c.intensity,
         });
         setIdx++;

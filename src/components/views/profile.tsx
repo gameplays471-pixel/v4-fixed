@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
-import { apiGet, apiPut } from "@/lib/api";
+import { apiGet, apiPost, apiPut } from "@/lib/api";
 import { toast } from "sonner";
-import { User, Mail, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing, Palette } from "lucide-react";
+import { User, Mail, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing, Palette, Camera, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { setToken } from "@/lib/api";
+import { compressImage } from "@/lib/progress-photo";
 import {
   getNotificationPermission,
   requestNotificationPermission,
@@ -32,6 +33,8 @@ export function ProfileView() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: "", bio: "", weight: "", height: "", sex: "", birthDate: "", goal: "" });
   const [notifPermission, setNotifPermission] = useState<NotificationPermissionState>("default");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setNotifPermission(getNotificationPermission());
@@ -64,6 +67,30 @@ export function ProfileView() {
       setUser(res.user);
       toast.success("Perfil atualizado!");
     } catch { toast.error("Erro ao atualizar perfil"); } finally { setSaving(false); }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // permite selecionar o mesmo arquivo de novo depois
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione um arquivo de imagem.");
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const image = await compressImage(file);
+      const res = await apiPost<{ user: UserProfile }>("/api/profile/avatar", { image });
+      setUser(res.user);
+      toast.success("Foto de perfil atualizada!");
+    } catch (err) {
+      console.error("Erro ao trocar avatar:", err);
+      toast.error("Não foi possível atualizar a foto. Tente outra imagem.");
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -108,11 +135,37 @@ export function ProfileView() {
           style={{ background: "linear-gradient(135deg, var(--hero-gradient-from) 0%, var(--hero-gradient-to) 100%)" }}>
           <div className="absolute top-0 right-0 w-48 h-32 pointer-events-none" style={{ background: "radial-gradient(circle, oklch(0.80 0.18 162 / 0.20), transparent 70%)" }} aria-hidden />
           <div className="flex items-center gap-5 relative">
-            <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}
-              className="w-20 h-20 rounded-3xl flex items-center justify-center text-primary-foreground text-3xl font-black shadow-2xl shrink-0"
-              style={{ background: "linear-gradient(135deg, var(--primary), oklch(0.70 0.20 200))", boxShadow: "0 8px 32px oklch(0.80 0.18 162 / 0.35)" }}>
-              {user.name.charAt(0).toUpperCase()}
-            </motion.div>
+            <div className="relative shrink-0">
+              <motion.button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                aria-label="Trocar foto de perfil"
+                className="w-20 h-20 rounded-3xl flex items-center justify-center text-primary-foreground text-3xl font-black shadow-2xl overflow-hidden bg-cover bg-center"
+                style={{
+                  background: user.avatarUrl ? `url(${user.avatarUrl}) center/cover` : "linear-gradient(135deg, var(--primary), oklch(0.70 0.20 200))",
+                  boxShadow: "0 8px 32px oklch(0.80 0.18 162 / 0.35)",
+                }}>
+                {!user.avatarUrl && user.name.charAt(0).toUpperCase()}
+              </motion.button>
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                aria-label="Trocar foto de perfil"
+                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-background border-2 border-background shadow-md flex items-center justify-center text-foreground/80 hover:text-primary transition-colors"
+                style={{ background: "var(--card)" }}>
+                {uploadingAvatar ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+              </button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+            </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-xl font-black">{user.name}</h2>
               <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-1">

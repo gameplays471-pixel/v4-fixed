@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { AdminNav } from "./admin-nav";
+import { AdminNav, AdminMobileNav } from "./admin-nav";
 
 export const metadata = {
   title: "Painel Admin — GEMgym",
@@ -31,6 +31,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             Voltar ao app
           </a>
         </header>
+        <AdminMobileNav />
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-8">{children}</div>
         </div>

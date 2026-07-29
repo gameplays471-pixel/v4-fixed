@@ -7,9 +7,11 @@ import Link from "next/link";
 import { useAppStore } from "@/lib/store";
 import { AuthScreen } from "@/components/auth-screen";
 import { Sidebar } from "@/components/sidebar";
-import { getToken, setToken } from "@/lib/api";
+import { getToken, setToken, apiPost } from "@/lib/api";
 import { LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
+import { PENDING_CLONE_KEY } from "@/app/w/[slug]/clone-workout-button";
 
 const USER_CACHE_KEY = "gemgym:user-cache";
 
@@ -231,6 +233,27 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
   const handleAuth = (u: unknown, token?: string, rememberMe = true) => {
     if (token) setToken(token, rememberMe);
     setUser(u as AppUser);
+
+    // Se a pessoa veio de um link de treino compartilhado (/w/[slug]) e
+    // precisou logar/criar conta pra clonar, a intenção ficou guardada em
+    // sessionStorage — concluímos o clone agora que já há um token válido,
+    // em vez de mandar ela de volta pro dashboard vazio.
+    const pendingSlug = typeof window !== "undefined" ? sessionStorage.getItem(PENDING_CLONE_KEY) : null;
+    if (pendingSlug) {
+      sessionStorage.removeItem(PENDING_CLONE_KEY);
+      apiPost("/api/workouts/clone", { slug: pendingSlug })
+        .then(() => {
+          toast.success("Treino clonado pra sua conta!");
+          router.push("/treinos");
+        })
+        .catch((e) => {
+          console.error("Erro ao clonar treino pendente:", e);
+          toast.error("Não foi possível clonar o treino compartilhado.");
+          router.push("/");
+        });
+      return;
+    }
+
     router.push("/");
   };
 

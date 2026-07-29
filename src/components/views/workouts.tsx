@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
-import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical, CheckSquare, Square } from "lucide-react";
+import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical, CheckSquare, Square, Share2, Check, Copy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { muscleGroups } from "@/lib/exercises-data";
 import { ExerciseThumb, ExerciseImageDialog } from "@/components/exercise-media";
@@ -44,6 +44,7 @@ export function WorkoutsView() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
+  const [sharingWorkout, setSharingWorkout] = useState<Workout | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -116,6 +117,9 @@ export function WorkoutsView() {
                     </div>
                   </div>
                   <div className="flex gap-0.5">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:bg-accent" onClick={() => setSharingWorkout(w)}>
+                      <Share2 className="w-3.5 h-3.5" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:bg-accent" onClick={() => { setEditingWorkoutId(w.id); setShowEditor(true); }}>
                       <Edit2 className="w-3.5 h-3.5" />
                     </Button>
@@ -151,7 +155,68 @@ export function WorkoutsView() {
         </div>
       )}
       {showEditor && <WorkoutEditor workoutId={editingWorkoutId} onClose={handleCloseEditor} />}
+      {sharingWorkout && <ShareLinkDialog workout={sharingWorkout} onClose={() => setSharingWorkout(null)} />}
     </div>
+  );
+}
+
+// ─── COMPARTILHAR TREINO (link público, gera sob demanda) ───────────────────
+function ShareLinkDialog({ workout, onClose }: { workout: Workout; onClose: () => void }) {
+  const [link, setLink] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    apiPost<{ shareSlug: string }>(`/api/workouts/${workout.id}/share`)
+      .then((d) => setLink(`${window.location.origin}/w/${d.shareSlug}`))
+      .catch((e) => {
+        console.error("Erro ao gerar link de compartilhamento:", e);
+        toast.error("Não foi possível gerar o link de compartilhamento.");
+      })
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workout.id]);
+
+  const handleCopy = async () => {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      toast.success("Link copiado!");
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      toast.error("Não foi possível copiar — selecione e copie manualmente.");
+    }
+  };
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-sm rounded-3xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Share2 className="w-4 h-4 text-primary" />
+            Compartilhar &quot;{workout.name}&quot;
+          </DialogTitle>
+        </DialogHeader>
+
+        <p className="text-sm text-muted-foreground">
+          Qualquer pessoa com este link pode ver o treino e clonar uma cópia pra própria conta — sem precisar fazer login pra visualizar.
+        </p>
+
+        {loading ? (
+          <LoadingSkeleton className="h-11 rounded-xl" />
+        ) : link ? (
+          <div className="flex items-center gap-2">
+            <Input value={link} readOnly onFocus={(e) => e.target.select()} className="h-11 text-sm" />
+            <Button type="button" onClick={handleCopy} className="h-11 w-11 shrink-0 rounded-xl p-0">
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm text-destructive">Não foi possível gerar o link agora. Tente novamente.</p>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 

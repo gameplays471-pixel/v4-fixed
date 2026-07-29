@@ -9,11 +9,50 @@ interface AdminNavProps {
   user: { name: string; email: string; role: string };
 }
 
-const navItems: Array<{ href: string; label: string; enabled: boolean }> = [
+export const navItems: Array<{ href: string; label: string; enabled: boolean }> = [
   { href: "/admin/exercicios", label: "Exercícios", enabled: true },
   { href: "/admin/usuarios", label: "Usuários", enabled: true },
   { href: "/admin/configuracoes", label: "Configurações", enabled: false },
 ];
+
+/**
+ * Nav em formato de abas horizontais pro header mobile (`md:hidden`).
+ * A sidebar (`AdminNav` abaixo) só aparece em telas >= md, então sem isso
+ * quem acessa o admin pelo celular fica preso na primeira página, sem
+ * nenhuma forma de navegar pras outras seções.
+ */
+export function AdminMobileNav() {
+  const pathname = usePathname();
+
+  return (
+    <nav className="md:hidden flex gap-1 px-4 pb-2 overflow-x-auto border-b border-border/60 bg-background/90 backdrop-blur-xl sticky top-14 z-30">
+      {navItems.map((item) => {
+        const active = pathname.startsWith(item.href);
+        if (!item.enabled) {
+          return (
+            <span
+              key={item.href}
+              className="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground/50 cursor-not-allowed"
+            >
+              {item.label}
+            </span>
+          );
+        }
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              active ? "bg-primary/15 text-primary" : "text-foreground/80 hover:bg-accent"
+            }`}
+          >
+            {item.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
 
 export function AdminNav({ user }: AdminNavProps) {
   const pathname = usePathname();
