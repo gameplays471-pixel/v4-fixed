@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
 import { Card } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Badge } from "@/components/ui/badge";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { toast } from "sonner";
 import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical, CheckSquare, Square, Share2, Check, Copy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -39,31 +41,42 @@ const INTENSITY_OPTIONS = ["Leve","Moderada","Intensa"];
 
 export function WorkoutsView() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const editingWorkoutId = useAppStore((s) => s.editingWorkoutId);
   const setEditingWorkoutId = useAppStore((s) => s.setEditingWorkoutId);
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
   const [sharingWorkout, setSharingWorkout] = useState<Workout | null>(null);
 
-  const load = () => {
-    setLoading(true);
-    apiGet<{ workouts: Workout[] }>("/api/workouts")
-      .then((d) => setWorkouts(d.workouts))
-      .catch((e) => {
-        console.error("Erro ao carregar treinos:", e);
-        toast.error("Não foi possível carregar seus treinos.");
-      })
-      .finally(() => setLoading(false));
-  };
-  useEffect(() => { load(); }, []);
+  const workoutsQuery = useQuery({
+    queryKey: queryKeys.workouts,
+    queryFn: () => apiGet<{ workouts: Workout[] }>("/api/workouts").then((d) => d.workouts),
+  });
+  const workouts = workoutsQuery.data ?? [];
+  const loading = workoutsQuery.isLoading;
+
+  useEffect(() => {
+    if (workoutsQuery.isError) {
+      console.error("Erro ao carregar treinos:", workoutsQuery.error);
+      toast.error("Não foi possível carregar seus treinos.");
+    }
+  }, [workoutsQuery.isError, workoutsQuery.error]);
+
   useEffect(() => { if (editingWorkoutId) setShowEditor(true); }, [editingWorkoutId]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Excluir este treino?")) return;
-    await apiDelete(`/api/workouts/${id}`).then(() => { toast.success("Treino excluído"); load(); }).catch(() => toast.error("Erro ao excluir"));
+    await apiDelete(`/api/workouts/${id}`)
+      .then(() => {
+        toast.success("Treino excluído");
+        queryClient.invalidateQueries({ queryKey: queryKeys.workouts });
+      })
+      .catch(() => toast.error("Erro ao excluir"));
   };
-  const handleCloseEditor = () => { setShowEditor(false); setEditingWorkoutId(null); load(); };
+  const handleCloseEditor = () => {
+    setShowEditor(false);
+    setEditingWorkoutId(null);
+    queryClient.invalidateQueries({ queryKey: queryKeys.workouts });
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -408,24 +421,35 @@ function ExercisePickerContent({
 }: { onAdd: (exList: Exercise[]) => void; onBack: () => void; excludeIds: string[] }) {
   const [search, setSearch] = useState("");
   const [filterMuscles, setFilterMuscles] = useState<string[]>([]);
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState<Exercise | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
+  // Mesma queryKey usada em Biblioteca: se a lista já estiver em cache
+  // (usuário já visitou a Biblioteca), o picker abre instantâneo em vez de
+  // esperar uma nova requisição. Busca e filtro de músculo são aplicados
+  // no cliente, então digitar não dispara requisição nenhuma.
+  const exercisesQuery = useQuery({
+    queryKey: queryKeys.exercises,
+    queryFn: () => apiGet<{ exercises: Exercise[] }>("/api/exercises").then((d) => d.exercises),
+  });
+  const allExercises = exercisesQuery.data ?? [];
+  const loading = exercisesQuery.isLoading;
+
   useEffect(() => {
-    setLoading(true);
-    const p = new URLSearchParams();
-    if (search) p.set("search", search);
-    if (filterMuscles.length) p.set("muscleGroup", filterMuscles.join(","));
-    apiGet<{ exercises: Exercise[] }>(`/api/exercises?${p}`)
-      .then((d) => setExercises(d.exercises))
-      .catch((e) => {
-        console.error("Erro ao carregar exercícios:", e);
-        toast.error("Não foi possível carregar a lista de exercícios.");
-      })
-      .finally(() => setLoading(false));
-  }, [search, filterMuscles]);
+    if (exercisesQuery.isError) {
+      console.error("Erro ao carregar exercícios:", exercisesQuery.error);
+      toast.error("Não foi possível carregar a lista de exercícios.");
+    }
+  }, [exercisesQuery.isError, exercisesQuery.error]);
+
+  const exercises = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return allExercises.filter((ex) => {
+      if (filterMuscles.length > 0 && !filterMuscles.includes(ex.muscleGroup)) return false;
+      if (term && !ex.name.toLowerCase().includes(term) && !ex.muscleGroup.toLowerCase().includes(term)) return false;
+      return true;
+    });
+  }, [allExercises, search, filterMuscles]);
 
   const filtered = exercises.filter((e) => !excludeIds.includes(e.id));
 

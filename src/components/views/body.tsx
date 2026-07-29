@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { apiGet, apiPost, apiDelete, formatDate } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { compressImage } from "@/lib/progress-photo";
 import {
   Scale, Plus, Trash2, Camera, Images, ArrowLeftRight, Upload, X,
@@ -39,16 +41,14 @@ type ProgressPhoto = {
 };
 
 export function BodyView() {
+  const queryClient = useQueryClient();
+
   // ── Peso / % de gordura ──────────────────────────────────────────────
-  const [logs, setLogs] = useState<BodyWeightLog[]>([]);
-  const [logsLoading, setLogsLoading] = useState(true);
   const [newWeight, setNewWeight] = useState("");
   const [newBodyFat, setNewBodyFat] = useState("");
   const [savingLog, setSavingLog] = useState(false);
 
   // ── Fotos de progresso ────────────────────────────────────────────────
-  const [photos, setPhotos] = useState<ProgressPhoto[]>([]);
-  const [photosLoading, setPhotosLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [lightboxPhoto, setLightboxPhoto] = useState<ProgressPhoto | null>(null);
@@ -57,40 +57,43 @@ export function BodyView() {
   const [beforeId, setBeforeId] = useState<string>("");
   const [afterId, setAfterId] = useState<string>("");
 
-  const loadLogs = () => {
-    setLogsLoading(true);
-    apiGet<{ logs: BodyWeightLog[] }>("/api/bodyweight")
-      .then((d) => setLogs(d.logs))
-      .catch((e) => {
-        console.error("Erro ao carregar registros de peso:", e);
-        toast.error("Não foi possível carregar seu histórico de peso.");
-      })
-      .finally(() => setLogsLoading(false));
-  };
+  const logsQuery = useQuery({
+    queryKey: queryKeys.bodyWeightLogs,
+    queryFn: () => apiGet<{ logs: BodyWeightLog[] }>("/api/bodyweight").then((d) => d.logs),
+  });
+  const logs = logsQuery.data ?? [];
+  const logsLoading = logsQuery.isLoading;
 
-  const loadPhotos = () => {
-    setPhotosLoading(true);
-    apiGet<{ photos: ProgressPhoto[] }>("/api/progress-photos")
-      .then((d) => {
-        setPhotos(d.photos);
-        // Preenche a comparação com "primeira" x "mais recente" assim que
-        // houver pelo menos 2 fotos, só na carga inicial.
-        if (d.photos.length >= 2) {
-          setBeforeId((prev) => prev || d.photos[d.photos.length - 1].id);
-          setAfterId((prev) => prev || d.photos[0].id);
-        }
-      })
-      .catch((e) => {
-        console.error("Erro ao carregar fotos de progresso:", e);
-        toast.error("Não foi possível carregar suas fotos de progresso.");
-      })
-      .finally(() => setPhotosLoading(false));
-  };
+  const photosQuery = useQuery({
+    queryKey: queryKeys.progressPhotos,
+    queryFn: () => apiGet<{ photos: ProgressPhoto[] }>("/api/progress-photos").then((d) => d.photos),
+  });
+  const photos = photosQuery.data ?? [];
+  const photosLoading = photosQuery.isLoading;
 
   useEffect(() => {
-    loadLogs();
-    loadPhotos();
-  }, []);
+    if (logsQuery.isError) {
+      console.error("Erro ao carregar registros de peso:", logsQuery.error);
+      toast.error("Não foi possível carregar seu histórico de peso.");
+    }
+  }, [logsQuery.isError, logsQuery.error]);
+
+  useEffect(() => {
+    if (photosQuery.isError) {
+      console.error("Erro ao carregar fotos de progresso:", photosQuery.error);
+      toast.error("Não foi possível carregar suas fotos de progresso.");
+    }
+  }, [photosQuery.isError, photosQuery.error]);
+
+  useEffect(() => {
+    // Preenche a comparação com "primeira" x "mais recente" assim que
+    // houver pelo menos 2 fotos — só entra em ação se ainda estiver vazio
+    // (não sobrescreve uma escolha manual do usuário).
+    if (photos.length >= 2) {
+      setBeforeId((prev) => prev || photos[photos.length - 1].id);
+      setAfterId((prev) => prev || photos[0].id);
+    }
+  }, [photos]);
 
   // ── Ações: peso ───────────────────────────────────────────────────────
   const handleAddLog = async () => {
@@ -113,7 +116,7 @@ export function BodyView() {
       toast.success("Registrado!");
       setNewWeight("");
       setNewBodyFat("");
-      loadLogs();
+      queryClient.invalidateQueries({ queryKey: queryKeys.bodyWeightLogs });
     } catch {
       toast.error("Erro ao registrar");
     } finally {
@@ -124,7 +127,7 @@ export function BodyView() {
   const handleDeleteLog = async (id: string) => {
     try {
       await apiDelete(`/api/bodyweight/${id}`);
-      loadLogs();
+      queryClient.invalidateQueries({ queryKey: queryKeys.bodyWeightLogs });
     } catch {
       toast.error("Erro ao remover registro");
     }
@@ -152,7 +155,7 @@ export function BodyView() {
         weight: latestWeight,
       });
       toast.success("Foto adicionada!");
-      loadPhotos();
+      queryClient.invalidateQueries({ queryKey: queryKeys.progressPhotos });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao enviar foto");
     } finally {
@@ -167,7 +170,7 @@ export function BodyView() {
       setLightboxPhoto(null);
       if (beforeId === id) setBeforeId("");
       if (afterId === id) setAfterId("");
-      loadPhotos();
+      queryClient.invalidateQueries({ queryKey: queryKeys.progressPhotos });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao remover foto");
     }

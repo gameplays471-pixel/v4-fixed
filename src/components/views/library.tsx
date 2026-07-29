@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Search, Heart, Filter } from "lucide-react";
 import { ExerciseDetail } from "@/components/exercise-detail";
 import { ExerciseThumb } from "@/components/exercise-media";
 import { apiGet, apiPost } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { muscleGroups, equipmentTypes, levels } from "@/lib/exercises-data";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -45,9 +47,7 @@ function normalize(value: string): string {
 }
 
 export function LibraryView() {
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [filterMuscles, setFilterMuscles] = useState<string[]>([]);
   const [filterEquipment, setFilterEquipment] = useState("");
@@ -59,32 +59,44 @@ export function LibraryView() {
     setFilterMuscles((prev) => (prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]));
   };
 
-  // Carregar exercícios uma única vez (a lista inteira cabe em memória —
+  // Carrega a lista inteira uma única vez (a lista inteira cabe em memória —
   // ~180 exercícios). Busca e filtros são aplicados no cliente, então
-  // digitar/filtrar não dispara nenhuma requisição nova.
-  useEffect(() => {
-    setLoading(true);
-    apiGet<{ exercises: Exercise[] }>("/api/exercises")
-      .then((data) => setExercises(data.exercises))
-      .catch((e) => {
-        console.error("Erro ao carregar exercícios:", e);
-        toast.error("Não foi possível carregar a biblioteca de exercícios.");
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  // digitar/filtrar não dispara nenhuma requisição nova. Com o React Query,
+  // voltar pra essa tela depois de visitar outra reaproveita o cache em vez
+  // de recarregar tudo com loading spinner de novo.
+  const exercisesQuery = useQuery({
+    queryKey: queryKeys.exercises,
+    queryFn: () => apiGet<{ exercises: Exercise[] }>("/api/exercises").then((d) => d.exercises),
+  });
+  const exercises = exercisesQuery.data ?? [];
+  const loading = exercisesQuery.isLoading;
 
-  // Carregar favoritos
+  // Favoritos numa query separada — assim uma falha aqui não bloqueia a
+  // lista principal, igual ao comportamento anterior.
+  const favoritesQuery = useQuery({
+    queryKey: queryKeys.favorites,
+    queryFn: () =>
+      apiGet<{ favorites: Favorite[] }>("/api/exercises/favorites").then(
+        (d) => new Set(d.favorites.map((f) => f.exerciseId))
+      ),
+  });
+  const favorites = favoritesQuery.data ?? new Set<string>();
+
   useEffect(() => {
-    apiGet<{ favorites: Favorite[] }>("/api/exercises/favorites").then((data) => {
-      setFavorites(new Set(data.favorites.map((f) => f.exerciseId)));
-    }).catch((e) => {
-      // Não bloqueia a tela (favoritos são um "extra" sobre a lista já
-      // carregada acima) — só evita a rejeição de promise não tratada e
-      // deixa registrado o motivo caso o usuário reclame de favoritos
-      // sumindo/não marcando.
-      console.error("Erro ao carregar favoritos:", e);
-    });
-  }, []);
+    if (exercisesQuery.isError) {
+      console.error("Erro ao carregar exercícios:", exercisesQuery.error);
+      toast.error("Não foi possível carregar a biblioteca de exercícios.");
+    }
+  }, [exercisesQuery.isError, exercisesQuery.error]);
+
+  useEffect(() => {
+    // Não bloqueia a tela (favoritos são um "extra" sobre a lista já
+    // carregada acima) — só registra o motivo caso o usuário reclame de
+    // favoritos sumindo/não marcando.
+    if (favoritesQuery.isError) {
+      console.error("Erro ao carregar favoritos:", favoritesQuery.error);
+    }
+  }, [favoritesQuery.isError, favoritesQuery.error]);
 
   // Filtrar (busca + filtros) e agrupar por grupo muscular — tudo no
   // cliente, instantâneo e sem rede.
@@ -117,19 +129,20 @@ export function LibraryView() {
   }, [exercises, search, filterMuscles, filterEquipment, filterLevel]);
 
   const toggleFavorite = async (exerciseId: string) => {
-    const newFavs = new Set(favorites);
+    const previous = favorites;
+    const newFavs = new Set(previous);
     if (newFavs.has(exerciseId)) {
       newFavs.delete(exerciseId);
     } else {
       newFavs.add(exerciseId);
     }
-    setFavorites(newFavs);
-    
+    queryClient.setQueryData(queryKeys.favorites, newFavs);
+
     try {
       await apiPost("/api/exercises/favorites", { exerciseId });
     } catch {
       // Reverter em caso de erro
-      setFavorites(favorites);
+      queryClient.setQueryData(queryKeys.favorites, previous);
     }
   };
 

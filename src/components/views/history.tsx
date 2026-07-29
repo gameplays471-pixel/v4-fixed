@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, formatVolume, formatDuration, formatDate } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { Dumbbell, Clock, ChevronRight, Calendar, X, Trophy, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -79,26 +81,29 @@ type Stats = {
 };
 
 export function HistoryView() {
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const sessionsQuery = useQuery({
+    queryKey: queryKeys.sessions(100),
+    queryFn: () => apiGet<{ sessions: Session[] }>("/api/sessions?limit=100").then((d) => d.sessions),
+  });
+  // Mesma queryKey do dashboard/stats: cache compartilhado entre as telas.
+  const statsQuery = useQuery({
+    queryKey: queryKeys.stats,
+    queryFn: () => apiGet<{ stats: Stats }>("/api/stats").then((d) => d.stats),
+  });
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
 
+  const sessions = sessionsQuery.data ?? [];
+  const stats = statsQuery.data ?? null;
+  const loading = sessionsQuery.isLoading || statsQuery.isLoading;
+  const hasError = sessionsQuery.isError || statsQuery.isError;
+
   useEffect(() => {
-    Promise.all([
-      apiGet<{ sessions: Session[] }>("/api/sessions?limit=100"),
-      apiGet<{ stats: Stats }>("/api/stats"),
-    ])
-      .then(([s, st]) => {
-        setSessions(s.sessions);
-        setStats(st.stats);
-      })
-      .catch((e) => {
-        console.error("Erro ao carregar histórico:", e);
-        toast.error("Não foi possível carregar seu histórico. Tente novamente.");
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    if (hasError) {
+      console.error("Erro ao carregar histórico:", sessionsQuery.error || statsQuery.error);
+      toast.error("Não foi possível carregar seu histórico. Tente novamente.");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasError]);
 
   if (loading) {
     return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, apiPost, apiPut } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { toast } from "sonner";
 import { User, Mail, Phone, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing, Palette, Camera, Loader2, Compass } from "lucide-react";
 import { motion } from "framer-motion";
@@ -29,44 +31,58 @@ type UserProfile = {
 };
 
 export function ProfileView() {
+  const queryClient = useQueryClient();
   const setShowOnboarding = useAppStore((s) => s.setShowOnboarding);
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", bio: "", weight: "", height: "", sex: "", birthDate: "", goal: "" });
   const [notifPermission, setNotifPermission] = useState<NotificationPermissionState>("default");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  // Rastreia se o formulário já foi inicializado com os dados vindos do
+  // servidor, pra não sobrescrever o que a pessoa está digitando caso a
+  // query refaça um refetch em segundo plano (stale-while-revalidate)
+  // enquanto ela ainda está editando.
+  const formInitialized = useRef(false);
 
   useEffect(() => {
     setNotifPermission(getNotificationPermission());
   }, []);
 
+  const profileQuery = useQuery({
+    queryKey: queryKeys.profile,
+    queryFn: () => apiGet<{ user: UserProfile }>("/api/profile").then((d) => d.user),
+  });
+  const user = profileQuery.data ?? null;
+  const loading = profileQuery.isLoading;
+
   useEffect(() => {
-    apiGet<{ user: UserProfile }>("/api/profile").then((d) => {
-      setUser(d.user);
-      if (d.user) setForm({
-        name: d.user.name || "", phone: d.user.phone || "", bio: d.user.bio || "",
-        weight: d.user.weight?.toString() || "", height: d.user.height?.toString() || "",
-        sex: d.user.sex || "",
-        birthDate: d.user.birthDate ? new Date(d.user.birthDate).toISOString().split("T")[0] : "",
-        goal: d.user.goal || "",
-      });
-    }).catch((e) => {
-      // Sem isso, uma falha aqui deixava `loading=false` e `user=null` —
-      // e o componente faz `if (!user) return null`, ou seja, tela
-      // completamente em branco, sem nenhuma mensagem de erro nem forma
-      // de tentar de novo além de recarregar a página manualmente.
-      console.error("Erro ao carregar perfil:", e);
+    if (profileQuery.isError) {
+      // Sem isso, uma falha aqui deixava a tela em branco (o componente
+      // faz `if (!user) return null`), sem nenhuma mensagem de erro nem
+      // forma de tentar de novo além de recarregar a página manualmente.
+      console.error("Erro ao carregar perfil:", profileQuery.error);
       toast.error("Não foi possível carregar seu perfil. Recarregue a página.");
-    }).finally(() => setLoading(false));
-  }, []);
+    }
+  }, [profileQuery.isError, profileQuery.error]);
+
+  useEffect(() => {
+    if (user && !formInitialized.current) {
+      formInitialized.current = true;
+      setForm({
+        name: user.name || "", phone: user.phone || "", bio: user.bio || "",
+        weight: user.weight?.toString() || "", height: user.height?.toString() || "",
+        sex: user.sex || "",
+        birthDate: user.birthDate ? new Date(user.birthDate).toISOString().split("T")[0] : "",
+        goal: user.goal || "",
+      });
+    }
+  }, [user]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
       const res = await apiPut<{ user: UserProfile }>("/api/profile", form);
-      setUser(res.user);
+      queryClient.setQueryData(queryKeys.profile, res.user);
       toast.success("Perfil atualizado!");
     } catch { toast.error("Erro ao atualizar perfil"); } finally { setSaving(false); }
   };
@@ -85,7 +101,7 @@ export function ProfileView() {
     try {
       const image = await compressImage(file);
       const res = await apiPost<{ user: UserProfile }>("/api/profile/avatar", { image });
-      setUser(res.user);
+      queryClient.setQueryData(queryKeys.profile, res.user);
       toast.success("Foto de perfil atualizada!");
     } catch (err) {
       console.error("Erro ao trocar avatar:", err);

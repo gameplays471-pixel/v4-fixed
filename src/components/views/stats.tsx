@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, formatVolume, formatDuration } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { Trophy, Dumbbell, Clock, TrendingUp, Flame, Target, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -26,20 +28,22 @@ type Stats = {
 };
 
 export function StatsView() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Mesma queryKey usada no dashboard: quem já visitou o dashboard chega
+  // aqui com os stats já em cache (instantâneo), atualizando por trás.
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: queryKeys.stats,
+    queryFn: () => apiGet<{ stats: Stats }>("/api/stats").then((d) => d.stats),
+  });
+  const stats = data ?? null;
 
   useEffect(() => {
-    apiGet<{ stats: Stats }>("/api/stats")
-      .then((d) => setStats(d.stats))
-      .catch((e) => {
-        console.error("Erro ao carregar estatísticas:", e);
-        toast.error("Não foi possível carregar suas estatísticas.");
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    if (isError) {
+      console.error("Erro ao carregar estatísticas:", error);
+      toast.error("Não foi possível carregar suas estatísticas.");
+    }
+  }, [isError, error]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="space-y-4">
         {Array.from({ length: 3 }).map((_, i) => (

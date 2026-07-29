@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -9,6 +10,7 @@ import { AuthScreen } from "@/components/auth-screen";
 import { Sidebar } from "@/components/sidebar";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { getToken, setToken, apiPost } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -194,6 +196,7 @@ function MobileBottomNav() {
 export default function AppShellLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
   const activeWorkoutId = useAppStore((s) => s.activeWorkoutId);
   const showOnboarding = useAppStore((s) => s.showOnboarding);
   const setShowOnboarding = useAppStore((s) => s.setShowOnboarding);
@@ -254,6 +257,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       apiPost("/api/workouts/clone", { slug: pendingSlug })
         .then(() => {
           toast.success("Treino clonado pra sua conta!");
+          queryClient.invalidateQueries({ queryKey: queryKeys.workouts });
           router.push("/treinos");
         })
         .catch((e) => {

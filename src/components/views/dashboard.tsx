@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, formatVolume, formatDuration, relativeTime } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { Flame, Dumbbell, TrendingUp, Clock, Plus, Trophy, ArrowRight, Play, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -26,29 +28,40 @@ type Session = { id: string; workoutName: string; startedAt: string; durationSec
 
 export function DashboardView() {
   const router = useRouter();
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [recentSessions, setRecentSessions] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // Cada recurso tem sua própria query (chave própria), então navegar pra
+  // outra aba e voltar aqui reaproveita o cache em vez de recarregar tudo
+  // do zero — a tela aparece instantânea com o último dado conhecido
+  // enquanto atualiza em segundo plano (stale-while-revalidate).
+  const statsQuery = useQuery({
+    queryKey: queryKeys.stats,
+    queryFn: () => apiGet<{ stats: Stats }>("/api/stats").then((d) => d.stats),
+  });
+  const workoutsQuery = useQuery({
+    queryKey: queryKeys.workouts,
+    queryFn: () => apiGet<{ workouts: Workout[] }>("/api/workouts").then((d) => d.workouts),
+  });
+  const sessionsQuery = useQuery({
+    queryKey: queryKeys.sessions(5),
+    queryFn: () => apiGet<{ sessions: Session[] }>("/api/sessions?limit=5").then((d) => d.sessions),
+  });
+
+  const stats = statsQuery.data ?? null;
+  const workouts = workoutsQuery.data ?? [];
+  const recentSessions = sessionsQuery.data ?? [];
+  const loading = statsQuery.isLoading || workoutsQuery.isLoading || sessionsQuery.isLoading;
+  const hasError = statsQuery.isError || workoutsQuery.isError || sessionsQuery.isError;
 
   useEffect(() => {
-    Promise.all([
-      apiGet<{ stats: Stats }>("/api/stats"),
-      apiGet<{ workouts: Workout[] }>("/api/workouts"),
-      apiGet<{ sessions: Session[] }>("/api/sessions?limit=5"),
-    ]).then(([s, w, sess]) => {
-      setStats(s.stats); setWorkouts(w.workouts); setRecentSessions(sess.sessions);
-    }).catch((e) => {
-      // Antes não havia .catch aqui: se qualquer uma das 3 chamadas
-      // falhasse (erro de rede, 401/500 transitório), a promise rejeitada
-      // não tratada deixava stats/workouts/sessions nos valores iniciais
-      // (vazios) — a tela renderizava normalmente os estados de "você
-      // ainda não tem treinos/registros", passando a falsa impressão de
-      // conta vazia quando na verdade era um erro de carregamento.
-      console.error("Erro ao carregar dashboard:", e);
+    // Mesmo comportamento de antes: se qualquer um dos 3 recursos falhar,
+    // avisa em vez de deixar a tela renderizar como se a conta estivesse
+    // vazia (records/workouts/sessions em [] silenciosamente).
+    if (hasError) {
+      console.error("Erro ao carregar dashboard:", statsQuery.error || workoutsQuery.error || sessionsQuery.error);
       toast.error("Não foi possível carregar seus dados. Puxe para atualizar ou tente novamente.");
-    }).finally(() => setLoading(false));
-  }, []);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasError]);
 
   const startWorkout = (id: string) => { router.push(`/treinos/${id}/ativo`); };
 

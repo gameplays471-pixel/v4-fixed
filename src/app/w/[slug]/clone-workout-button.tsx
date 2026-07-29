@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Copy, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { getToken, apiPost } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 
 // Chave usada pra "lembrar" que o usuário queria clonar um treino enquanto
 // ele ainda não tinha conta/login — consumida por (app)/layout.tsx logo
@@ -19,6 +21,7 @@ interface CloneWorkoutButtonProps {
 
 export function CloneWorkoutButton({ slug, workoutName }: CloneWorkoutButtonProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
   const handleClone = async () => {
@@ -36,6 +39,7 @@ export function CloneWorkoutButton({ slug, workoutName }: CloneWorkoutButtonProp
     try {
       await apiPost<{ workout: { id: string } }>("/api/workouts/clone", { slug });
       toast.success(`"${workoutName}" clonado pra sua conta!`);
+      queryClient.invalidateQueries({ queryKey: queryKeys.workouts });
       router.push("/treinos");
     } catch (e) {
       console.error("Erro ao clonar treino:", e);
