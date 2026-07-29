@@ -1,66 +1,62 @@
-"use client";
+'use client'
 
-import { useEffect } from "react";
-import * as Sentry from "@sentry/nextjs";
+import { useEffect } from 'react'
+import { AlertTriangle, RefreshCw } from 'lucide-react'
+import { Button } from "@/components/ui/button"
 
-// Precisa ter <html>/<body> proprios porque, quando acionado, esse
-// componente substitui o root layout inteiro (e o ultimo degrau antes de
-// uma tela branca crua do navegador). Por isso nao importa fontes/CSS do
-// layout principal — mantem so o essencial pra sempre renderizar, mesmo
-// se o que quebrou for o proprio layout.
 export default function GlobalError({
   error,
   reset,
 }: {
-  error: Error & { digest?: string };
-  reset: () => void;
+  error: Error & { digest?: string }
+  reset: () => void
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
-  }, [error]);
+    // Logar erro crítico para serviço de monitoramento
+    console.error('Erro Global:', error)
+  }, [error])
 
   return (
     <html lang="pt-BR">
-      <body
-        style={{
-          margin: 0,
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#0a0a0a",
-          color: "#fafafa",
-          fontFamily: "system-ui, -apple-system, sans-serif",
-          padding: "24px",
-        }}
-      >
-        <div style={{ textAlign: "center", maxWidth: 420 }}>
-          <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Algo deu errado</h1>
-          <p style={{ fontSize: 14, color: "#a3a3a3", marginBottom: 20 }}>
-            O erro ja foi registrado automaticamente. Tente recarregar a pagina.
-          </p>
+      <body className="min-h-screen flex items-center justify-center bg-background text-foreground px-4">
+        <div className="max-w-md w-full space-y-6 text-center">
+          {/* Icon */}
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-destructive/10">
+            <AlertTriangle className="h-10 w-10 text-destructive" />
+          </div>
+
+          {/* Title & Description */}
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold tracking-tight">
+              Erro Crítico da Aplicação
+            </h1>
+            <p className="text-muted-foreground">
+              Ocorreu um erro grave no sistema. Nossa equipe foi notificada.
+            </p>
+          </div>
+
+          {/* Error Details (dev only) */}
+          {process.env.NODE_ENV === 'development' && error.message && (
+            <div className="rounded-lg bg-muted p-4 text-sm font-mono text-left overflow-auto max-h-32 border border-border">
+              {error.message}
+            </div>
+          )}
+
           {error.digest && (
-            <p style={{ fontSize: 11, color: "#737373", marginBottom: 20, fontFamily: "monospace" }}>
-              Ref: {error.digest}
+            <p className="text-xs text-muted-foreground">
+              ID do Erro: {error.digest}
             </p>
           )}
-          <button
-            onClick={reset}
-            style={{
-              background: "#22c55e",
-              color: "#052e16",
-              border: "none",
-              borderRadius: 10,
-              padding: "10px 20px",
-              fontWeight: 700,
-              fontSize: 14,
-              cursor: "pointer",
-            }}
-          >
-            Tentar novamente
-          </button>
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <Button onClick={reset} size="lg" variant="default">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Recarregar Aplicação
+            </Button>
+          </div>
         </div>
       </body>
     </html>
-  );
+  )
 }
