@@ -10,7 +10,7 @@ interface BuildLiveSnapshotParams {
   totalCardioMin: number;
 }
 
-/** Monta o payload enviado pro espectador — mesma lógica usada pro header local, só reempacotada. */
+/** Monta o payload enviado pro espectador — séries, peso, reps e imagem. */
 export function buildLiveSnapshot({
   workout,
   setsMap,
@@ -25,26 +25,76 @@ export function buildLiveSnapshot({
 
   const exercises = workout.exercises.map((ex) => {
     const isCardio = ex.exercise.category === "Cardio";
+    const imageUrl =
+      Array.isArray(ex.exercise.images) && ex.exercise.images.length > 0
+        ? ex.exercise.images[0]
+        : null;
+
     let exTotal: number;
     let exCompleted: number;
+    let sets:
+      | Array<{
+          setNumber: number;
+          weight: number;
+          reps: number;
+          completed: boolean;
+          isPR?: boolean;
+        }>
+      | undefined;
+    let cardio:
+      | {
+          completed: boolean;
+          durationSec?: number | null;
+          distanceKm?: number | null;
+          intensity?: string | null;
+        }
+      | undefined;
 
     if (isCardio) {
+      const c = cardioMap[ex.id];
       exTotal = 1;
-      exCompleted = cardioMap[ex.id]?.completed ? 1 : 0;
+      exCompleted = c?.completed ? 1 : 0;
+      cardio = {
+        completed: !!c?.completed,
+        durationSec: c?.durationSec ?? ex.targetDurationSec,
+        distanceKm: c?.distanceKm ?? ex.targetDistanceKm,
+        intensity: c?.intensity ?? ex.targetIntensity,
+      };
     } else {
-      const sets = setsMap[ex.id] || [];
-      exTotal = sets.length;
-      exCompleted = sets.filter((s) => s.completed).length;
+      const raw = setsMap[ex.id] || [];
+      exTotal = raw.length || ex.targetSets;
+      exCompleted = raw.filter((s) => s.completed).length;
+      sets = (raw.length ? raw : Array.from({ length: ex.targetSets }, () => ({
+        weight: 0,
+        reps: ex.targetReps,
+        completed: false,
+      }))).map((s, i) => ({
+        setNumber: i + 1,
+        weight: Number(s.weight) || 0,
+        reps: Number(s.reps) || 0,
+        completed: !!s.completed,
+        isPR: !!(s as SetState & { isPR?: boolean }).isPR,
+      }));
     }
 
     totalSets += exTotal;
     completedSets += exCompleted;
 
-    // "Exercício atual" = primeiro que ainda não foi 100% concluído.
     const current = !currentAssigned && exCompleted < exTotal;
     if (current) currentAssigned = true;
 
-    return { name: ex.exercise.name, isCardio, totalSets: exTotal, completedSets: exCompleted, current };
+    return {
+      name: ex.exercise.name,
+      isCardio,
+      muscleGroup: ex.exercise.muscleGroup,
+      imageUrl,
+      totalSets: exTotal,
+      completedSets: exCompleted,
+      current,
+      targetReps: ex.targetReps,
+      sets,
+      cardio,
+    };
   });
 
   return { elapsed, totalSets, completedSets, totalVolume, totalCardioMin, exercises };

@@ -3,88 +3,126 @@ import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
 
 /** Snapshot enviado periodicamente pro servidor enquanto a transmissão está ligada. */
+export interface LiveSetSnapshot {
+  setNumber: number;
+  weight: number;
+  reps: number;
+  completed: boolean;
+  isPR?: boolean;
+}
+
+export interface LiveExerciseSnapshot {
+  name: string;
+  isCardio: boolean;
+  muscleGroup?: string;
+  imageUrl?: string | null;
+  totalSets: number;
+  completedSets: number;
+  current: boolean;
+  targetReps?: number;
+  /** Séries com peso/reps — espelha a tela do treino ativo */
+  sets?: LiveSetSnapshot[];
+  cardio?: {
+    completed: boolean;
+    durationSec?: number | null;
+    distanceKm?: number | null;
+    intensity?: string | null;
+  };
+}
+
 export interface LiveSnapshot {
   elapsed: number;
   totalSets: number;
   completedSets: number;
   totalVolume: number;
   totalCardioMin: number;
-  exercises: Array<{
-    name: string;
-    isCardio: boolean;
-    totalSets: number;
-    completedSets: number;
-    current: boolean;
-  }>;
+  exercises: LiveExerciseSnapshot[];
 }
 
-const SNAPSHOT_INTERVAL_MS = 12_000;
+// Push mais agressivo = espectador vê série a série quase em tempo real
+const SNAPSHOT_INTERVAL_MS = 2_500;
 
-/**
- * Controla o ciclo "compartilhar treino ao vivo" — start/stop e o envio
- * periódico de progresso. Desligado por padrão ("off-live"): só existe
- * transmissão enquanto `sharing` for true, e a pessoa escolhe isso na hora.
- *
- * `getSnapshot` é lido via ref pra sempre pegar o estado mais recente do
- * treino (setsMap/cardioMap mudam a cada toque) sem precisar recriar o
- * intervalo a cada render.
- */
-export function useLiveShare(workoutId: string, workoutName: string, getSnapshot: () => LiveSnapshot) {
+export function useLiveShare(
+  workoutId: string,
+  workoutName: string,
+  getSnapshot: () => LiveSnapshot
+) {
   const [sharing, setSharing] = useState(false);
   const [slug, setSlug] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
   const getSnapshotRef = useRef(getSnapshot);
-  useEffect(() => {
-    getSnapshotRef.current = getSnapshot;
-  });
+  getSnapshotRef.current = getSnapshot;
 
   const pushSnapshot = useCallback(() => {
-    apiPost("/api/sessions/live/snapshot", { snapshot: getSnapshotRef.current() }).catch(() => {
-      // Best-effort — uma falha pontual de rede não deveria interromper o treino.
-    });
-  }, []);
+    if (!slug) return;
+    const snapshot = getSnapshotRef.current();
+    // fire-and-forget; falha silenciosa (rede instável não deve spammar toast)
+    apiPost(`/api/sessions/live/snapshot`, { snapshot }).catch(() => {});
+  }, [slug]);
+
+  // Push imediato quando estado muda — debounce curto
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const schedulePush = useCallback(() => {
+    if (!sharing || !slug) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      pushSnapshot();
+    }, 400);
+  }, [sharing, slug, pushSnapshot]);
+
+  useEffect(() => {
+    if (!sharing) return;
+    pushSnapshot();
+    const id = setInterval(pushSnapshot, SNAPSHOT_INTERVAL_MS);
+    return () => {
+      clearInterval(id);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [sharing, pushSnapshot]);
+
+  // Expor schedulePush via ref pattern — o index pode chamar após cada set
+  useEffect(() => {
+    (window as unknown as { __gemgym_live_push?: () => void }).__gemgym_live_push = schedulePush;
+    return () => {
+      delete (window as unknown as { __gemgym_live_push?: () => void }).__gemgym_live_push;
+    };
+  }, [schedulePush]);
 
   const start = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await apiPost<{ slug: string }>("/api/sessions/live/start", { workoutId, workoutName });
+      const res = await apiPost<{ slug: string }>("/api/sessions/live/start", {
+        workoutId,
+        workoutName,
+      });
+      // envia snapshot logo após criar a sessão
+      await apiPost(`/api/sessions/live/snapshot`, { snapshot: getSnapshotRef.current() }).catch(() => {});
       setSlug(res.slug);
       setSharing(true);
-      return res.slug;
+      toast.success("Transmissão ao vivo ligada");
     } catch (e) {
-      console.error("Erro ao iniciar transmissão ao vivo:", e);
-      toast.error("Não foi possível iniciar a transmissão ao vivo.");
-      return null;
+      toast.error(e instanceof Error ? e.message : "Não foi possível iniciar o ao vivo");
     } finally {
       setLoading(false);
     }
   }, [workoutId, workoutName]);
 
-  const stop = useCallback(() => {
-    setSharing(false);
-    setSlug(null);
-    apiPost("/api/sessions/live/stop").catch(() => {});
-  }, []);
+  const stop = useCallback(async () => {
+    if (!slug) {
+      setSharing(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      await apiPost(`/api/sessions/live/stop`, {});
+    } catch {
+      /* ignore */
+    } finally {
+      setSlug(null);
+      setSharing(false);
+      setLoading(false);
+    }
+  }, [slug]);
 
-  useEffect(() => {
-    if (!sharing) return;
-    pushSnapshot(); // imediato ao ligar, não espera o primeiro intervalo
-    const id = setInterval(pushSnapshot, SNAPSHOT_INTERVAL_MS);
-    return () => clearInterval(id);
-  }, [sharing, pushSnapshot]);
-
-  // Se a pessoa fechar a aba/app com a transmissão ligada sem clicar em
-  // "Cancelar"/"Finalizar" (que já chamam stop explicitamente), tentamos
-  // avisar o servidor mesmo assim — best-effort, sem bloquear o unload.
-  useEffect(() => {
-    if (!sharing) return;
-    const handleUnload = () => {
-      navigator.sendBeacon?.("/api/sessions/live/stop", new Blob([], { type: "application/json" }));
-    };
-    window.addEventListener("pagehide", handleUnload);
-    return () => window.removeEventListener("pagehide", handleUnload);
-  }, [sharing]);
-
-  return { sharing, slug, loading, start, stop };
+  return { sharing, slug, loading, start, stop, schedulePush };
 }
