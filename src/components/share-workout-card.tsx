@@ -296,11 +296,58 @@ export const ShareWorkoutCard = forwardRef<HTMLDivElement, ShareWorkoutCardProps
               <div
                 style={
                   variant === "silhouette"
-                    ? { height: "100%", maxHeight: silhouetteMaxHeight, aspectRatio: "724/1448" }
-                    : { height: silhouetteMaxHeight, aspectRatio: "724/1448" }
+                    ? {
+                        height: "100%",
+                        maxHeight: silhouetteMaxHeight,
+                        display: "flex",
+                        alignItems: "flex-end",
+                        justifyContent: "center",
+                        gap: 8,
+                      }
+                    : {
+                        height: silhouetteMaxHeight,
+                        display: "flex",
+                        alignItems: "flex-end",
+                        justifyContent: "center",
+                        gap: 8,
+                      }
                 }
               >
-                <MuscleSilhouette side="front" primaryMuscles={primaryMuscles} secondaryMuscles={filteredSecondary} />
+                {([
+                  { side: "front" as const, label: "Frente" },
+                  { side: "back" as const, label: "Costas" },
+                ]).map(({ side, label }) => (
+                  <div
+                    key={side}
+                    style={{
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "flex-end",
+                      gap: 4,
+                    }}
+                  >
+                    <p style={{
+                      fontSize: 8,
+                      color: "rgba(245,245,245,0.55)",
+                      fontWeight: 800,
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5,
+                      lineHeight: 1,
+                    }}>
+                      {label}
+                    </p>
+                    {/* height: calc(100% - 13px) reserva 9px do label + 4px do gap
+                        da coluna flex; o `aspectRatio` (724/1448) define a largura
+                        a partir dessa altura. `minHeight: 0` permite que o
+                        `calc` encolha abaixo do conteúdo se o card for muito
+                        pequeno. */}
+                    <div style={{ aspectRatio: "724/1448", height: "calc(100% - 13px)", minHeight: 0 }}>
+                      <MuscleSilhouette side={side} primaryMuscles={primaryMuscles} secondaryMuscles={filteredSecondary} />
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
             {showList && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
@@ -18,7 +18,7 @@ import {
   Gamepad2, Droplets, Salad, Dumbbell, Plus, Users, Copy, Check,
   LogOut, Crown, Trophy, ArrowRight, Settings,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 type GameSummary = {
   enabled: boolean;
@@ -67,6 +67,16 @@ export function GameView() {
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Feedback visual: badge flutuante "+ml" que sobe sobre o botão clicado,
+  // e chave numérica usada pra re-disparar a animação de pulse no contador
+  // de ml. O badge é por-clique (id muda a cada clique pra AnimatePresence
+  // tratar como elemento novo); o pulseKey é estável por valor de água.
+  const [floatingMl, setFloatingMl] = useState<{ id: number; ml: number } | null>(null);
+  const [waterPulseKey, setWaterPulseKey] = useState(0);
+  const [dietPulseKey, setDietPulseKey] = useState(0);
+  const prevWaterRef = useRef<number | null>(null);
+  const prevDietRef = useRef<boolean | null>(null);
+
   const summaryQuery = useQuery({
     queryKey: queryKeys.gameSummary,
     queryFn: () => apiGet<GameSummary>("/api/gamification/summary"),
@@ -87,17 +97,114 @@ export function GameView() {
     enabled: !!activeGroupId,
   });
 
+  // Dispara o pulse dos contadores quando o valor muda (pós-otimização ou
+  // pós-refetch do servidor). Compara via ref pra não animar no primeiro
+  // mount — só quando o número realmente muda em re-renders seguintes.
+  useEffect(() => {
+    const currentWater = summaryQuery.data?.today.waterMl;
+    if (currentWater == null) return;
+    if (prevWaterRef.current == null) {
+      prevWaterRef.current = currentWater;
+      return;
+    }
+    if (prevWaterRef.current !== currentWater) {
+      prevWaterRef.current = currentWater;
+      setWaterPulseKey((k) => k + 1);
+    }
+  }, [summaryQuery.data?.today.waterMl]);
+
+  useEffect(() => {
+    const currentDiet = summaryQuery.data?.today.dietOnTrack;
+    if (currentDiet == null) return;
+    if (prevDietRef.current == null) {
+      prevDietRef.current = currentDiet;
+      return;
+    }
+    if (prevDietRef.current !== currentDiet) {
+      prevDietRef.current = currentDiet;
+      setDietPulseKey((k) => k + 1);
+    }
+  }, [summaryQuery.data?.today.dietOnTrack]);
+
   const invalidateSummary = () => queryClient.invalidateQueries({ queryKey: queryKeys.gameSummary });
   const invalidateRanking = () => {
     if (activeGroupId) queryClient.invalidateQueries({ queryKey: queryKeys.groupRanking(activeGroupId) });
   };
 
+  /**
+   * Adiciona `ml` ml de água HOJE com optimistic update:
+   * 1. Cancela refetches em voo (pra não sobrescrever nossa otimização).
+   * 2. Tira snapshot do cache pra rollback em caso de erro.
+   * 3. Atualiza o cache local de `gameSummary` E do ranking do grupo (só a
+   *    linha do próprio usuário) ANTES do servidor responder — a UI muda
+   *    na hora.
+   * 4. Mostra toast e badge flutuante imediatamente.
+   * 5. Dispara o PATCH em paralelo. Se der erro, restaura os snapshots e
+   *    mostra toast de erro. Se der certo, só refaz a invalidação pra
+   *    sincronizar com a verdade do servidor (sem bloquear a UI).
+   */
   const addWater = async (ml: number) => {
+    // Feedback instantâneo (toast + badge) — não espera nada.
+    setFloatingMl({ id: Date.now(), ml });
+    setTimeout(() => setFloatingMl((f) => (f && f.ml === ml ? null : f)), 900);
+    toast.success(
+      `💧 +${ml >= 1000 ? `${ml / 1000}L` : `${ml}ml`} registrado!`,
+      { duration: 1400 }
+    );
+
+    const previousSummary = queryClient.getQueryData<GameSummary>(queryKeys.gameSummary);
+    const rankingKey = activeGroupId ? queryKeys.groupRanking(activeGroupId) : null;
+    const previousRanking = rankingKey
+      ? queryClient.getQueryData<{ ranking: RankingEntry[]; week: { start: string; end: string } }>(rankingKey)
+      : undefined;
+
+    if (previousSummary) {
+      // Cancela refetches pra eles não sobrescreverem nosso update otimista.
+      await queryClient.cancelQueries({ queryKey: queryKeys.gameSummary });
+      if (rankingKey) await queryClient.cancelQueries({ queryKey: rankingKey });
+
+      const newWaterMl = previousSummary.today.waterMl + ml;
+      const wasWaterDay = previousSummary.today.waterMl >= previousSummary.goals.waterGoalMl;
+      const isWaterDay = newWaterMl >= previousSummary.goals.waterGoalMl;
+      // Cruzar a meta no meio do update conta +1 (e se passar pra "abaixo"
+      // — improvável já que só somamos — contaria -1).
+      const waterDaysDelta = (isWaterDay ? 1 : 0) - (wasWaterDay ? 1 : 0);
+      const newWaterDays = previousSummary.week.waterDays + waterDaysDelta;
+      const newScore = previousSummary.week.score + waterDaysDelta * 5; // GAME_POINTS.WATER_DAY
+
+      queryClient.setQueryData<GameSummary>(queryKeys.gameSummary, {
+        ...previousSummary,
+        today: { ...previousSummary.today, waterMl: newWaterMl },
+        week: { ...previousSummary.week, waterDays: newWaterDays, score: newScore },
+      });
+
+      // Ranking: a linha do próprio usuário espelha o que mexemos no summary.
+      if (previousRanking) {
+        queryClient.setQueryData(rankingKey!, {
+          ...previousRanking,
+          ranking: previousRanking.ranking.map((entry) =>
+            entry.isYou
+              ? { ...entry, waterDays: newWaterDays, score: newScore }
+              : entry
+          ),
+        });
+      }
+    }
+
+    // PATCH em paralelo. A UI já está atualizada; aqui só confirmamos com o
+    // servidor e re-sincronizamos em background. Se falhar, desfazemos.
     try {
       await apiPatch("/api/daily-log", { addWaterMl: ml });
-      invalidateSummary();
-      invalidateRanking();
+      // `refetchType: 'none'` apenas marca os dados como stale; o próximo
+      // foco/montagem/interação dispara o refetch real. Isso evita o custo
+      // de 2 GETs a cada clique de água — a UI já reflete o valor correto
+      // e o servidor confirma silenciosamente depois.
+      queryClient.invalidateQueries({ queryKey: queryKeys.gameSummary, refetchType: "none" });
+      if (rankingKey) queryClient.invalidateQueries({ queryKey: rankingKey, refetchType: "none" });
     } catch {
+      // Rollback: volta o cache pro estado pré-clique.
+      if (previousSummary) queryClient.setQueryData(queryKeys.gameSummary, previousSummary);
+      if (previousRanking && rankingKey) queryClient.setQueryData(rankingKey, previousRanking);
       toast.error("Não foi possível registrar a água.");
     }
   };
@@ -105,12 +212,50 @@ export function GameView() {
   const toggleDiet = async () => {
     if (!summaryQuery.data) return;
     const next = !summaryQuery.data.today.dietOnTrack;
+
+    // Feedback instantâneo — toast e pulse já disparam agora, não depois.
+    toast.success(next ? "Dia marcado como \"na dieta\"! 🥗" : "Marcação removida.", { duration: 1400 });
+
+    const previousSummary = queryClient.getQueryData<GameSummary>(queryKeys.gameSummary);
+    const rankingKey = activeGroupId ? queryKeys.groupRanking(activeGroupId) : null;
+    const previousRanking = rankingKey
+      ? queryClient.getQueryData<{ ranking: RankingEntry[]; week: { start: string; end: string } }>(rankingKey)
+      : undefined;
+
+    if (previousSummary) {
+      await queryClient.cancelQueries({ queryKey: queryKeys.gameSummary });
+      if (rankingKey) await queryClient.cancelQueries({ queryKey: rankingKey });
+
+      const wasDietDay = previousSummary.today.dietOnTrack;
+      const dietDaysDelta = (next ? 1 : 0) - (wasDietDay ? 1 : 0);
+      const newDietDays = previousSummary.week.dietDays + dietDaysDelta;
+      const newScore = previousSummary.week.score + dietDaysDelta * 5; // GAME_POINTS.DIET_DAY
+
+      queryClient.setQueryData<GameSummary>(queryKeys.gameSummary, {
+        ...previousSummary,
+        today: { ...previousSummary.today, dietOnTrack: next },
+        week: { ...previousSummary.week, dietDays: newDietDays, score: newScore },
+      });
+
+      if (previousRanking) {
+        queryClient.setQueryData(rankingKey!, {
+          ...previousRanking,
+          ranking: previousRanking.ranking.map((entry) =>
+            entry.isYou
+              ? { ...entry, dietDays: newDietDays, score: newScore }
+              : entry
+          ),
+        });
+      }
+    }
+
     try {
       await apiPatch("/api/daily-log", { dietOnTrack: next });
-      invalidateSummary();
-      invalidateRanking();
-      toast.success(next ? "Dia marcado como \"na dieta\"! 🥗" : "Marcação removida.");
+      queryClient.invalidateQueries({ queryKey: queryKeys.gameSummary, refetchType: "none" });
+      if (rankingKey) queryClient.invalidateQueries({ queryKey: rankingKey, refetchType: "none" });
     } catch {
+      if (previousSummary) queryClient.setQueryData(queryKeys.gameSummary, previousSummary);
+      if (previousRanking && rankingKey) queryClient.setQueryData(rankingKey, previousRanking);
       toast.error("Não foi possível atualizar a dieta de hoje.");
     }
   };
@@ -200,29 +345,70 @@ export function GameView() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-bold flex items-center gap-1.5"><Droplets className="w-4 h-4 text-sky-400" /> Água</span>
-              <span className="text-sm font-bold tabular-nums">{today.waterMl} / {goals.waterGoalMl} ml</span>
+              {/* `key={waterPulseKey}` re-monta o span a cada mudança real
+                  do contador, re-disparando a animação de pulse. */}
+              <motion.span
+                key={`water-${waterPulseKey}`}
+                initial={{ scale: 1 }}
+                animate={{ scale: 1 }}
+                className="text-sm font-bold tabular-nums inline-flex items-center gap-1.5"
+              >
+                <motion.span
+                  key={`water-inner-${waterPulseKey}`}
+                  initial={{ scale: 0.85 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 18 }}
+                  className="inline-block origin-right"
+                >
+                  {today.waterMl}
+                </motion.span>
+                <span className="text-muted-foreground font-semibold"> / {goals.waterGoalMl} ml</span>
+              </motion.span>
             </div>
             <Progress value={waterPct} className="h-2.5 [&>div]:bg-sky-400" />
-            <div className="flex gap-2 pt-1">
+            <div className="relative flex gap-2 pt-1">
               {WATER_QUICK_ADD.map((q) => (
                 <Button key={q.ml} size="sm" variant="outline" onClick={() => addWater(q.ml)} className="rounded-xl font-semibold flex-1">
                   {q.label}
                 </Button>
               ))}
+              {/* Badge flutuante "+ml" — sobe e desaparece, dando feedback
+                  visual instantâneo no exato momento do clique. */}
+              <AnimatePresence>
+                {floatingMl && (
+                  <motion.span
+                    key={floatingMl.id}
+                    initial={{ opacity: 0, y: 4, scale: 0.85 }}
+                    animate={{ opacity: 1, y: -18, scale: 1.05 }}
+                    exit={{ opacity: 0, y: -36, scale: 0.9 }}
+                    transition={{ duration: 0.55, ease: "easeOut" }}
+                    className="pointer-events-none absolute left-1/2 -top-1 -translate-x-1/2 text-sm font-black text-sky-500 drop-shadow-sm whitespace-nowrap"
+                  >
+                    +{floatingMl.ml >= 1000 ? `${floatingMl.ml / 1000}L` : `${floatingMl.ml}ml`}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
           {/* Dieta */}
           <div className="flex items-center justify-between gap-4 pt-1">
             <span className="text-sm font-bold flex items-center gap-1.5"><Salad className="w-4 h-4 text-lime-500" /> Segui a dieta hoje</span>
-            <Button
-              size="sm"
-              onClick={toggleDiet}
-              variant={today.dietOnTrack ? "default" : "outline"}
-              className={`rounded-xl font-semibold gap-1.5 ${today.dietOnTrack ? "bg-lime-500 hover:bg-lime-500/90 text-white shadow-lg shadow-lime-500/20" : ""}`}
+            <motion.div
+              key={`diet-${dietPulseKey}`}
+              initial={{ scale: 1 }}
+              animate={{ scale: [1, 1.12, 1] }}
+              transition={{ duration: 0.32, times: [0, 0.4, 1], ease: "easeOut" }}
             >
-              {today.dietOnTrack ? <><Check className="w-3.5 h-3.5" /> Sim</> : "Marcar"}
-            </Button>
+              <Button
+                size="sm"
+                onClick={toggleDiet}
+                variant={today.dietOnTrack ? "default" : "outline"}
+                className={`rounded-xl font-semibold gap-1.5 ${today.dietOnTrack ? "bg-lime-500 hover:bg-lime-500/90 text-white shadow-lg shadow-lime-500/20" : ""}`}
+              >
+                {today.dietOnTrack ? <><Check className="w-3.5 h-3.5" /> Sim</> : "Marcar"}
+              </Button>
+            </motion.div>
           </div>
 
           {/* Treino */}

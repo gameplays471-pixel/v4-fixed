@@ -7,7 +7,8 @@ export const GET = withErrorHandling("Get workouts", async (req: NextRequest) =>
   const user = await requireUser(req);
 
   const workouts = await db.workout.findMany({
-    where: { userId: user.id },
+    // Templates do admin não aparecem na lista do usuário — só cópias atribuídas.
+    where: { userId: user.id, isTemplate: false },
     include: {
       exercises: {
         include: { exercise: true },

@@ -61,7 +61,7 @@ export const GET = withErrorHandling<{
     ] = await Promise.all([
       // Workout list
       db.workout.findMany({
-        where: { userId: id },
+        where: { userId: id, isTemplate: false },
         select: { id: true, name: true, createdAt: true },
         orderBy: { createdAt: "desc" },
       }),
