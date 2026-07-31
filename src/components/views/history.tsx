@@ -137,7 +137,7 @@ export function HistoryView() {
     );
   }
 
-  const grouped: Record<string, Session[]> = {};
+  const grouped: Record<string, SessionListItem[]> = {};
   for (const s of sessions) {
     const date = new Date(s.startedAt).toISOString().split("T")[0];
     if (!grouped[date]) grouped[date] = [];
