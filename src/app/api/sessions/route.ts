@@ -3,40 +3,78 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { requireUser, withErrorHandling } from "@/lib/api-error";
 import { parseBody, parseIntParam, sessionSchema } from "@/lib/validation";
+import { suggestProgressions } from "@/lib/progression";
 
 // Listagem leve: sem sets por padrão. Detalhe: GET /api/sessions/[id]
+// Paginação por cursor: ?cursor=<startedAtISO>|<id>&limit=20
 // Legado: ?includeSets=1
 export const GET = withErrorHandling("Get sessions", async (req: NextRequest) => {
   const user = await getCurrentUser(req);
   if (!user) {
-    return NextResponse.json({ sessions: [] });
+    return NextResponse.json({ sessions: [], nextCursor: null, hasMore: false });
   }
 
   const { searchParams } = new URL(req.url);
-  const limit = parseIntParam(searchParams.get("limit"), { default: 50, min: 1, max: 200 });
+  const limit = parseIntParam(searchParams.get("limit"), { default: 20, min: 1, max: 50 });
   const includeSets = searchParams.get("includeSets") === "1";
+  const cursorRaw = searchParams.get("cursor");
 
-  const sessions = await db.workoutSession.findMany({
-    where: { userId: user.id },
-    include: includeSets
-      ? {
-          sets: {
-            include: {
-              exercise: {
-                select: { muscleGroup: true, category: true, secondaryMuscles: true },
-              },
+  let cursorFilter: { startedAt: Date; id: string } | null = null;
+  if (cursorRaw) {
+    const sep = cursorRaw.indexOf("|");
+    if (sep > 0) {
+      const startedAt = new Date(cursorRaw.slice(0, sep));
+      const id = cursorRaw.slice(sep + 1);
+      if (!Number.isNaN(startedAt.getTime()) && id) {
+        cursorFilter = { startedAt, id };
+      }
+    }
+  }
+
+  const include = includeSets
+    ? {
+        sets: {
+          include: {
+            exercise: {
+              select: { muscleGroup: true, category: true, secondaryMuscles: true },
             },
           },
-          workout: { select: { id: true, color: true, name: true } },
-        }
-      : {
-          workout: { select: { id: true, color: true, name: true } },
         },
-    orderBy: { startedAt: "desc" },
-    take: limit,
+        workout: { select: { id: true, color: true, name: true } },
+      }
+    : {
+        workout: { select: { id: true, color: true, name: true } },
+      };
+
+  const sessions = await db.workoutSession.findMany({
+    where: {
+      userId: user.id,
+      ...(cursorFilter
+        ? {
+            OR: [
+              { startedAt: { lt: cursorFilter.startedAt } },
+              {
+                startedAt: cursorFilter.startedAt,
+                id: { lt: cursorFilter.id },
+              },
+            ],
+          }
+        : {}),
+    },
+    include,
+    orderBy: [{ startedAt: "desc" }, { id: "desc" }],
+    take: limit + 1,
   });
 
-  return NextResponse.json({ sessions });
+  const hasMore = sessions.length > limit;
+  const page = hasMore ? sessions.slice(0, limit) : sessions;
+  const last = page[page.length - 1];
+  const nextCursor =
+    hasMore && last
+      ? `${new Date(last.startedAt).toISOString()}|${last.id}`
+      : null;
+
+  return NextResponse.json({ sessions: page, nextCursor, hasMore });
 });
 
 export const POST = withErrorHandling("Create session", async (req: NextRequest) => {
@@ -119,5 +157,17 @@ export const POST = withErrorHandling("Create session", async (req: NextRequest)
     include: { sets: true },
   });
 
-  return NextResponse.json({ session });
+  const progressions = suggestProgressions(
+    setRows.map((s) => ({
+      exerciseId: s.exerciseId,
+      exerciseName: s.exerciseName,
+      weight: s.weight,
+      reps: s.reps,
+      rir: s.rir,
+      isPR: s.isPR,
+      durationSec: s.durationSec,
+    }))
+  );
+
+  return NextResponse.json({ session, progressions });
 });

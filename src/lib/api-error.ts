@@ -77,34 +77,70 @@ export function withErrorHandling<Ctx = any>(
   handler: (req: NextRequest, ctx: Ctx) => Promise<Response> | Response
 ) {
   return async (req: NextRequest, ctx: Ctx): Promise<Response> => {
+    const started = Date.now();
+
+    const logTiming = (status: number) => {
+      const durationMs = Date.now() - started;
+      // Facilita p95 por rota nos logs da Vercel / agregadores.
+      logger.info(routeName, {
+        route: routeName,
+        status,
+        durationMs,
+        method: req.method,
+      });
+      try {
+        Sentry.setTag("route", routeName);
+        // Metrics API (Sentry SDK ≥ 7/8) — ignore se indisponível no build.
+        const metrics = (Sentry as unknown as { metrics?: { distribution?: Function } }).metrics;
+        metrics?.distribution?.("api.duration_ms", durationMs, {
+          tags: { route: routeName, status: String(status), method: req.method },
+          unit: "millisecond",
+        });
+      } catch {
+        /* optional */
+      }
+      return durationMs;
+    };
+
     try {
-      return await handler(req, ctx);
+      const res = await handler(req, ctx);
+      logTiming(res.status);
+      // Server-Timing ajuda debug local e APM sem alterar o body.
+      try {
+        res.headers.set("Server-Timing", `total;dur=${Date.now() - started}`);
+        res.headers.set("X-Response-Time", `${Date.now() - started}ms`);
+      } catch {
+        /* headers imutáveis em alguns runtimes */
+      }
+      return res;
     } catch (e) {
       if (e instanceof ApiError) {
-        // Erro esperado (validação, 404, permissão) — não é bug, não vai
-        // pro Sentry. Ainda assim vira uma linha de log em nível `warn`,
-        // útil pra notar padrões (ex.: muitos 409 num endpoint específico
-        // pode indicar um problema de UX, não só "usuário errou").
-        logger.warn(`${routeName} — ${e.status}`, { route: routeName, status: e.status, message: e.message });
+        logTiming(e.status);
+        logger.warn(`${routeName} — ${e.status}`, {
+          route: routeName,
+          status: e.status,
+          message: e.message,
+        });
         return NextResponse.json({ error: e.message }, { status: e.status });
       }
       if (e instanceof SyntaxError) {
+        logTiming(400);
         return NextResponse.json({ error: "JSON inválido no corpo da requisição" }, { status: 400 });
       }
 
-      // Erro de verdade (bug, banco fora do ar, etc.): log estruturado +
-      // Sentry. O requestId volta pro cliente pra quem for reportar o
-      // problema (email de suporte, print) conseguir dar uma referência
-      // que você acha em segundos no log/Sentry, em vez de "tava dando
-      // erro ali, sei lá quando".
       const requestId = newRequestId();
+      const durationMs = logTiming(500);
       logger.error(`${routeName} — erro inesperado`, {
         route: routeName,
         requestId,
+        durationMs,
         error: e instanceof Error ? e.message : String(e),
         stack: e instanceof Error ? e.stack : undefined,
       });
-      Sentry.captureException(e, { tags: { route: routeName, requestId } });
+      Sentry.captureException(e, {
+        tags: { route: routeName, requestId },
+        extra: { durationMs },
+      });
 
       return NextResponse.json({ error: "Erro interno", requestId }, { status: 500 });
     }

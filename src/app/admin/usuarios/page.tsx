@@ -120,6 +120,15 @@ interface UserDetail {
     avgVolume: number;
     favoriteMuscleGroup: string | null;
   };
+  report?: {
+    assignedWorkouts: number;
+    doneAssignedThisWeek: number;
+    adherencePercent: number;
+    sessionsThisWeek: number;
+    volumeThisWeek: number;
+    prsThisMonth: number;
+    plans: Array<{ id: string; name: string; totalDays: number; doneThisWeek: number; percent: number }>;
+  };
 }
 
 interface ListResponse {
@@ -637,6 +646,61 @@ export default function AdminUsuariosPage() {
                     <StatCard icon={<Calendar className="w-4 h-4" />} label="Fotos de progresso" value={String(detailUser.progressPhotoCount)} />
                   </div>
                 </div>
+
+                {/* Relatório de aderência */}
+                {detailUser.report && (
+                  <div className="space-y-3">
+                    <h3 className="font-bold text-sm flex items-center gap-2">
+                      <Target className="w-4 h-4 text-primary" /> Relatório (semana / mês)
+                    </h3>
+                    <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Aderência esta semana</p>
+                          <p className="text-sm font-medium">
+                            {detailUser.report.doneAssignedThisWeek}/{detailUser.report.assignedWorkouts} treinos com sessão
+                          </p>
+                        </div>
+                        <p className="text-2xl font-black text-primary tabular-nums">
+                          {detailUser.report.adherencePercent}%
+                        </p>
+                      </div>
+                      <div className="h-2 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-primary transition-all"
+                          style={{ width: `${detailUser.report.adherencePercent}%` }}
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="rounded-lg bg-background/60 p-2">
+                          <p className="text-lg font-black tabular-nums">{detailUser.report.sessionsThisWeek}</p>
+                          <p className="text-[10px] text-muted-foreground">Sessões/sem</p>
+                        </div>
+                        <div className="rounded-lg bg-background/60 p-2">
+                          <p className="text-lg font-black tabular-nums">{formatVolume(detailUser.report.volumeThisWeek)}</p>
+                          <p className="text-[10px] text-muted-foreground">kg / sem</p>
+                        </div>
+                        <div className="rounded-lg bg-background/60 p-2">
+                          <p className="text-lg font-black tabular-nums">{detailUser.report.prsThisMonth}</p>
+                          <p className="text-[10px] text-muted-foreground">PRs / mês</p>
+                        </div>
+                      </div>
+                      {detailUser.report.plans.length > 0 && (
+                        <div className="space-y-2 pt-1">
+                          <p className="text-xs font-semibold text-muted-foreground">Planos</p>
+                          {detailUser.report.plans.map((pl) => (
+                            <div key={pl.id} className="flex items-center justify-between text-xs">
+                              <span className="truncate font-medium">{pl.name}</span>
+                              <span className="tabular-nums text-muted-foreground shrink-0 ml-2">
+                                {pl.doneThisWeek}/{pl.totalDays} · {pl.percent}%
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Treinos do usuário */}
                 <div className="space-y-3">

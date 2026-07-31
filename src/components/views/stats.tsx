@@ -32,6 +32,7 @@ export function StatsView() {
   // aqui com os stats já em cache (instantâneo), atualizando por trás.
   const { data, isLoading, isError, error } = useQuery({
     queryKey: queryKeys.stats,
+    staleTime: 2 * 60_000,
     queryFn: () => apiGet<{ stats: Stats }>("/api/stats").then((d) => d.stats),
   });
   const stats = data ?? null;

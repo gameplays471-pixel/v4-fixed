@@ -148,6 +148,108 @@ export const GET = withErrorHandling<{
       }
     }
 
+
+    // ── Relatório de negócio (aderência / volume / PRs) ─────────────────
+    const weekStartReport = new Date();
+    {
+      const d = weekStartReport.getDay();
+      const diff = d === 0 ? 6 : d - 1;
+      weekStartReport.setDate(weekStartReport.getDate() - diff);
+      weekStartReport.setHours(0, 0, 0, 0);
+    }
+    const monthStartReport = new Date();
+    monthStartReport.setDate(1);
+    monthStartReport.setHours(0, 0, 0, 0);
+
+    const userWorkouts = await db.workout.findMany({
+      where: { userId: id, isTemplate: false },
+      select: { id: true },
+    });
+    const assignedWorkoutIds = userWorkouts.map((w) => w.id);
+
+    const [weekAgg, sessionsThisWeekOnAssigned, prsThisMonth, plans] = await Promise.all([
+      db.workoutSession.aggregate({
+        where: { userId: id, startedAt: { gte: weekStartReport } },
+        _sum: { totalVolume: true },
+        _count: { _all: true },
+      }),
+      assignedWorkoutIds.length
+        ? db.workoutSession.findMany({
+            where: {
+              userId: id,
+              workoutId: { in: assignedWorkoutIds },
+              startedAt: { gte: weekStartReport },
+            },
+            select: { workoutId: true },
+            distinct: ["workoutId"],
+          })
+        : Promise.resolve([] as { workoutId: string | null }[]),
+      db.$queryRaw<Array<{ count: bigint }>>`
+        SELECT COUNT(*)::bigint AS count
+        FROM "SessionSet" ss
+        INNER JOIN "WorkoutSession" ws ON ws.id = ss."sessionId"
+        WHERE ws."userId" = ${id}
+          AND ss."isPR" = true
+          AND ws."startedAt" >= ${monthStartReport}
+      `,
+      db.workoutPlan.findMany({
+        where: { userId: id, isTemplate: false },
+        include: {
+          items: { select: { workoutId: true } },
+        },
+      }).catch(() => [] as Array<{ id: string; name: string; items: { workoutId: string }[] }>),
+    ]);
+
+    const assignedCount = assignedWorkoutIds.length;
+    const doneAssignedThisWeek = sessionsThisWeekOnAssigned.filter((s) => s.workoutId).length;
+    const adherencePercent =
+      assignedCount === 0
+        ? 0
+        : Math.min(100, Math.round((doneAssignedThisWeek / assignedCount) * 100));
+
+    // Plano: % de dias do plano feitos nesta semana
+    const planReports = await Promise.all(
+      (plans as Array<{ id: string; name: string; items: { workoutId: string }[] }>).map(async (plan) => {
+        const ids = plan.items.map((i) => i.workoutId);
+        const done =
+          ids.length === 0
+            ? 0
+            : (
+                await db.workoutSession.findMany({
+                  where: {
+                    userId: id,
+                    workoutId: { in: ids },
+                    startedAt: { gte: weekStartReport },
+                  },
+                  distinct: ["workoutId"],
+                  select: { workoutId: true },
+                })
+              ).length;
+        return {
+          id: plan.id,
+          name: plan.name,
+          totalDays: plan.items.length,
+          doneThisWeek: done,
+          percent: plan.items.length
+            ? Math.min(100, Math.round((done / plan.items.length) * 100))
+            : 0,
+        };
+      })
+    );
+
+    const report = {
+      assignedWorkouts: assignedCount,
+      doneAssignedThisWeek,
+      adherencePercent,
+      sessionsThisWeek: weekAgg._count._all,
+      volumeThisWeek: weekAgg._sum.totalVolume ?? 0,
+      prsThisMonth: Number(prsThisMonth[0]?.count ?? 0),
+      weekStart: weekStartReport.toISOString(),
+      monthStart: monthStartReport.toISOString(),
+      plans: planReports,
+    };
+
+
     return NextResponse.json({
       user: { ...user, avatarUrl: publicAvatarUrl(user.avatarUrl) },
       workouts,
@@ -166,6 +268,7 @@ export const GET = withErrorHandling<{
         favoriteMuscleGroup:
           topExercises.length > 0 ? topExercises[0].exerciseName : null,
       },
+      report,
     });
   }
 );

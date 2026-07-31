@@ -17,3 +17,10 @@
 - Menu admin `/admin/atribuicao-treinos`
 - Templates + seed de 8 treinos pré-setados
 - SQL schema: `supabase-migration-workout-templates.sql`
+
+## 2026-07-31 — Cursor, cache, pool, avatars
+
+- `GET /api/sessions` cursor (`?cursor=&limit=20`, max 50) + histórico com infinite query
+- React Query: exercises 10min, stats 2min, default 60s; sem refetch on focus
+- `src/lib/db.ts`: `pgbouncer=true`, `connection_limit=1`, `pool_timeout=10` no pooler
+- Script: `bun run migrate:avatars` / `migrate:avatars:upload`

@@ -41,6 +41,7 @@ model User {
   dailyLogs DailyLog[]
   ownedGroups Group[] @relation("GroupOwner")
   groupMemberships GroupMember[]
+  workoutPlans    WorkoutPlan[]
   @@index([role])
   @@index([disabled])
 }
@@ -92,6 +93,7 @@ model Workout {
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercises WorkoutExercise[]
   sessions  WorkoutSession[]
+  planItems WorkoutPlanItem[]
 
   @@index([userId])
   @@index([isTemplate])
@@ -289,6 +291,46 @@ model GroupMember {
 // (não um campo Json nativo, pra manter compatibilidade com o modo como o
 // resto do schema já representa dados semiestruturados como texto) —
 // permite reconstruir "o que mudou" sem depender de triggers no banco.
+// Plano semanal (template do admin ou cópia do aluno)
+model WorkoutPlan {
+  id             String   @id @default(cuid())
+  userId         String
+  name           String
+  description    String?
+  daysPerWeek    Int      @default(3)
+  isTemplate     Boolean  @default(false)
+  templateGoal   String?
+  templateSex    String?
+  templateLevel  String?
+  fromTemplateId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items WorkoutPlanItem[]
+
+  @@index([userId])
+  @@index([isTemplate])
+  @@index([userId, isTemplate])
+}
+
+model WorkoutPlanItem {
+  id               String  @id @default(cuid())
+  planId           String
+  order            Int
+  label            String
+  suggestedWeekday Int?
+  workoutId        String
+
+  plan    WorkoutPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  workout Workout     @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, order])
+  @@index([planId])
+  @@index([workoutId])
+}
+
+
 model AuditLog {
   id         String   @id @default(cuid())
   actorId    String   // id do admin que executou a ação

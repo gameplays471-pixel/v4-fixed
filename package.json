@@ -15,7 +15,11 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
-    "vercel-build": "prisma generate && next build"
+    "vercel-build": "prisma generate && next build",
+    "migrate:avatars": "bun run scripts/migrate-data-avatars.ts",
+    "migrate:avatars:upload": "bun run scripts/migrate-data-avatars.ts --upload",
+    "test:e2e": "bun run scripts/test-e2e-ci.ts",
+    "test:ci": "bun run test && echo 'unit ok'"
   },
   "dependencies": {
     "@prisma/client": "^6.11.1",

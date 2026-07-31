@@ -269,6 +269,44 @@ export function WorkoutSummaryView(_props: WorkoutSummaryViewProps) {
         })}
       </motion.div>
 
+
+      {/* Progressão sugerida para o próximo treino */}
+      {data.progressions && data.progressions.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="space-y-3"
+        >
+          <div>
+            <h2 className="text-sm font-black tracking-tight">Próxima progressão</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Sugestões com base no que você acabou de fazer (carga, reps e RIR)
+            </p>
+          </div>
+          <div className="space-y-2">
+            {data.progressions.map((p) => (
+              <Card key={p.exerciseId} className="p-3 border-primary/20 bg-primary/5">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold truncate">{p.exerciseName}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{p.reason}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-xs text-muted-foreground line-through tabular-nums">
+                      {p.lastWeight} kg × {p.lastReps}
+                    </p>
+                    <p className="text-sm font-black text-primary tabular-nums">
+                      {p.suggestedWeight} kg × {p.suggestedReps}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Ações */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
         className="flex gap-3 pt-2">

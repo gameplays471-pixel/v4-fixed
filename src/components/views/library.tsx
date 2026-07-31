@@ -66,6 +66,7 @@ export function LibraryView() {
   // de recarregar tudo com loading spinner de novo.
   const exercisesQuery = useQuery({
     queryKey: queryKeys.exercises,
+    staleTime: 10 * 60_000,
     queryFn: () => apiGet<{ exercises: Exercise[] }>("/api/exercises").then((d) => d.exercises),
   });
   const exercises = exercisesQuery.data ?? [];

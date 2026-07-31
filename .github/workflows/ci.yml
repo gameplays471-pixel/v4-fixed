@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bunx prisma generate
+      - name: Unit tests (Zod + progressão + contratos)
+        run: bun run test
+
+  e2e:
+    runs-on: ubuntu-latest
+    # Só roda se o secret BASE_URL estiver configurado (preview/prod).
+    if: ${{ vars.E2E_BASE_URL != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: E2E HTTP login → session → stats
+        env:
+          BASE_URL: ${{ vars.E2E_BASE_URL }}
+          EMAIL: ${{ vars.E2E_EMAIL || 'aluno1@aluno.com' }}
+          PASSWORD: ${{ vars.E2E_PASSWORD || '12345678' }}
+        run: bun run scripts/test-e2e-ci.ts

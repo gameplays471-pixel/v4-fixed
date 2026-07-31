@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiGet, apiPost, apiPut } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,7 @@ import {
   Filter,
   ClipboardList,
   ChevronRight,
+  Pencil,
 } from "lucide-react";
 
 type TemplateExercise = {
@@ -113,6 +114,20 @@ export default function AtribuicaoTreinosPage() {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [assigning, setAssigning] = useState(false);
+  const [adjustWorkout, setAdjustWorkout] = useState<{
+    id: string;
+    name: string;
+    userName: string;
+    exercises: Array<{
+      exerciseId: string;
+      exerciseName: string;
+      targetSets: number;
+      targetReps: number;
+      restSeconds: number;
+      notes: string | null;
+    }>;
+  } | null>(null);
+  const [adjustSaving, setAdjustSaving] = useState(false);
 
   const [goalFilter, setGoalFilter] = useState(ALL);
   const [sexFilter, setSexFilter] = useState(ALL);
@@ -236,6 +251,86 @@ export default function AtribuicaoTreinosPage() {
       setAssigning(false);
     }
   };
+
+  /** Clona 1 template para o aluno e abre editor inline (ajustar cargas/reps). */
+  const handleCloneAndAdjust = async () => {
+    if (!selectedUserId || selectedTemplateIds.size !== 1) {
+      toast.error("Selecione exatamente 1 treino e 1 aluno para clonar e ajustar");
+      return;
+    }
+    setAssigning(true);
+    try {
+      const templateId = Array.from(selectedTemplateIds)[0];
+      const res = await apiPost<{
+        assigned: Array<{ id: string; name: string; exerciseCount: number }>;
+        user: { id: string; name: string };
+      }>("/api/admin/assign-workouts", {
+        userId: selectedUserId,
+        templateIds: [templateId],
+      });
+      const assigned = res.assigned[0];
+      if (!assigned) throw new Error("Nenhum treino clonado");
+
+      const detail = await apiGet<{
+        workout: {
+          id: string;
+          name: string;
+          exercises: Array<{
+            exerciseId: string;
+            targetSets: number;
+            targetReps: number;
+            restSeconds: number;
+            notes: string | null;
+            exercise: { name: string };
+          }>;
+        };
+      }>(`/api/admin/user-workouts/${assigned.id}`);
+
+      setAdjustWorkout({
+        id: detail.workout.id,
+        name: detail.workout.name,
+        userName: res.user.name,
+        exercises: detail.workout.exercises.map((ex) => ({
+          exerciseId: ex.exerciseId,
+          exerciseName: ex.exercise.name,
+          targetSets: ex.targetSets,
+          targetReps: ex.targetReps,
+          restSeconds: ex.restSeconds,
+          notes: ex.notes,
+        })),
+      });
+      setSelectedTemplateIds(new Set());
+      toast.success(`Cópia criada para ${res.user.name} — ajuste se quiser`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao clonar");
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleSaveAdjust = async () => {
+    if (!adjustWorkout) return;
+    setAdjustSaving(true);
+    try {
+      await apiPut(`/api/admin/user-workouts/${adjustWorkout.id}`, {
+        name: adjustWorkout.name,
+        exercises: adjustWorkout.exercises.map((ex) => ({
+          exerciseId: ex.exerciseId,
+          targetSets: ex.targetSets,
+          targetReps: ex.targetReps,
+          restSeconds: ex.restSeconds,
+          notes: ex.notes,
+        })),
+      });
+      toast.success("Treino do aluno atualizado");
+      setAdjustWorkout(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro ao salvar ajuste");
+    } finally {
+      setAdjustSaving(false);
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -477,6 +572,15 @@ export default function AtribuicaoTreinosPage() {
               >
                 Atribuir treinos
               </Button>
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                disabled={selectedTemplateIds.size !== 1 || !selectedUserId || assigning}
+                onClick={handleCloneAndAdjust}
+              >
+                {assigning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
+                Clonar e ajustar
+              </Button>
             </div>
           </div>
         </div>
@@ -579,6 +683,94 @@ export default function AtribuicaoTreinosPage() {
                   {selectedTemplateIds.has(detailTemplate.id)
                     ? "Remover da seleção"
                     : "Selecionar este treino"}
+                </Button>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {/* Editor pós-clone */}
+      <Sheet open={!!adjustWorkout} onOpenChange={(o) => { if (!o) setAdjustWorkout(null); }}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+          {adjustWorkout && (
+            <>
+              <SheetHeader>
+                <SheetTitle>Ajustar treino do aluno</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4 space-y-4">
+                <p className="text-xs text-muted-foreground">
+                  Cópia para <span className="font-semibold text-foreground">{adjustWorkout.userName}</span>
+                </p>
+                <div className="space-y-1.5">
+                  <Label>Nome do treino</Label>
+                  <Input
+                    value={adjustWorkout.name}
+                    onChange={(e) =>
+                      setAdjustWorkout({ ...adjustWorkout, name: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-3">
+                  {adjustWorkout.exercises.map((ex, i) => (
+                    <div key={ex.exerciseId} className="rounded-xl border border-border/60 p-3 space-y-2">
+                      <p className="text-sm font-semibold">{ex.exerciseName}</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <Label className="text-[10px]">Séries</Label>
+                          <Input
+                            type="number"
+                            min={1}
+                            value={ex.targetSets}
+                            onChange={(e) => {
+                              const exercises = [...adjustWorkout.exercises];
+                              exercises[i] = {
+                                ...ex,
+                                targetSets: parseInt(e.target.value) || 1,
+                              };
+                              setAdjustWorkout({ ...adjustWorkout, exercises });
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-[10px]">Reps</Label>
+                          <Input
+                            type="number"
+                            min={1}
+                            value={ex.targetReps}
+                            onChange={(e) => {
+                              const exercises = [...adjustWorkout.exercises];
+                              exercises[i] = {
+                                ...ex,
+                                targetReps: parseInt(e.target.value) || 1,
+                              };
+                              setAdjustWorkout({ ...adjustWorkout, exercises });
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-[10px]">Descanso (s)</Label>
+                          <Input
+                            type="number"
+                            min={0}
+                            value={ex.restSeconds}
+                            onChange={(e) => {
+                              const exercises = [...adjustWorkout.exercises];
+                              exercises[i] = {
+                                ...ex,
+                                restSeconds: parseInt(e.target.value) || 0,
+                              };
+                              setAdjustWorkout({ ...adjustWorkout, exercises });
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Button className="w-full" onClick={handleSaveAdjust} disabled={adjustSaving}>
+                  {adjustSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                  Salvar ajustes
                 </Button>
               </div>
             </>

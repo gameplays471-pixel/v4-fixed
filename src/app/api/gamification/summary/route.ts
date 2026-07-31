@@ -1,3 +1,4 @@
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUser, withErrorHandling } from "@/lib/api-error";
@@ -9,6 +10,9 @@ import { computeGameScore, getWeekRange, startOfDay } from "@/lib/gamification";
 // nenhum grupo ainda.
 export const GET = withErrorHandling("Get gamification summary", async (req: NextRequest) => {
   const user = await requireUser(req);
+  if (!isFeatureEnabled("gamification")) {
+    return NextResponse.json({ enabled: false, disabledByFlag: true });
+  }
   const { start, end } = getWeekRange();
   const today = startOfDay();
 

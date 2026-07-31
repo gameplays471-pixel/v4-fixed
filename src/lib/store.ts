@@ -28,6 +28,16 @@ export type WorkoutSummaryData = {
       intensity?: string;
     }>;
   }>;
+  /** Sugestões de progressão geradas ao finalizar (POST /api/sessions). */
+  progressions?: Array<{
+    exerciseId: string;
+    exerciseName: string;
+    lastWeight: number;
+    lastReps: number;
+    suggestedWeight: number;
+    suggestedReps: number;
+    reason: string;
+  }>;
 };
 
 interface AppState {

@@ -47,8 +47,12 @@ export function useWorkoutSession(workoutId: string) {
     isPRBySetIndex: boolean[];
     elapsed: number;
     totalVolume: number;
+    progressions?: WorkoutSummaryData["progressions"];
   }) => {
-    const summaryData: WorkoutSummaryData = buildSummaryData(params);
+    const summaryData: WorkoutSummaryData = {
+      ...buildSummaryData(params),
+      progressions: params.progressions,
+    };
     clearWorkoutDraft(params.workout.id);
     setWorkoutSummaryData(summaryData);
     setActiveWorkoutId(null);
@@ -68,7 +72,7 @@ export function useWorkoutSession(workoutId: string) {
     }
 
     try {
-      const { session } = await apiPost<{
+      const { session, progressions } = await apiPost<{
         session: {
           sets: Array<{
             exerciseId: string;
@@ -81,6 +85,7 @@ export function useWorkoutSession(workoutId: string) {
             intensity: string | null;
           }>;
         };
+        progressions?: WorkoutSummaryData["progressions"];
       }>("/api/sessions", {
         workoutId: workout.id,
         workoutName: workout.name,
@@ -93,7 +98,15 @@ export function useWorkoutSession(workoutId: string) {
       // Reconstrói o resumo por exercício, aproveitando as flags de PR
       // vindas da API (mesma ordem em que os sets foram enviados acima).
       const isPRBySetIndex = session.sets.map((s) => s.isPR);
-      finishWorkoutLocally({ workout, setsMap, cardioMap, isPRBySetIndex, elapsed, totalVolume });
+      finishWorkoutLocally({
+        workout,
+        setsMap,
+        cardioMap,
+        isPRBySetIndex,
+        elapsed,
+        totalVolume,
+        progressions,
+      });
       onFinished?.();
     } catch (e) {
       // Detecta se é erro de rede (TypeError do fetch quando offline)

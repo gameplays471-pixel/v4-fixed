@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { Dumbbell, Clock, ChevronRight, Calendar, X, Trophy, Share2 } from "luci
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { ShareWorkoutDialog } from "@/components/share-workout-dialog";
+import { ExerciseHistoryChart } from "@/components/exercise-history-chart";
 import type { WorkoutSummaryData } from "@/lib/store";
 
 /** Listagem leve — sem sets (GET /api/sessions). */
@@ -88,9 +89,18 @@ type Stats = {
 };
 
 export function HistoryView() {
-  const sessionsQuery = useQuery({
-    queryKey: queryKeys.sessions(100),
-    queryFn: () => apiGet<{ sessions: Session[] }>("/api/sessions?limit=100").then((d) => d.sessions),
+  const sessionsQuery = useInfiniteQuery({
+    queryKey: queryKeys.sessionsInfinite,
+    queryFn: ({ pageParam }) =>
+      apiGet<{
+        sessions: SessionListItem[];
+        nextCursor: string | null;
+        hasMore: boolean;
+      }>(
+        `/api/sessions?limit=20${pageParam ? `&cursor=${encodeURIComponent(pageParam)}` : ""}`
+      ),
+    initialPageParam: null as string | null,
+    getNextPageParam: (last) => (last.hasMore ? last.nextCursor : null),
   });
   // Mesma queryKey do dashboard/stats: cache compartilhado entre as telas.
   const statsQuery = useQuery({
@@ -113,7 +123,7 @@ export function HistoryView() {
     }
   }, []);
 
-  const sessions = (sessionsQuery.data ?? []) as SessionListItem[];
+  const sessions = (sessionsQuery.data?.pages.flatMap((p) => p.sessions) ?? []) as SessionListItem[];
   const stats = statsQuery.data ?? null;
   const loading = sessionsQuery.isLoading || statsQuery.isLoading;
   const hasError = sessionsQuery.isError || statsQuery.isError;
@@ -227,7 +237,22 @@ export function HistoryView() {
         )}
       </div>
 
+
+      {sessionsQuery.hasNextPage && (
+        <div className="flex justify-center pt-2 pb-6">
+          <Button
+            variant="outline"
+            className="rounded-xl"
+            disabled={sessionsQuery.isFetchingNextPage}
+            onClick={() => sessionsQuery.fetchNextPage()}
+          >
+            {sessionsQuery.isFetchingNextPage ? "Carregando…" : "Carregar mais treinos"}
+          </Button>
+        </div>
+      )}
+
       {selectedSession && (
+
         <SessionModal session={selectedSession} onClose={() => setSelectedSession(null)} />
       )}
     </div>
@@ -371,6 +396,18 @@ function SessionModal({ session, onClose }: { session: Session; onClose: () => v
               </div>
             ))}
           </div>
+
+
+          {/* Evolução de carga */}
+          {Array.from(new Map(session.sets.map((s) => [s.exerciseId, s])).values())
+            .filter((s) => s.durationSec == null)
+            .slice(0, 4)
+            .map((s) => (
+              <div key={s.exerciseId} className="bg-muted/20 rounded-2xl p-3 border border-border/40">
+                <p className="text-xs font-bold mb-1">{s.exerciseName}</p>
+                <ExerciseHistoryChart exerciseId={s.exerciseId} exerciseName={s.exerciseName} days={90} height={140} />
+              </div>
+            ))}
 
           {/* Por exercício */}
           <div className="space-y-4">

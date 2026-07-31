@@ -1,30 +1,21 @@
-# Pacote consolidado — GEMgym
+# GEMgym — pacote consolidado
 
-## Inclui
+## Features novas
+- **Planos semanais**: templates 3×/semana, atribuição admin, progresso % no dashboard
+- **Progressão automática**: ao finalizar, sugere +2,5 kg / +1 rep (carga, reps, RIR)
+- **Gráfico de carga**: histórico peso×data por exercício no modal do histórico
 
-### Feature: Atribuição de treinos (admin)
-- Página `/admin/atribuicao-treinos`
-- APIs templates / seed / assign
-- 8 treinos pré-setados (emagrecimento/hipertrofia × M/F × iniciante/intermediário)
-- Schema: `isTemplate`, `templateGoal`, `templateSex`, `templateLevel`
-- SQL: `supabase-migration-workout-templates.sql`
+## Já incluído antes
+- Atribuição de treinos pré-setados
+- Performance (stats SQL, PR batch, sessions leves, admin users, avatars Blob)
+- Fix build `never[]` e history SessionListItem
 
-### Performance
-- PR em 1 query + isPR no create
-- Stats agregadas no Postgres
-- Exercícios filtrados no banco, payload leve
-- Admin users sem overfetch de sessions/avatar
-- Listagem de sessions sem sets; detalhe sob demanda
-- Avatar só URL Blob; bloqueio de base64
-- Índices: `supabase-indexes-performance.sql`
+## SQL no Supabase (ordem)
+1. `supabase-migration-workout-templates.sql` (isTemplate nas colunas Workout)
+2. `supabase-migration-workout-plans.sql` (tabelas WorkoutPlan / WorkoutPlanItem)
+3. `supabase-indexes-performance.sql` (opcional)
 
-### Build fix
-- Arrays tipados em assign-workouts e seed (evita `never[]` no tsc da Vercel)
-
-## Deploy
-
-1. Rodar no Supabase SQL Editor:
-   - `supabase-migration-workout-templates.sql`
-   - `supabase-indexes-performance.sql`
-2. Deploy do código
-3. Admin → Atribuição de treinos → Criar pré-setados
+## Fluxo admin planos
+1. Atribuição de treinos → Criar pré-setados
+2. Planos semanais → Criar planos pré-setados
+3. Selecionar plano(s) + aluno → Atribuir

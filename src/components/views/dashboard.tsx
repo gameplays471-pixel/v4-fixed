@@ -46,6 +46,26 @@ export function DashboardView() {
     queryKey: queryKeys.sessions(5),
     queryFn: () => apiGet<{ sessions: Session[] }>("/api/sessions?limit=5").then((d) => d.sessions),
   });
+  const plansQuery = useQuery({
+    queryKey: queryKeys.plans,
+    queryFn: () =>
+      apiGet<{
+        plans: Array<{
+          id: string;
+          name: string;
+          daysPerWeek: number;
+          progress: { completedThisWeek: number; totalDays: number; percent: number };
+          items: Array<{
+            id: string;
+            label: string;
+            suggestedWeekday: number | null;
+            workoutId: string;
+            workoutName: string;
+            doneThisWeek: boolean;
+          }>;
+        }>;
+      }>("/api/plans").then((d) => d.plans),
+  });
   const gameSummaryQuery = useQuery({
     queryKey: queryKeys.gameSummary,
     queryFn: () => apiGet<{ enabled: boolean; goals: { waterGoalMl: number; weeklyWorkoutGoal: number }; today: { dietOnTrack: boolean; waterMl: number; workoutDone: boolean }; week: { workouts: number; dietDays: number; waterDays: number; score: number } }>("/api/gamification/summary"),
@@ -54,6 +74,7 @@ export function DashboardView() {
   const stats = statsQuery.data ?? null;
   const workouts = workoutsQuery.data ?? [];
   const recentSessions = sessionsQuery.data ?? [];
+  const myPlans = plansQuery.data ?? [];
   const loading = statsQuery.isLoading || workoutsQuery.isLoading || sessionsQuery.isLoading;
   const hasError = statsQuery.isError || workoutsQuery.isError || sessionsQuery.isError;
 
@@ -230,6 +251,46 @@ export function DashboardView() {
         {/* Recentes */}
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <div className="flex items-center justify-between mb-3">
+
+      {myPlans.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="font-black text-base">Seu plano</h2>
+          {myPlans.slice(0, 2).map((plan) => (
+            <Card key={plan.id} className="p-4 space-y-3 border-primary/15">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-bold text-sm truncate">{plan.name}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {plan.daysPerWeek}× / semana · {plan.progress.completedThisWeek}/{plan.progress.totalDays} dias esta semana
+                  </p>
+                </div>
+                <p className="text-lg font-black text-primary tabular-nums shrink-0">{plan.progress.percent}%</p>
+              </div>
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
+                <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${plan.progress.percent}%` }} />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {plan.items.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => startWorkout(item.workoutId)}
+                    className={`text-[11px] font-semibold px-2.5 py-1.5 rounded-full border transition-colors ${
+                      item.doneThisWeek
+                        ? "bg-primary/15 border-primary/30 text-primary"
+                        : "bg-muted/40 border-border/60 hover:border-primary/40"
+                    }`}
+                  >
+                    {item.doneThisWeek ? "✓ " : ""}
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
             <h2 className="font-black text-base">Recentes</h2>
             <button onClick={() => router.push("/historico")} className="text-xs text-primary flex items-center gap-1 font-semibold hover:opacity-80 transition-opacity">
               Ver histórico <ArrowRight className="w-3.5 h-3.5" />

@@ -7,6 +7,7 @@ export const queryKeys = {
   workouts: ["workouts"] as const,
   workout: (id: string) => ["workouts", id] as const,
   sessions: (limit?: number) => ["sessions", limit ?? "all"] as const,
+  sessionsInfinite: ["sessions", "infinite"] as const,
   exercises: ["exercises"] as const,
   favorites: ["favorites"] as const,
   profile: ["profile"] as const,
@@ -14,6 +15,8 @@ export const queryKeys = {
   progressPhotos: ["progress-photos"] as const,
   gameSummary: ["game-summary"] as const,
   dailyLogs: (days?: number) => ["daily-logs", days ?? 14] as const,
+  plans: ["plans"] as const,
+  exerciseHistory: (id: string) => ["exercise-history", id] as const,
   groups: ["groups"] as const,
   groupRanking: (id: string) => ["groups", id, "ranking"] as const,
 };
