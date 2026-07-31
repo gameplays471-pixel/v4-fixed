@@ -3,11 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Gamepad2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface SidebarProps {
-  user: { name: string; email: string; role?: string };
+  user: { name: string; email: string; role?: string; gameEnabled?: boolean };
   onLogout: () => void;
 }
 
@@ -51,6 +51,14 @@ function isActivePath(pathname: string, item: (typeof navItems)[number]) {
 export function Sidebar({ user, onLogout }: SidebarProps) {
   const pathname = usePathname();
 
+  const items = user.gameEnabled
+    ? [
+        ...navItems.slice(0, -1),
+        { href: "/jogo", label: "Mini-game", emoji: "🎮", icon: <Gamepad2 className="w-4.5 h-4.5" /> },
+        navItems[navItems.length - 1],
+      ]
+    : navItems;
+
   return (
     <div className="flex flex-col w-full h-screen sticky top-0 overflow-hidden">
       {/* Logo */}
@@ -72,7 +80,7 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-        {navItems.map((item) => {
+        {items.map((item) => {
           const active = isActivePath(pathname, item);
           return (
             <Link

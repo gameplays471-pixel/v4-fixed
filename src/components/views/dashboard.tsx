@@ -3,12 +3,13 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, formatVolume, formatDuration, relativeTime } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
-import { Flame, Dumbbell, TrendingUp, Clock, Plus, Trophy, ArrowRight, Play, Zap } from "lucide-react";
+import { Flame, Dumbbell, TrendingUp, Clock, Plus, Trophy, ArrowRight, Play, Zap, Gamepad2, Droplets, Salad } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
@@ -44,6 +45,10 @@ export function DashboardView() {
   const sessionsQuery = useQuery({
     queryKey: queryKeys.sessions(5),
     queryFn: () => apiGet<{ sessions: Session[] }>("/api/sessions?limit=5").then((d) => d.sessions),
+  });
+  const gameSummaryQuery = useQuery({
+    queryKey: queryKeys.gameSummary,
+    queryFn: () => apiGet<{ enabled: boolean; goals: { waterGoalMl: number; weeklyWorkoutGoal: number }; today: { dietOnTrack: boolean; waterMl: number; workoutDone: boolean }; week: { workouts: number; dietDays: number; waterDays: number; score: number } }>("/api/gamification/summary"),
   });
 
   const stats = statsQuery.data ?? null;
@@ -139,6 +144,34 @@ export function DashboardView() {
           </motion.div>
         ))}
       </div>
+
+      {/* ── Mini-game (só aparece se ativado no perfil) ── */}
+      {gameSummaryQuery.data?.enabled && (
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
+          <Link href="/jogo" className="block group">
+            <Card className="p-4 flex items-center gap-4 border-primary/20 hover:border-primary/40 hover:shadow-lg transition-all duration-300">
+              <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <Gamepad2 className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0 grid grid-cols-3 gap-3">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold flex items-center gap-1"><Dumbbell className="w-3 h-3" /> Treinos</p>
+                  <p className="text-sm font-black tabular-nums">{gameSummaryQuery.data.week.workouts}/{gameSummaryQuery.data.goals.weeklyWorkoutGoal}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold flex items-center gap-1"><Salad className="w-3 h-3" /> Dieta</p>
+                  <p className="text-sm font-black tabular-nums">{gameSummaryQuery.data.week.dietDays}/7</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold flex items-center gap-1"><Droplets className="w-3 h-3" /> Água</p>
+                  <p className="text-sm font-black tabular-nums">{gameSummaryQuery.data.week.waterDays}/7</p>
+                </div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+            </Card>
+          </Link>
+        </motion.div>
+      )}
 
       {/* ── Meus treinos ── */}
       <section>

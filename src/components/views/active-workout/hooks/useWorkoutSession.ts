@@ -55,7 +55,7 @@ export function useWorkoutSession(workoutId: string) {
     router.push(`/treinos/${params.workout.id}/resumo`);
   };
 
-  const handleFinish = async () => {
+  const handleFinish = async (onFinished?: () => void) => {
     if (!workout) return;
     setSaving(true);
 
@@ -94,6 +94,7 @@ export function useWorkoutSession(workoutId: string) {
       // vindas da API (mesma ordem em que os sets foram enviados acima).
       const isPRBySetIndex = session.sets.map((s) => s.isPR);
       finishWorkoutLocally({ workout, setsMap, cardioMap, isPRBySetIndex, elapsed, totalVolume });
+      onFinished?.();
     } catch (e) {
       // Detecta se é erro de rede (TypeError do fetch quando offline)
       // vs erro de servidor (4xx/5xx com mensagem específica).
@@ -128,6 +129,7 @@ export function useWorkoutSession(workoutId: string) {
           elapsed,
           totalVolume,
         });
+        onFinished?.();
 
         toast.warning(
           "Sem conexão. Treino salvo localmente e será sincronizado automaticamente.",
@@ -144,8 +146,9 @@ export function useWorkoutSession(workoutId: string) {
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = (onConfirmed?: () => void) => {
     if (confirm("Cancelar treino? O progresso salvo será apagado.")) {
+      onConfirmed?.();
       if (workout) clearWorkoutDraft(workout.id);
       setActiveWorkoutId(null);
       router.push("/treinos");
@@ -182,6 +185,7 @@ export function useWorkoutSession(workoutId: string) {
     toggleCardioComplete: cardioActions.toggleCardioComplete,
     toggleCollapse: persistence.toggleCollapse,
     formatLastSets: persistence.formatLastSets,
+    substituteExercise: persistence.substituteExercise,
 
     handleFinish,
     handleCancel,

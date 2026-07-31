@@ -5,13 +5,17 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExerciseImageDialog } from "@/components/exercise-media";
+import { ExerciseSubstituteDialog, type SubstitutableExercise } from "@/components/exercise-substitute-dialog";
 
 import { useWorkoutSession } from "./hooks/useWorkoutSession";
 import { useRestTimer } from "./hooks/useRestTimer";
+import { useLiveShare } from "./hooks/useLiveShare";
+import { buildLiveSnapshot } from "./hooks/build-live-snapshot";
 import { WorkoutHeader } from "./components/WorkoutHeader";
 import { RestTimerCard } from "./components/RestTimerCard";
 import { ExerciseCard } from "./components/ExerciseCard";
 import { FinishModal } from "./components/FinishModal";
+import type { WorkoutExercise } from "./types";
 
 interface ActiveWorkoutViewProps {
   workoutId: string;
@@ -21,8 +25,19 @@ export function ActiveWorkoutView({ workoutId }: ActiveWorkoutViewProps) {
   const router = useRouter();
   const session = useWorkoutSession(workoutId);
   const restTimer = useRestTimer();
+  const liveShare = useLiveShare(workoutId, session.workout?.name || "", () =>
+    buildLiveSnapshot({
+      workout: session.workout!,
+      setsMap: session.setsMap,
+      cardioMap: session.cardioMap,
+      elapsed: session.elapsed,
+      totalVolume: session.totalVolume,
+      totalCardioMin: session.totalCardioMin,
+    })
+  );
 
   const [lightboxExercise, setLightboxExercise] = useState<{ name: string; images: string[] } | null>(null);
+  const [substitutingEx, setSubstitutingEx] = useState<WorkoutExercise | null>(null);
 
   const handleCompleteSet = (exerciseId: string, setIdx: number, restSeconds: number, exerciseName: string) => {
     const justCompleted = session.toggleSetComplete(exerciseId, setIdx);
@@ -59,8 +74,13 @@ export function ActiveWorkoutView({ workoutId }: ActiveWorkoutViewProps) {
         totalSets={session.totalSets}
         totalVolume={session.totalVolume}
         totalCardioMin={session.totalCardioMin}
-        onCancel={session.handleCancel}
+        onCancel={() => session.handleCancel(liveShare.stop)}
         onFinishClick={() => session.setShowFinishModal(true)}
+        liveSharing={liveShare.sharing}
+        liveSlug={liveShare.slug}
+        liveLoading={liveShare.loading}
+        onLiveStart={liveShare.start}
+        onLiveStop={liveShare.stop}
       />
 
       <RestTimerCard
@@ -102,6 +122,7 @@ export function ActiveWorkoutView({ workoutId }: ActiveWorkoutViewProps) {
               onCompleteSet={(setIdx) => handleCompleteSet(ex.id, setIdx, ex.restSeconds, ex.exercise.name)}
               onUpdateCardio={(updates) => session.updateCardio(ex.id, updates)}
               onToggleCardioComplete={() => session.toggleCardioComplete(ex.id)}
+              onSubstitute={() => setSubstitutingEx(ex)}
             />
           );
         })}
@@ -115,7 +136,7 @@ export function ActiveWorkoutView({ workoutId }: ActiveWorkoutViewProps) {
           elapsed={session.elapsed}
           saving={session.saving}
           onClose={() => session.setShowFinishModal(false)}
-          onFinish={session.handleFinish}
+          onFinish={() => session.handleFinish(liveShare.stop)}
         />
       )}
 
@@ -127,6 +148,18 @@ export function ActiveWorkoutView({ workoutId }: ActiveWorkoutViewProps) {
         images={lightboxExercise?.images}
         name={lightboxExercise?.name || ""}
       />
+
+      {substitutingEx && (
+        <ExerciseSubstituteDialog
+          currentExercise={substitutingEx.exercise as SubstitutableExercise}
+          excludeIds={workout.exercises.filter((e) => e.id !== substitutingEx.id).map((e) => e.exerciseId)}
+          onSelect={(newEx) => {
+            session.substituteExercise(substitutingEx.id, newEx);
+            setSubstitutingEx(null);
+          }}
+          onClose={() => setSubstitutingEx(null)}
+        />
+      )}
     </div>
   );
 }

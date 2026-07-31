@@ -2,16 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, apiPost, apiPut, formatPhoneInput } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { toast } from "sonner";
-import { User, Mail, Phone, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing, Palette, Camera, Loader2, Compass } from "lucide-react";
+import { User, Mail, Phone, Calendar, Target, Scale, Ruler, Save, LogOut, Shield, Bell, BellOff, BellRing, Palette, Camera, Loader2, Compass, Gamepad2, Droplets, Dumbbell, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { setToken } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
@@ -28,13 +30,14 @@ type UserProfile = {
   id: string; email: string; name: string; phone: string | null; bio: string | null;
   weight: number | null; height: number | null; sex: string | null;
   birthDate: string | null; goal: string | null; avatarUrl: string | null;
+  gameEnabled: boolean; waterGoalMl: number; weeklyWorkoutGoal: number;
 };
 
 export function ProfileView() {
   const queryClient = useQueryClient();
   const setShowOnboarding = useAppStore((s) => s.setShowOnboarding);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ name: "", phone: "", bio: "", weight: "", height: "", sex: "", birthDate: "", goal: "" });
+  const [form, setForm] = useState({ name: "", phone: "", bio: "", weight: "", height: "", sex: "", birthDate: "", goal: "", gameEnabled: false, waterGoalMl: "2000", weeklyWorkoutGoal: "3" });
   const [notifPermission, setNotifPermission] = useState<NotificationPermissionState>("default");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -74,6 +77,9 @@ export function ProfileView() {
         sex: user.sex || "",
         birthDate: user.birthDate ? new Date(user.birthDate).toISOString().split("T")[0] : "",
         goal: user.goal || "",
+        gameEnabled: user.gameEnabled ?? false,
+        waterGoalMl: (user.waterGoalMl ?? 2000).toString(),
+        weeklyWorkoutGoal: (user.weeklyWorkoutGoal ?? 3).toString(),
       });
     }
   }, [user]);
@@ -85,6 +91,21 @@ export function ProfileView() {
       queryClient.setQueryData(queryKeys.profile, res.user);
       toast.success("Perfil atualizado!");
     } catch { toast.error("Erro ao atualizar perfil"); } finally { setSaving(false); }
+  };
+
+  // O toggle liga/desliga na hora (mesmo padrão do tema e das notificações
+  // logo abaixo) — não faz sentido exigir "Salvar alterações" só pra
+  // ativar/desativar o mini-game.
+  const handleToggleGame = async (checked: boolean) => {
+    setForm((f) => ({ ...f, gameEnabled: checked }));
+    try {
+      const res = await apiPut<{ user: UserProfile }>("/api/profile", { ...form, gameEnabled: checked });
+      queryClient.setQueryData(queryKeys.profile, res.user);
+      toast.success(checked ? "Mini-game ativado! 🎮" : "Mini-game desativado.");
+    } catch {
+      setForm((f) => ({ ...f, gameEnabled: !checked }));
+      toast.error("Não foi possível atualizar o mini-game.");
+    }
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -276,6 +297,51 @@ export function ProfileView() {
               {saving ? "Salvando..." : "Salvar alterações"}
             </Button>
           </div>
+        </Card>
+      </motion.div>
+
+      {/* Mini-game */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <Card className="p-5 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Gamepad2 className="w-5 h-5 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-bold text-sm">Mini-game</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Metas diárias/semanais de água, dieta e treino, com ranking por grupo.
+                </p>
+              </div>
+            </div>
+            <Switch checked={form.gameEnabled} onCheckedChange={handleToggleGame} aria-label="Ativar mini-game" />
+          </div>
+
+          {form.gameEnabled && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-4 pt-1 border-t border-border/50">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="waterGoalMl" className="flex items-center gap-1.5"><Droplets className="w-3.5 h-3.5" /> Meta de água diária (ml)</Label>
+                  <Input id="waterGoalMl" type="number" step="50" min="0" value={form.waterGoalMl}
+                    onChange={(e) => setForm({ ...form, waterGoalMl: e.target.value })} className="h-11" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="weeklyWorkoutGoal" className="flex items-center gap-1.5"><Dumbbell className="w-3.5 h-3.5" /> Meta de treinos por semana</Label>
+                  <Input id="weeklyWorkoutGoal" type="number" min="1" max="21" value={form.weeklyWorkoutGoal}
+                    onChange={(e) => setForm({ ...form, weeklyWorkoutGoal: e.target.value })} className="h-11" />
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <Button variant="outline" onClick={handleSave} disabled={saving} size="sm" className="rounded-xl font-semibold gap-2">
+                  <Save className="w-3.5 h-3.5" /> Salvar metas
+                </Button>
+                <Link href="/jogo" className="text-xs font-bold text-primary flex items-center gap-1 hover:opacity-80 transition-opacity">
+                  Abrir mini-game <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </motion.div>
+          )}
         </Card>
       </motion.div>
 

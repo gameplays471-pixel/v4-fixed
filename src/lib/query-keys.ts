@@ -12,4 +12,8 @@ export const queryKeys = {
   profile: ["profile"] as const,
   bodyWeightLogs: ["bodyweight-logs"] as const,
   progressPhotos: ["progress-photos"] as const,
+  gameSummary: ["game-summary"] as const,
+  dailyLogs: (days?: number) => ["daily-logs", days ?? 14] as const,
+  groups: ["groups"] as const,
+  groupRanking: (id: string) => ["groups", id, "ranking"] as const,
 };

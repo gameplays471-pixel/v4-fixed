@@ -211,6 +211,9 @@ export type SelectedUser = {
   goal: string | null;
   avatarUrl: string | null;
   role: string;
+  gameEnabled: boolean;
+  waterGoalMl: number;
+  weeklyWorkoutGoal: number;
   createdAt: Date;
 };
 
@@ -231,6 +234,9 @@ async function lookupUser(userId: string): Promise<SelectedUser | null> {
       avatarUrl: true,
       role: true,
       disabled: true,
+      gameEnabled: true,
+      waterGoalMl: true,
+      weeklyWorkoutGoal: true,
       createdAt: true,
     },
   });

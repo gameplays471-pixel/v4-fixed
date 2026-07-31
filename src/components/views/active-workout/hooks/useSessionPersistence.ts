@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPatch } from "@/lib/api";
 import { toast } from "sonner";
 import { loadWorkoutDraft, saveWorkoutDraft } from "@/lib/workout-draft";
 import type { CardioState, SetState, Workout } from "../types";
 import { suggestNextLoad, type LoadSuggestion } from "../utils";
 import { computeSessionTotals } from "./session-summary";
+import type { SubstitutableExercise } from "@/components/exercise-substitute-dialog";
 
 /**
  * Concentra o ciclo de vida "de dados" de uma sessão de treino ativa:
@@ -159,6 +160,90 @@ export function useSessionPersistence(workoutId: string) {
     return last.map((s) => `${s.weight}kg × ${s.reps}`).join(" · ");
   };
 
+  // Substitui o exercício de um item do treino ativo (academia sem o
+  // equipamento, ou preferência do aluno). Chama a API na hora — não há
+  // um botão de "salvar treino" separado no treino ativo, então a troca
+  // já fica valendo pro treino a partir de agora (próximas vezes que ele
+  // for aberto virá com o exercício novo). Usa PATCH num único item em
+  // vez do PUT completo do editor porque este último recria todos os
+  // WorkoutExercise (novos ids), o que quebraria setsMap/cardioMap —
+  // aqui o id do item (`workoutExerciseId`, == `ex.id`) é preservado.
+  const substituteExercise = async (workoutExerciseId: string, newExercise: SubstitutableExercise) => {
+    if (!workout) return;
+    const oldEx = workout.exercises.find((e) => e.id === workoutExerciseId);
+    if (!oldEx) return;
+
+    try {
+      const { workoutExercise: updated } = await apiPatch<{ workoutExercise: Workout["exercises"][number] }>(
+        `/api/workouts/${workoutId}/exercises/${workoutExerciseId}`,
+        { exerciseId: newExercise.id }
+      );
+
+      setWorkout((prev) =>
+        prev
+          ? {
+              ...prev,
+              exercises: prev.exercises.map((e) =>
+                e.id === workoutExerciseId ? { ...e, exerciseId: updated.exerciseId, exercise: updated.exercise } : e
+              ),
+            }
+          : prev
+      );
+
+      // Categoria mudou (força ↔ cardio) — migra o slot pro formato certo
+      // de estado (sets vs. duração/distância) em vez de deixar dado do
+      // tipo antigo pendurado numa chave que agora é do outro tipo.
+      const wasCardio = oldEx.exercise.category === "Cardio";
+      const isCardio = updated.exercise.category === "Cardio";
+      if (isCardio !== wasCardio) {
+        if (isCardio) {
+          setCardioMap((prev) => ({
+            ...prev,
+            [workoutExerciseId]: {
+              durationMin: oldEx.targetDurationSec ? String(Math.round(oldEx.targetDurationSec / 60)) : "30",
+              distanceKm: oldEx.targetDistanceKm ? String(oldEx.targetDistanceKm) : "",
+              avgBpm: "",
+              intensity: oldEx.targetIntensity || "Moderada",
+              completed: false,
+            },
+          }));
+          setSetsMap((prev) => {
+            const next = { ...prev };
+            delete next[workoutExerciseId];
+            return next;
+          });
+        } else {
+          setSetsMap((prev) => ({
+            ...prev,
+            [workoutExerciseId]: Array.from({ length: oldEx.targetSets }, () => ({
+              weight: "",
+              reps: oldEx.targetReps.toString(),
+              completed: false,
+            })),
+          }));
+          setCardioMap((prev) => {
+            const next = { ...prev };
+            delete next[workoutExerciseId];
+            return next;
+          });
+        }
+      }
+
+      // Busca o histórico ("última vez") do novo exercício em segundo
+      // plano, pra placeholder/sugestão de carga já aparecerem certos.
+      apiGet<{ lastSets: Record<string, Array<{ weight: number; reps: number; rir: number | null }>> }>(
+        `/api/sessions/last-sets?exerciseIds=${encodeURIComponent(newExercise.id)}`
+      )
+        .then((d) => setLastSetsMap((prev) => ({ ...prev, [newExercise.id]: d.lastSets?.[newExercise.id] || [] })))
+        .catch((e) => console.error("Erro ao buscar últimos sets do exercício substituído:", e));
+
+      toast.success(`Substituído por ${updated.exercise.name} — o treino já fica salvo assim.`);
+    } catch (e) {
+      console.error("Erro ao substituir exercício:", e);
+      toast.error("Não foi possível substituir o exercício.");
+    }
+  };
+
   const toggleCollapse = (exerciseId: string) => {
     const newSet = new Set(collapsedExercises);
     if (newSet.has(exerciseId)) {
@@ -200,6 +285,7 @@ export function useSessionPersistence(workoutId: string) {
     toggleCollapse,
     formatLastSets,
     suggestionsMap,
+    substituteExercise,
 
     totalSets,
     completedSets,

@@ -26,6 +26,9 @@ model User {
   role         String   @default("user") // "user" | "admin" | "support" — controla acesso ao painel /admin
   disabled     Boolean  @default(false) // admin pode bloquear acesso do usuário
   disabledAt   DateTime? // quando foi bloqueado (para estatísticas)
+  gameEnabled  Boolean  @default(false) // liga/desliga o mini-game (metas diárias/semanais + ranking em grupo) — via Perfil
+  waterGoalMl  Int      @default(2000)  // meta diária de água (ml), usada pelo mini-game
+  weeklyWorkoutGoal Int @default(3)     // meta semanal de treinos, usada pelo mini-game
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -34,6 +37,10 @@ model User {
   favorites Favorite[]
   bodyWeightLogs BodyWeightLog[]
   progressPhotos ProgressPhoto[]
+  liveWorkoutSession LiveWorkoutSession?
+  dailyLogs DailyLog[]
+  ownedGroups Group[] @relation("GroupOwner")
+  groupMemberships GroupMember[]
 }
 
 model Exercise {
@@ -186,6 +193,77 @@ model ProgressPhoto {
 
   @@index([userId])
   @@index([takenAt])
+}
+
+// Transmissão ao vivo de um treino em andamento — completamente separada de
+// WorkoutSession (que só é criada quando o treino é finalizado). Existe só
+// enquanto a pessoa decide compartilhar (@@unique em userId: no máximo uma
+// transmissão ativa por vez); "parar de compartilhar", finalizar ou cancelar
+// o treino apaga a linha, e o link público volta a não funcionar — o treino
+// nunca é visível "ao vivo" a não ser que o dono ative isso explicitamente.
+model LiveWorkoutSession {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  workoutId   String
+  workoutName String
+  slug        String   @unique
+  startedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // JSON com o progresso atual (exercícios, sets concluídos, tempo
+  // decorrido etc.) — ver buildLiveSnapshot no client. Guardado como texto,
+  // no mesmo espírito do AuditLog (sem depender de coluna Json nativa).
+  snapshot    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Registro diário do mini-game: se o usuário seguiu a dieta no dia e
+// quanta água bebeu. Um registro por usuário por dia — `date` é sempre
+// gravado à meia-noite (hora do servidor, mesma convenção já usada em
+// /api/stats para sequência de treinos) e serve de chave de agrupamento
+// tanto para as metas diárias quanto para o cálculo do ranking semanal.
+model DailyLog {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime // meia-noite do dia em questão
+  dietOnTrack Boolean  @default(false) // "segui a dieta hoje"
+  waterMl     Int      @default(0)     // água registrada no dia (ml)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+// Grupo (turma da academia, grupo de amigos etc.) usado pro ranking
+// semanal do mini-game. Quem cria vira dono; os demais entram através do
+// código de convite (`inviteCode`), sem precisar de aprovação.
+model Group {
+  id         String   @id @default(cuid())
+  name       String
+  inviteCode String   @unique
+  ownerId    String
+  createdAt  DateTime @default(now())
+
+  owner   User          @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members GroupMember[]
+
+  @@index([ownerId])
+}
+
+model GroupMember {
+  id       String   @id @default(cuid())
+  groupId  String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId])
 }
 
 // Log de auditoria do painel administrativo — toda ação de escrita feita

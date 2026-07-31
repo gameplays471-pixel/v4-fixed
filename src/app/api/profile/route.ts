@@ -17,7 +17,7 @@ export const PUT = withErrorHandling("Update profile", async (req: NextRequest) 
 
   const parsed = await parseBody(req, profileSchema, "PUT /api/profile");
   if (!parsed.success) return parsed.response;
-  const { name, phone, bio, weight, height, sex, birthDate, goal, avatarUrl } = parsed.data;
+  const { name, phone, bio, weight, height, sex, birthDate, goal, avatarUrl, gameEnabled, waterGoalMl, weeklyWorkoutGoal } = parsed.data;
 
   const updated = await db.user.update({
     where: { id: user.id },
@@ -31,6 +31,9 @@ export const PUT = withErrorHandling("Update profile", async (req: NextRequest) 
       birthDate: birthDate ?? null,
       goal: goal ?? null,
       avatarUrl: avatarUrl ?? null,
+      ...(gameEnabled !== undefined ? { gameEnabled } : {}),
+      ...(waterGoalMl !== undefined ? { waterGoalMl } : {}),
+      ...(weeklyWorkoutGoal !== undefined ? { weeklyWorkoutGoal } : {}),
     },
     select: {
       id: true,
@@ -44,6 +47,9 @@ export const PUT = withErrorHandling("Update profile", async (req: NextRequest) 
       birthDate: true,
       goal: true,
       avatarUrl: true,
+      gameEnabled: true,
+      waterGoalMl: true,
+      weeklyWorkoutGoal: true,
     },
   });
 

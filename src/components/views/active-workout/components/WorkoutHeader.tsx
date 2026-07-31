@@ -3,6 +3,7 @@ import { Clock, Flame, Dumbbell, HeartPulse } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatTime } from "../utils";
 import { SyncBadge } from "./SyncIndicator";
+import { LiveShareControl } from "./LiveShareControl";
 
 interface WorkoutHeaderProps {
   workoutName: string;
@@ -13,6 +14,11 @@ interface WorkoutHeaderProps {
   totalCardioMin: number;
   onCancel: () => void;
   onFinishClick: () => void;
+  liveSharing: boolean;
+  liveSlug: string | null;
+  liveLoading: boolean;
+  onLiveStart: () => Promise<string | null>;
+  onLiveStop: () => void;
 }
 
 export function WorkoutHeader({
@@ -24,6 +30,11 @@ export function WorkoutHeader({
   totalCardioMin,
   onCancel,
   onFinishClick,
+  liveSharing,
+  liveSlug,
+  liveLoading,
+  onLiveStart,
+  onLiveStop,
 }: WorkoutHeaderProps) {
   return (
     <div className="sticky top-14 md:top-0 z-30 -mx-4 px-4 py-3 bg-background/90 backdrop-blur-xl border-b border-border/60">
@@ -53,6 +64,13 @@ export function WorkoutHeader({
           </div>
         </div>
         <div className="flex gap-2 shrink-0">
+          <LiveShareControl
+            sharing={liveSharing}
+            slug={liveSlug}
+            loading={liveLoading}
+            onStart={onLiveStart}
+            onStop={onLiveStop}
+          />
           <Button variant="ghost" size="sm" onClick={onCancel} className="h-9 rounded-xl text-muted-foreground">
             Cancelar
           </Button>

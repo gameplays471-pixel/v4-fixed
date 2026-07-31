@@ -15,10 +15,13 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { toast } from "sonner";
-import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical, CheckSquare, Square, Share2, Check, Copy } from "lucide-react";
+import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical, CheckSquare, Square, Share2, Check, Copy, Repeat, MoreVertical, FileText } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { PlanShareDialog } from "@/components/plan-share-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { muscleGroups } from "@/lib/exercises-data";
 import { ExerciseThumb, ExerciseImageDialog } from "@/components/exercise-media";
+import { ExerciseSubstituteDialog, type SubstitutableExercise } from "@/components/exercise-substitute-dialog";
 
 type Exercise = {
   id: string; name: string; muscleGroup: string; equipment: string | null;
@@ -46,6 +49,7 @@ export function WorkoutsView() {
   const setEditingWorkoutId = useAppStore((s) => s.setEditingWorkoutId);
   const [showEditor, setShowEditor] = useState(false);
   const [sharingWorkout, setSharingWorkout] = useState<Workout | null>(null);
+  const [exportingWorkout, setExportingWorkout] = useState<Workout | null>(null);
 
   const workoutsQuery = useQuery({
     queryKey: queryKeys.workouts,
@@ -129,17 +133,28 @@ export function WorkoutsView() {
                       <p className="text-[11px] text-muted-foreground">{w._count.sessions}× realizado · {w.exercises.length} exercícios</p>
                     </div>
                   </div>
-                  <div className="flex gap-0.5">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:bg-accent" onClick={() => setSharingWorkout(w)}>
-                      <Share2 className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:bg-accent" onClick={() => { setEditingWorkoutId(w.id); setShowEditor(true); }}>
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:text-destructive hover:bg-destructive/10" onClick={() => handleDelete(w.id)}>
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:bg-accent shrink-0">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-52">
+                      <DropdownMenuItem onClick={() => setSharingWorkout(w)}>
+                        <Share2 className="w-3.5 h-3.5 mr-2" /> Compartilhar link
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setExportingWorkout(w)}>
+                        <FileText className="w-3.5 h-3.5 mr-2" /> Exportar (foto/PDF)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { setEditingWorkoutId(w.id); setShowEditor(true); }}>
+                        <Edit2 className="w-3.5 h-3.5 mr-2" /> Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(w.id)}>
+                        <Trash2 className="w-3.5 h-3.5 mr-2" /> Excluir
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
                 <div className="flex-1 space-y-1.5 min-h-[60px]">
                   {w.exercises.length === 0 ? (
@@ -169,6 +184,26 @@ export function WorkoutsView() {
       )}
       {showEditor && <WorkoutEditor workoutId={editingWorkoutId} onClose={handleCloseEditor} />}
       {sharingWorkout && <ShareLinkDialog workout={sharingWorkout} onClose={() => setSharingWorkout(null)} />}
+      {exportingWorkout && (
+        <PlanShareDialog
+          workoutName={exportingWorkout.name}
+          description={exportingWorkout.description}
+          exercises={exportingWorkout.exercises.map((ex) => ({
+            name: ex.exercise.name,
+            muscleGroup: ex.exercise.muscleGroup,
+            isCardio: ex.exercise.category === "Cardio",
+            targetSets: ex.targetSets,
+            targetReps: ex.targetReps,
+            restSeconds: ex.restSeconds,
+            notes: ex.notes,
+            targetDurationSec: ex.targetDurationSec,
+            targetDistanceKm: ex.targetDistanceKm,
+            targetIntensity: ex.targetIntensity,
+          }))}
+          open
+          onOpenChange={(o) => !o && setExportingWorkout(null)}
+        />
+      )}
     </div>
   );
 }
@@ -244,6 +279,7 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
   const [saving, setSaving] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [lightbox, setLightbox] = useState<Exercise | null>(null);
+  const [substitutingIdx, setSubstitutingIdx] = useState<number | null>(null);
 
   useEffect(() => {
     if (!workoutId) return;
@@ -293,6 +329,33 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
     });
     setExercises((prev) => [...prev, ...newOnes]);
     setShowPicker(false);
+  };
+
+  // Troca o exercício de um slot mantendo séries/reps/descanso já
+  // configurados. Se a nova opção cruzar a fronteira força↔cardio (algo
+  // que o dialog já filtra por categoria, mas fica como segurança extra),
+  // reaplica os defaults do tipo certo em vez de manter metas sem sentido.
+  const substituteExercise = (idx: number, newEx: Exercise) => {
+    setExercises((prev) =>
+      prev.map((ex, i) => {
+        if (i !== idx) return ex;
+        const wasCardio = ex.exercise.category === "Cardio";
+        const isCardio = newEx.category === "Cardio";
+        if (wasCardio === isCardio) return { ...ex, exerciseId: newEx.id, exercise: newEx };
+        return {
+          ...ex,
+          exerciseId: newEx.id,
+          exercise: newEx,
+          targetDurationSec: isCardio ? 1800 : null,
+          targetDistanceKm: null,
+          targetIntensity: isCardio ? "Moderada" : null,
+          targetSets: isCardio ? ex.targetSets : 3,
+          targetReps: isCardio ? ex.targetReps : 10,
+        };
+      })
+    );
+    setSubstitutingIdx(null);
+    toast.success(`Substituído por ${newEx.name}`);
   };
 
   const removeExercise = (idx: number) => setExercises(exercises.filter((_, i) => i !== idx));
@@ -378,6 +441,7 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
                             <div className="flex gap-0.5">
                               <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-muted-foreground" onClick={() => moveExercise(idx, -1)} disabled={idx === 0}>↑</Button>
                               <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-muted-foreground" onClick={() => moveExercise(idx, 1)} disabled={idx === exercises.length - 1}>↓</Button>
+                              <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-muted-foreground hover:text-primary" title="Substituir exercício" onClick={() => setSubstitutingIdx(idx)}><Repeat className="w-3.5 h-3.5" /></Button>
                               <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg hover:text-destructive" onClick={() => removeExercise(idx)}><X className="w-3.5 h-3.5" /></Button>
                             </div>
                           </div>
@@ -411,6 +475,14 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
         </DialogContent>
       </Dialog>
       <ExerciseImageDialog open={!!lightbox} onOpenChange={(o) => !o && setLightbox(null)} images={lightbox?.images} name={lightbox?.name || ""} />
+      {substitutingIdx !== null && (
+        <ExerciseSubstituteDialog
+          currentExercise={exercises[substitutingIdx].exercise as SubstitutableExercise}
+          excludeIds={exercises.filter((_, i) => i !== substitutingIdx).map((e) => e.exerciseId)}
+          onSelect={(newEx) => substituteExercise(substitutingIdx, newEx as Exercise)}
+          onClose={() => setSubstitutingIdx(null)}
+        />
+      )}
     </>
   );
 }

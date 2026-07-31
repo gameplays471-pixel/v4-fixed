@@ -125,6 +125,14 @@ export const workoutSchema = z.object({
   exercises: z.array(workoutExerciseSchema).max(200).optional(),
 });
 
+// Substituir o exercício de um item de treino (mesmo slot, mesmas metas
+// configuradas — só troca de qual `Exercise` ele aponta). Usado tanto no
+// editor de treino quanto no treino ativo, pra adequar o treino à
+// academia/gosto do aluno sem perder a série já configurada.
+export const substituteExerciseSchema = z.object({
+  exerciseId: id,
+});
+
 // ─── Sessions (finalizar treino) ─────────────────────────────────────────────
 
 const sessionSetSchema = z.object({
@@ -175,6 +183,35 @@ export const profileSchema = z.object({
   birthDate: z.preprocess(emptyToNull, z.coerce.date().nullable()).optional(),
   goal: z.preprocess(emptyToNull, z.string().trim().max(500).nullable()).optional(),
   avatarUrl: z.preprocess(emptyToNull, z.string().max(2_000_000).nullable()).optional(), // pode ser data URL (base64) de um avatar
+  gameEnabled: z.coerce.boolean().optional(),
+  waterGoalMl: z.coerce.number().int().positive("Meta de água inválida").max(15000).optional(),
+  weeklyWorkoutGoal: z.coerce.number().int().positive("Meta de treinos inválida").max(21).optional(),
+});
+
+// ─── Mini-game (metas diárias/semanais) ────────────────────────────────────
+
+// Atualização do registro diário (dieta do dia / água bebida). `addWaterMl`
+// soma ao total já registrado no dia (usado pelos botões de "+250ml" etc.);
+// `waterMl` substitui o valor absoluto (correção manual). `dietOnTrack`
+// troca o estado do dia inteiro — não há histórico de múltiplos toggles.
+export const dailyLogSchema = z
+  .object({
+    dietOnTrack: z.boolean().optional(),
+    addWaterMl: z.coerce.number().int().positive().max(10000).optional(),
+    waterMl: z.coerce.number().int().min(0).max(20000).optional(),
+  })
+  .refine((d) => d.dietOnTrack !== undefined || d.addWaterMl !== undefined || d.waterMl !== undefined, {
+    message: "Nada para atualizar",
+  });
+
+// ─── Grupos (ranking do mini-game) ─────────────────────────────────────────
+
+export const groupCreateSchema = z.object({
+  name: z.string().trim().min(1, "Nome é obrigatório").max(60),
+});
+
+export const groupJoinSchema = z.object({
+  inviteCode: z.string().trim().min(4, "Código inválido").max(20),
 });
 
 // ─── Peso corporal ───────────────────────────────────────────────────────────

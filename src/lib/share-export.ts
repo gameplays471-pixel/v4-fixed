@@ -279,3 +279,140 @@ export async function buildWorkoutPdf(data: WorkoutSummaryData): Promise<Blob> {
 
   return doc.output("blob");
 }
+
+export interface PlanPdfExercise {
+  name: string;
+  muscleGroup: string;
+  isCardio: boolean;
+  targetSets: number;
+  targetReps: number;
+  restSeconds: number;
+  notes: string | null;
+  targetDurationSec: number | null;
+  targetDistanceKm: number | null;
+  targetIntensity: string | null;
+}
+
+export interface PlanPdfData {
+  workoutName: string;
+  description: string | null;
+  exercises: PlanPdfExercise[];
+}
+
+/**
+ * Ficha de treino em PDF — pensada pro treino ainda não realizado (o card
+ * `Exportar` da lista de treinos), por isso não tem duração/volume/PR como
+ * `buildWorkoutPdf`: lista os alvos planejados (séries×reps, descanso,
+ * observações) em vez de séries já executadas.
+ */
+export async function buildPlanPdf(data: PlanPdfData): Promise<Blob> {
+  const { jsPDF } = await import("jspdf");
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginX = 48;
+  let y = 56;
+
+  const primary: [number, number, number] = [34, 197, 94];
+  const muted: [number, number, number] = [110, 120, 135];
+  const dark: [number, number, number] = [20, 22, 28];
+
+  const ensureSpace = (needed: number) => {
+    if (y + needed > pageHeight - 48) {
+      doc.addPage();
+      y = 56;
+    }
+  };
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...primary);
+  doc.text("GEMGYM · FICHA DE TREINO", marginX, y);
+  y += 28;
+
+  doc.setTextColor(...dark);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(24);
+  doc.text(data.workoutName, marginX, y);
+  y += 22;
+
+  if (data.description) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(...muted);
+    const descLines = doc.splitTextToSize(data.description, pageWidth - marginX * 2);
+    doc.text(descLines, marginX, y);
+    y += descLines.length * 14 + 10;
+  }
+
+  const totalSets = data.exercises.reduce((acc, ex) => acc + (ex.isCardio ? 1 : ex.targetSets), 0);
+  const stats: Array<[string, string]> = [
+    ["Exercícios", String(data.exercises.length)],
+    ["Séries totais", String(totalSets)],
+  ];
+  const statColWidth = (pageWidth - marginX * 2) / stats.length;
+  stats.forEach(([label, value], i) => {
+    const x = marginX + i * statColWidth;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(...dark);
+    doc.text(value, x, y);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...muted);
+    doc.text(label.toUpperCase(), x, y + 14);
+  });
+  y += 34;
+
+  doc.setDrawColor(230, 230, 230);
+  doc.line(marginX, y, pageWidth - marginX, y);
+  y += 24;
+
+  for (const ex of data.exercises) {
+    ensureSpace(46);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(...dark);
+    doc.text(ex.name, marginX, y);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...muted);
+    doc.text(ex.muscleGroup || "", pageWidth - marginX, y, { align: "right" });
+    y += 16;
+
+    doc.setFontSize(9.5);
+    doc.setTextColor(...muted);
+    let targetLine: string;
+    if (ex.isCardio) {
+      const parts: string[] = [`${Math.round((ex.targetDurationSec ?? 1800) / 60)} min`];
+      if (ex.targetDistanceKm) parts.push(`${ex.targetDistanceKm} km`);
+      if (ex.targetIntensity) parts.push(ex.targetIntensity);
+      targetLine = parts.join("  ·  ");
+    } else {
+      targetLine = `${ex.targetSets} séries  ×  ${ex.targetReps} reps  ·  descanso ${ex.restSeconds}s`;
+    }
+    doc.text(targetLine, marginX + 12, y);
+    y += 14;
+
+    if (ex.notes) {
+      ensureSpace(14);
+      doc.setFont("helvetica", "italic");
+      doc.text(`Obs: ${ex.notes}`, marginX + 12, y);
+      doc.setFont("helvetica", "normal");
+      y += 14;
+    }
+    y += 8;
+  }
+
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...muted);
+    doc.text(`Gerado no GEMgym  ·  página ${i} de ${pageCount}`, pageWidth / 2, pageHeight - 28, { align: "center" });
+  }
+
+  return doc.output("blob");
+}

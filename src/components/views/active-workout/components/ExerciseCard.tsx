@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronDown, ChevronUp, Plus, History, HeartPulse, TrendingUp } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Plus, History, HeartPulse, TrendingUp, Repeat } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ExerciseThumb } from "@/components/exercise-media";
 import type { CardioState, SetState, WorkoutExercise } from "../types";
@@ -29,6 +29,7 @@ interface ExerciseCardProps {
   onCompleteSet: (setIdx: number) => void;
   onUpdateCardio: (updates: Partial<CardioState>) => void;
   onToggleCardioComplete: () => void;
+  onSubstitute: () => void;
 }
 
 export function ExerciseCard({
@@ -51,6 +52,7 @@ export function ExerciseCard({
   onCompleteSet,
   onUpdateCardio,
   onToggleCardioComplete,
+  onSubstitute,
 }: ExerciseCardProps) {
   const completedCount = sets.filter((s) => s.completed).length;
 
@@ -101,6 +103,18 @@ export function ExerciseCard({
                 </Badge>
               )
             )}
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7 rounded-lg shrink-0 text-muted-foreground hover:text-primary"
+              title="Substituir exercício"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSubstitute();
+              }}
+            >
+              <Repeat className="w-3.5 h-3.5" />
+            </Button>
             {isCollapsed ? (
               <ChevronDown className="w-4 h-4 text-muted-foreground" />
             ) : (

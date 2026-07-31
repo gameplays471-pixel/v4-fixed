@@ -11,7 +11,7 @@ import { Sidebar } from "@/components/sidebar";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { getToken, setToken, apiPost } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Gamepad2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { PENDING_CLONE_KEY } from "@/app/w/[slug]/clone-workout-button";
@@ -35,7 +35,7 @@ function setCachedUser(u: AppUser | null) {
   } catch {}
 }
 
-type AppUser = { name: string; email: string; role?: string };
+type AppUser = { name: string; email: string; role?: string; gameEnabled?: boolean };
 
 function MobileTopbar({ user, onLogout }: { user: AppUser; onLogout: () => void }) {
   const pathname = usePathname();
@@ -93,6 +93,16 @@ function MobileTopbar({ user, onLogout }: { user: AppUser; onLogout: () => void 
                 <User className="w-4 h-4 text-muted-foreground" />
                 Meu perfil
               </Link>
+              {user.gameEnabled && (
+                <Link
+                  href="/jogo"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium hover:bg-accent transition-colors"
+                >
+                  <Gamepad2 className="w-4 h-4 text-muted-foreground" />
+                  Mini-game
+                </Link>
+              )}
               <button
                 onClick={() => { setMenuOpen(false); onLogout(); }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-destructive hover:bg-destructive/10 transition-colors"
