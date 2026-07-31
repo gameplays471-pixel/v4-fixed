@@ -54,10 +54,19 @@ export function buildLiveSnapshot({
       const c = cardioMap[ex.id];
       exTotal = 1;
       exCompleted = c?.completed ? 1 : 0;
+      // CardioDraft guarda duração em minutos (string); o snapshot usa segundos.
+      const parsedMin = c?.durationMin ? parseInt(c.durationMin, 10) : NaN;
+      const durationSec = Number.isFinite(parsedMin)
+        ? parsedMin * 60
+        : ex.targetDurationSec;
+      const parsedKm = c?.distanceKm ? parseFloat(c.distanceKm) : NaN;
+      const distanceKm = Number.isFinite(parsedKm)
+        ? parsedKm
+        : ex.targetDistanceKm;
       cardio = {
         completed: !!c?.completed,
-        durationSec: c?.durationSec ?? ex.targetDurationSec,
-        distanceKm: c?.distanceKm ?? ex.targetDistanceKm,
+        durationSec,
+        distanceKm,
         intensity: c?.intensity ?? ex.targetIntensity,
       };
     } else {
