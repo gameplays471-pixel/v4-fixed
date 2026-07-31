@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { forbidden, notFound, requireUser, withErrorHandling } from "@/lib/api-error";
 import { computeGameScore, getWeekRange } from "@/lib/gamification";
+import { publicAvatarUrl } from "@/lib/avatar";
 
 // GET /api/groups/[id]/ranking — ranking da semana atual (segunda a
 // domingo) pros membros do grupo: treinos realizados, dias na dieta e
@@ -40,7 +41,7 @@ export const GET = withErrorHandling<{ params: Promise<{ id: string }> }>(
         return {
           userId: m.userId,
           name: m.user.name,
-          avatarUrl: m.user.avatarUrl,
+          avatarUrl: publicAvatarUrl(m.user.avatarUrl),
           isYou: m.userId === user.id,
           workouts,
           dietDays,

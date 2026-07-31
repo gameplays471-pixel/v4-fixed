@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,8 @@ import { toast } from "sonner";
 import { ShareWorkoutDialog } from "@/components/share-workout-dialog";
 import type { WorkoutSummaryData } from "@/lib/store";
 
-type Session = {
+/** Listagem leve — sem sets (GET /api/sessions). */
+type SessionListItem = {
   id: string;
   workoutName: string;
   startedAt: string;
@@ -22,21 +23,27 @@ type Session = {
   durationSec: number;
   totalVolume: number;
   notes: string | null;
-  workout: { id: string; color: string | null } | null;
-  sets: Array<{
-    id: string;
-    exerciseId: string;
-    exerciseName: string;
-    weight: number;
-    reps: number;
-    setNumber: number;
-    isPR: boolean;
-    durationSec: number | null;
-    distanceKm: number | null;
-    avgBpm: number | null;
-    intensity: string | null;
-    exercise: { muscleGroup: string; category: string; secondaryMuscles: string | null };
-  }>;
+  workout: { id: string; color: string | null; name?: string | null } | null;
+};
+
+type SessionSet = {
+  id: string;
+  exerciseId: string;
+  exerciseName: string;
+  weight: number;
+  reps: number;
+  setNumber: number;
+  isPR: boolean;
+  durationSec: number | null;
+  distanceKm: number | null;
+  avgBpm: number | null;
+  intensity: string | null;
+  exercise: { muscleGroup: string; category: string; secondaryMuscles: string | null };
+};
+
+/** Detalhe completo — GET /api/sessions/[id]. */
+type Session = SessionListItem & {
+  sets: SessionSet[];
 };
 
 // Reconstrói o mesmo formato usado pela tela de resumo pós-treino
@@ -91,8 +98,22 @@ export function HistoryView() {
     queryFn: () => apiGet<{ stats: Stats }>("/api/stats").then((d) => d.stats),
   });
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
-  const sessions = sessionsQuery.data ?? [];
+  const openSession = useCallback(async (id: string) => {
+    setDetailLoading(true);
+    try {
+      const res = await apiGet<{ session: Session }>(`/api/sessions/${id}`);
+      setSelectedSession(res.session);
+    } catch (err) {
+      console.error(err);
+      toast.error("Não foi possível carregar o detalhe do treino.");
+    } finally {
+      setDetailLoading(false);
+    }
+  }, []);
+
+  const sessions = (sessionsQuery.data ?? []) as SessionListItem[];
   const stats = statsQuery.data ?? null;
   const loading = sessionsQuery.isLoading || statsQuery.isLoading;
   const hasError = sessionsQuery.isError || statsQuery.isError;
@@ -169,7 +190,7 @@ export function HistoryView() {
                   <Card
                     key={session.id}
                     className="px-4 py-3.5 hover:border-primary/30 hover:bg-accent/20 hover:shadow-md hover:shadow-primary/5 transition-all cursor-pointer group"
-                    onClick={() => setSelectedSession(session)}
+                    onClick={() => openSession(session.id)}
                   >
                     <div className="flex items-center gap-3">
                       <div

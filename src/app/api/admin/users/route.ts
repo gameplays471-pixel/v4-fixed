@@ -35,7 +35,7 @@ export const GET = withErrorHandling(
     if (sort === "oldest") orderBy = { createdAt: "asc" };
     else if (sort === "name") orderBy = { name: "asc" };
 
-    const [total, users, prCountsByUser] = await Promise.all([
+    const [total, users] = await Promise.all([
       db.user.count({ where }),
       db.user.findMany({
         where,
@@ -48,35 +48,55 @@ export const GET = withErrorHandling(
           disabled: true,
           disabledAt: true,
           createdAt: true,
-          avatarUrl: true,
           _count: { select: { workouts: true, sessions: true } },
-          sessions: {
-            select: { totalVolume: true, durationSec: true, startedAt: true },
-          },
         },
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
-      // Sessões que contêm pelo menos um PR — agrupa por userId
-db.$queryRaw<Array<{ userId: string; count: bigint }>>`
-  SELECT ws."userId", COUNT(DISTINCT ss."sessionId")::bigint as count
-  FROM "SessionSet" ss
-         JOIN "WorkoutSession" ws ON ws."id" = ss."sessionId"
-         WHERE ss."isPR" = true
-         GROUP BY ws."userId"`,
     ]);
 
+    const ids = users.map((u) => u.id);
+
+    const [sessionAggs, prCountsByUser] = ids.length
+      ? await Promise.all([
+          db.workoutSession.groupBy({
+            by: ["userId"],
+            where: { userId: { in: ids } },
+            _sum: { totalVolume: true, durationSec: true },
+            _max: { startedAt: true },
+          }),
+          db.$queryRaw<Array<{ userId: string; count: bigint }>>`
+            SELECT ws."userId", COUNT(DISTINCT ss."sessionId")::bigint as count
+            FROM "SessionSet" ss
+            JOIN "WorkoutSession" ws ON ws."id" = ss."sessionId"
+            WHERE ss."isPR" = true
+              AND ws."userId" IN (${Prisma.join(ids)})
+            GROUP BY ws."userId"
+          `,
+        ])
+      : [
+          [] as Array<{
+            userId: string;
+            _sum: { totalVolume: number | null; durationSec: number | null };
+            _max: { startedAt: Date | null };
+          }>,
+          [] as Array<{ userId: string; count: bigint }>,
+        ];
+
+    const sessMap = new Map(
+      sessionAggs.map((r) => [
+        r.userId,
+        {
+          totalVolume: r._sum.totalVolume ?? 0,
+          totalDurationSec: r._sum.durationSec ?? 0,
+          lastActiveAt: r._max.startedAt,
+        },
+      ])
+    );
     const prMap = new Map(prCountsByUser.map((r) => [r.userId, Number(r.count)]));
 
     const items = users.map((user) => {
-      const sessions = user.sessions;
-      const totalVolume = sessions.reduce((sum, s) => sum + s.totalVolume, 0);
-      const totalDurationSec = sessions.reduce((sum, s) => sum + s.durationSec, 0);
-      const lastActiveAt =
-        sessions.length > 0
-          ? new Date(Math.max(...sessions.map((s) => new Date(s.startedAt).getTime())))
-          : null;
-
+      const agg = sessMap.get(user.id);
       return {
         id: user.id,
         email: user.email,
@@ -85,12 +105,12 @@ db.$queryRaw<Array<{ userId: string; count: bigint }>>`
         disabled: user.disabled,
         disabledAt: user.disabledAt,
         createdAt: user.createdAt,
-        avatarUrl: user.avatarUrl,
+        avatarUrl: null as string | null,
         workoutCount: user._count.workouts,
         sessionCount: user._count.sessions,
-        totalVolume,
-        totalDurationSec,
-        lastActiveAt,
+        totalVolume: agg?.totalVolume ?? 0,
+        totalDurationSec: agg?.totalDurationSec ?? 0,
+        lastActiveAt: agg?.lastActiveAt ?? null,
         prCount: prMap.get(user.id) || 0,
       };
     });

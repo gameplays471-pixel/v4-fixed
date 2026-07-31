@@ -8,6 +8,7 @@ import {
   withErrorHandling,
 } from "@/lib/api-error";
 import { recordAudit } from "@/lib/audit-log";
+import { publicAvatarUrl } from "@/lib/avatar";
 
 export const GET = withErrorHandling<{
   params: Promise<{ id: string }> }>(
@@ -148,7 +149,7 @@ export const GET = withErrorHandling<{
     }
 
     return NextResponse.json({
-      user,
+      user: { ...user, avatarUrl: publicAvatarUrl(user.avatarUrl) },
       workouts,
       sessions: {
         items: sessions,

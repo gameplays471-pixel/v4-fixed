@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { withErrorHandling } from "@/lib/api-error";
+import { parseIntParam } from "@/lib/validation";
 
-// Remove acentos e caixa (maiúscula/minúscula) para permitir busca e
-// filtros "sem acento, minúsculo, etc". Ex: "peito" === "Peito" === "péíto".
 function normalize(value: string): string {
   return value
     .normalize("NFD")
@@ -14,9 +14,7 @@ function normalize(value: string): string {
 
 export const GET = withErrorHandling("Get exercises", async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
-  const search = searchParams.get("search") || "";
-  // Suporta múltiplos grupos musculares separados por vírgula, ex:
-  // ?muscleGroup=Peito,Costas,Ombros
+  const search = (searchParams.get("search") || "").trim();
   const muscleGroupParam = searchParams.get("muscleGroup") || "";
   const muscleGroupList = muscleGroupParam
     .split(",")
@@ -26,37 +24,75 @@ export const GET = withErrorHandling("Get exercises", async (req: NextRequest) =
   const level = searchParams.get("level") || "";
   const category = searchParams.get("category") || "";
 
-  // Filtros exatos (não dependem de acento/caixa) continuam no banco.
-  const where: Record<string, unknown> = {};
+  const pageParam = searchParams.get("page");
+  const pageSizeParam = searchParams.get("pageSize");
+  const paginate = pageParam != null || pageSizeParam != null;
+  const page = paginate ? parseIntParam(pageParam, { default: 1, min: 1, max: 10_000 }) : 1;
+  const pageSize = paginate
+    ? parseIntParam(pageSizeParam, { default: 50, min: 1, max: 500 })
+    : undefined;
+
+  const where: Prisma.ExerciseWhereInput = {};
   if (equipmentType) where.equipmentType = equipmentType;
   if (level) where.level = level;
   if (category) where.category = category;
+  if (muscleGroupList.length === 1) where.muscleGroup = muscleGroupList[0];
+  else if (muscleGroupList.length > 1) where.muscleGroup = { in: muscleGroupList };
 
-  const exercises = await db.exercise.findMany({
-    where,
-    orderBy: { name: "asc" },
-  });
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { slug: { contains: search, mode: "insensitive" } },
+      { muscleGroup: { contains: search, mode: "insensitive" } },
+      { equipment: { contains: search, mode: "insensitive" } },
+      { secondaryMuscles: { contains: search, mode: "insensitive" } },
+    ];
+  }
 
-  // Busca por texto e grupo muscular feitas em memória, normalizando
-  // acentos e caixa em ambos os lados — assim "peito", "Peito" e "pêito"
-  // encontram os mesmos resultados.
-  const normalizedSearch = normalize(search);
-  const normalizedMuscleGroups = muscleGroupList.map(normalize);
+  const listSelect = {
+    id: true,
+    name: true,
+    slug: true,
+    muscleGroup: true,
+    secondaryMuscles: true,
+    equipment: true,
+    category: true,
+    equipmentType: true,
+    level: true,
+    description: true,
+    images: true,
+  } as const;
 
-  const filtered = exercises.filter((ex) => {
-    if (normalizedMuscleGroups.length > 0 && !normalizedMuscleGroups.includes(normalize(ex.muscleGroup))) {
-      return false;
-    }
-    if (normalizedSearch) {
+  const [total, exercises] = await Promise.all([
+    paginate ? db.exercise.count({ where }) : Promise.resolve(0),
+    db.exercise.findMany({
+      where,
+      orderBy: { name: "asc" },
+      select: listSelect,
+      ...(pageSize != null ? { skip: (page - 1) * pageSize, take: pageSize } : {}),
+    }),
+  ]);
+
+  let result = exercises;
+  if (search) {
+    const normalizedSearch = normalize(search);
+    result = exercises.filter((ex) => {
       const haystack = normalize(
-        [ex.name, ex.muscleGroup, ex.secondaryMuscles, ex.equipment]
-          .filter(Boolean)
-          .join(" ")
+        [ex.name, ex.muscleGroup, ex.secondaryMuscles, ex.equipment].filter(Boolean).join(" ")
       );
-      if (!haystack.includes(normalizedSearch)) return false;
-    }
-    return true;
-  });
+      return haystack.includes(normalizedSearch);
+    });
+  }
 
-  return NextResponse.json({ exercises: filtered });
+  return NextResponse.json({
+    exercises: result,
+    ...(paginate
+      ? {
+          total,
+          page,
+          pageSize,
+          totalPages: Math.max(1, Math.ceil(total / (pageSize || 1))),
+        }
+      : {}),
+  });
 });

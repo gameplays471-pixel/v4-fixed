@@ -16,6 +16,7 @@
 // funcionar sozinhas mesmo sem revogação explícita.
 
 import { db } from "@/lib/db";
+import { publicAvatarUrl } from "@/lib/avatar";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import crypto from "crypto";
@@ -242,7 +243,8 @@ async function lookupUser(userId: string): Promise<SelectedUser | null> {
   });
   // Conta bloqueada pelo admin — trata como não autenticado.
   if (user?.disabled) return null;
-  return user;
+  if (!user) return null;
+  return { ...user, avatarUrl: publicAvatarUrl(user.avatarUrl) };
 }
 
 /**

@@ -4,7 +4,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { requireUser, withErrorHandling } from "@/lib/api-error";
 import { parseBody, parseIntParam, sessionSchema } from "@/lib/validation";
 
-// Listar sessões do usuário
+// Listagem leve: sem sets por padrão. Detalhe: GET /api/sessions/[id]
+// Legado: ?includeSets=1
 export const GET = withErrorHandling("Get sessions", async (req: NextRequest) => {
   const user = await getCurrentUser(req);
   if (!user) {
@@ -13,21 +14,24 @@ export const GET = withErrorHandling("Get sessions", async (req: NextRequest) =>
 
   const { searchParams } = new URL(req.url);
   const limit = parseIntParam(searchParams.get("limit"), { default: 50, min: 1, max: 200 });
+  const includeSets = searchParams.get("includeSets") === "1";
 
   const sessions = await db.workoutSession.findMany({
     where: { userId: user.id },
-    include: {
-      sets: {
-        include: {
-          // Precisa pra montar o card de compartilhamento a partir do
-          // histórico (agrupamento por músculo no manequim, detecção de
-          // "Cardio") — o SessionSet por si só só guarda o nome do
-          // exercício em texto, não o grupo muscular/categoria.
-          exercise: { select: { muscleGroup: true, category: true, secondaryMuscles: true } },
+    include: includeSets
+      ? {
+          sets: {
+            include: {
+              exercise: {
+                select: { muscleGroup: true, category: true, secondaryMuscles: true },
+              },
+            },
+          },
+          workout: { select: { id: true, color: true, name: true } },
+        }
+      : {
+          workout: { select: { id: true, color: true, name: true } },
         },
-      },
-      workout: true,
-    },
     orderBy: { startedAt: "desc" },
     take: limit,
   });
@@ -35,7 +39,6 @@ export const GET = withErrorHandling("Get sessions", async (req: NextRequest) =>
   return NextResponse.json({ sessions });
 });
 
-// Criar nova sessão (finalizar treino)
 export const POST = withErrorHandling("Create session", async (req: NextRequest) => {
   const user = await requireUser(req);
 
@@ -48,55 +51,58 @@ export const POST = withErrorHandling("Create session", async (req: NextRequest)
     totalVolume += s.weight * s.reps;
   }
 
-  // Detectar PRs
-  const prUpdates: Array<{
-    exerciseId: string;
-    exerciseName: string;
-    weight: number;
-    reps: number;
-    restSeconds: number;
-    isPR: boolean;
-    rir?: number | null;
-    durationSec?: number | null;
-    distanceKm?: number | null;
-    avgBpm?: number | null;
-    intensity?: string | null;
-  }> = [];
+  // PR em 1 groupBy (antes: N findFirst) + isPR no create (sem loop de update)
+  const strengthExerciseIds = Array.from(
+    new Set(sets.filter((s) => s.durationSec == null).map((s) => s.exerciseId))
+  );
 
-  // Detectar PRs — consulta o maior peso já registrado para o mesmo exercício
-  // pelo usuário atual (via relação session -> userId). Exercícios de cardio
-  // (identificados pela presença de durationSec) não entram nessa comparação,
-  // já que não fazem sentido como "recorde de peso".
-  for (const s of sets) {
+  const previousMaxByExercise = new Map<string, number>();
+  if (strengthExerciseIds.length > 0) {
+    const grouped = await db.sessionSet.groupBy({
+      by: ["exerciseId"],
+      where: {
+        exerciseId: { in: strengthExerciseIds },
+        session: { userId: user.id },
+      },
+      _max: { weight: true },
+    });
+    for (const row of grouped) {
+      previousMaxByExercise.set(row.exerciseId, row._max.weight ?? 0);
+    }
+  }
+
+  const sessionMaxByExercise = new Map<string, number>();
+
+  const setRows = sets.map((s, i) => {
     const isCardio = s.durationSec != null;
-    let isNewPR = false;
+    let isPR = false;
 
     if (!isCardio) {
-      const previousMax = await db.sessionSet.findFirst({
-        where: {
-          exerciseId: s.exerciseId,
-          session: { userId: user.id },
-        },
-        orderBy: { weight: "desc" },
-        select: { weight: true },
-      });
-      isNewPR = !previousMax || s.weight > previousMax.weight;
+      const histMax = previousMaxByExercise.get(s.exerciseId) ?? 0;
+      const sessionMax = sessionMaxByExercise.get(s.exerciseId) ?? histMax;
+      if (s.weight > sessionMax) {
+        isPR = true;
+        sessionMaxByExercise.set(s.exerciseId, s.weight);
+      } else {
+        sessionMaxByExercise.set(s.exerciseId, Math.max(sessionMax, s.weight));
+      }
     }
 
-    prUpdates.push({
+    return {
       exerciseId: s.exerciseId,
       exerciseName: s.exerciseName,
+      setNumber: i + 1,
       weight: s.weight,
       reps: s.reps,
+      rir: s.rir ?? null,
       restSeconds: s.restSeconds || 90,
-      isPR: isNewPR,
-      rir: s.rir,
-      durationSec: s.durationSec,
-      distanceKm: s.distanceKm,
-      avgBpm: s.avgBpm,
-      intensity: s.intensity,
-    });
-  }
+      isPR,
+      durationSec: s.durationSec ?? null,
+      distanceKm: s.distanceKm ?? null,
+      avgBpm: s.avgBpm ?? null,
+      intensity: s.intensity ?? null,
+    };
+  });
 
   const session = await db.workoutSession.create({
     data: {
@@ -108,34 +114,10 @@ export const POST = withErrorHandling("Create session", async (req: NextRequest)
       durationSec: durationSec || 0,
       totalVolume,
       notes: notes || null,
-      sets: {
-        create: prUpdates.map((s, i) => ({
-          exerciseId: s.exerciseId,
-          exerciseName: s.exerciseName,
-          setNumber: i + 1,
-          weight: s.weight,
-          reps: s.reps,
-          rir: s.rir ?? null,
-          restSeconds: s.restSeconds || 90,
-          durationSec: s.durationSec ?? null,
-          distanceKm: s.distanceKm ?? null,
-          avgBpm: s.avgBpm ?? null,
-          intensity: s.intensity ?? null,
-        })),
-      },
+      sets: { create: setRows },
     },
     include: { sets: true },
   });
-
-  // Marcar PRs nas sets criadas
-  for (let i = 0; i < prUpdates.length; i++) {
-    if (prUpdates[i].isPR) {
-      await db.sessionSet.update({
-        where: { id: session.sets[i].id },
-        data: { isPR: true },
-      });
-    }
-  }
 
   return NextResponse.json({ session });
 });

@@ -41,6 +41,8 @@ model User {
   dailyLogs DailyLog[]
   ownedGroups Group[] @relation("GroupOwner")
   groupMemberships GroupMember[]
+  @@index([role])
+  @@index([disabled])
 }
 
 model Exercise {
@@ -64,6 +66,9 @@ model Exercise {
   workoutExercises WorkoutExercise[]
   sessionSets     SessionSet[]
   favorites       Favorite[]
+  @@index([muscleGroup])
+  @@index([category])
+  @@index([level])
 }
 
 model Workout {
@@ -90,6 +95,7 @@ model Workout {
 
   @@index([userId])
   @@index([isTemplate])
+  @@index([userId, isTemplate])
 }
 
 model WorkoutExercise {
@@ -109,6 +115,7 @@ model WorkoutExercise {
   exercise Exercise @relation(fields: [exerciseId], references: [id])
 
   @@index([workoutId])
+  @@index([exerciseId])
 }
 
 model WorkoutSession {
@@ -128,6 +135,7 @@ model WorkoutSession {
 
   @@index([userId])
   @@index([startedAt])
+  @@index([userId, startedAt])
 }
 
 model SessionSet {
@@ -153,6 +161,7 @@ model SessionSet {
 
   @@index([sessionId])
   @@index([exerciseId])
+  @@index([exerciseId, weight])
 }
 
 model Favorite {

@@ -182,7 +182,15 @@ export const profileSchema = z.object({
   sex: z.preprocess(emptyToNull, z.enum(["M", "F", "Outro"]).nullable()).optional(),
   birthDate: z.preprocess(emptyToNull, z.coerce.date().nullable()).optional(),
   goal: z.preprocess(emptyToNull, z.string().trim().max(500).nullable()).optional(),
-  avatarUrl: z.preprocess(emptyToNull, z.string().max(2_000_000).nullable()).optional(), // pode ser data URL (base64) de um avatar
+  // Apenas URL http(s) — upload via POST /api/profile/avatar (Vercel Blob).
+  avatarUrl: z
+    .preprocess(emptyToNull, z.union([
+      z.string().url().max(2000).refine((u) => u.startsWith("http://") || u.startsWith("https://"), {
+        message: "avatarUrl deve ser uma URL http(s) — use /api/profile/avatar para enviar a foto",
+      }),
+      z.null(),
+    ]))
+    .optional(),
   gameEnabled: z.coerce.boolean().optional(),
   waterGoalMl: z.coerce.number().int().positive("Meta de água inválida").max(15000).optional(),
   weeklyWorkoutGoal: z.coerce.number().int().positive("Meta de treinos inválida").max(21).optional(),
