@@ -41,9 +41,13 @@ export const GET = withErrorHandling("Get sessions", async (req: NextRequest) =>
           },
         },
         workout: { select: { id: true, color: true, name: true } },
+        _count: { select: { sets: true } },
       }
     : {
         workout: { select: { id: true, color: true, name: true } },
+        _count: { select: { sets: true } },
+        // Só IDs de PR — payload leve para badge no histórico
+        sets: { where: { isPR: true }, select: { id: true }, take: 1 },
       };
 
   const sessions = await db.workoutSession.findMany({
@@ -74,7 +78,22 @@ export const GET = withErrorHandling("Get sessions", async (req: NextRequest) =>
       ? `${new Date(last.startedAt).toISOString()}|${last.id}`
       : null;
 
-  return NextResponse.json({ sessions: page, nextCursor, hasMore });
+  const shaped = page.map((s) => {
+    const { _count, sets, ...rest } = s as typeof s & {
+      _count?: { sets: number };
+      sets?: Array<{ id: string }>;
+    };
+    if (includeSets) {
+      return { ...rest, sets, setCount: _count?.sets ?? (Array.isArray(sets) ? sets.length : 0) };
+    }
+    return {
+      ...rest,
+      setCount: _count?.sets ?? 0,
+      hasPR: Array.isArray(sets) && sets.length > 0,
+    };
+  });
+
+  return NextResponse.json({ sessions: shaped, nextCursor, hasMore });
 });
 
 export const POST = withErrorHandling("Create session", async (req: NextRequest) => {

@@ -25,6 +25,9 @@ type SessionListItem = {
   totalVolume: number;
   notes: string | null;
   workout: { id: string; color: string | null; name?: string | null } | null;
+  /** Presente na listagem leve (API envia _count / flag, sem arrays de sets). */
+  setCount?: number;
+  hasPR?: boolean;
 };
 
 type SessionSet = {
@@ -216,8 +219,10 @@ export function HistoryView() {
                             <Clock className="w-3 h-3" />{formatDuration(session.durationSec)}
                           </span>
                           <span>·</span>
-                          <span>{session.sets.length} sets</span>
-                          {session.sets.some(s => s.isPR) && (
+                          {session.setCount != null && (
+                            <span>{session.setCount} sets</span>
+                          )}
+                          {session.hasPR && (
                             <><span>·</span><span className="text-yellow-400 font-semibold flex items-center gap-0.5"><Trophy className="w-3 h-3" /> PR</span></>
                           )}
                           <span>·</span>
