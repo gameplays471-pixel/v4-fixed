@@ -80,15 +80,7 @@ export function useLiveShare(
     };
   }, [sharing, pushSnapshot]);
 
-  // Expor schedulePush via ref pattern — o index pode chamar após cada set
-  useEffect(() => {
-    (window as unknown as { __gemgym_live_push?: () => void }).__gemgym_live_push = schedulePush;
-    return () => {
-      delete (window as unknown as { __gemgym_live_push?: () => void }).__gemgym_live_push;
-    };
-  }, [schedulePush]);
-
-  const start = useCallback(async () => {
+  const start = useCallback(async (): Promise<string | null> => {
     setLoading(true);
     try {
       const res = await apiPost<{ slug: string }>("/api/sessions/live/start", {
@@ -96,12 +88,18 @@ export function useLiveShare(
         workoutName,
       });
       // envia snapshot logo após criar a sessão
-      await apiPost(`/api/sessions/live/snapshot`, { snapshot: getSnapshotRef.current() }).catch(() => {});
+      await apiPost(`/api/sessions/live/snapshot`, {
+        snapshot: getSnapshotRef.current(),
+      }).catch(() => {});
       setSlug(res.slug);
       setSharing(true);
       toast.success("Transmissão ao vivo ligada");
+      return res.slug;
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Não foi possível iniciar o ao vivo");
+      toast.error(
+        e instanceof Error ? e.message : "Não foi possível iniciar o ao vivo"
+      );
+      return null;
     } finally {
       setLoading(false);
     }
