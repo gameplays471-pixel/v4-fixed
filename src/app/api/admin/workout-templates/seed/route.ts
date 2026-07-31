@@ -48,7 +48,7 @@ export const POST = withErrorHandling("Admin: seed preset workout templates", as
     await db.workout.deleteMany({ where: { id: { in: existing.map((e) => e.id) } } });
   }
 
-  const created = [];
+  const created: Array<{ id: string; name: string; exercises: number }> = [];
   for (const preset of PRESET_WORKOUTS) {
     const template = await db.workout.create({
       data: {

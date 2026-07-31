@@ -40,7 +40,12 @@ export const POST = withErrorHandling("Admin: assign workouts to user", async (r
   }
 
   const assigned = await db.$transaction(async (tx) => {
-    const results = [];
+    const results: Array<{
+      id: string;
+      name: string;
+      fromTemplateId: string;
+      exerciseCount: number;
+    }> = [];
     for (const source of templates) {
       const workout = await tx.workout.create({
         data: {
