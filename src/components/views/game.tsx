@@ -265,7 +265,26 @@ export function GameView() {
     setBusy(true);
     try {
       const { group } = await apiPost<{ group: GroupSummary }>("/api/groups", { name: groupName.trim() });
+
+      // Atualização otimista: adiciona o grupo novo direto no cache em vez de
+      // só invalidar. Razão: depois de `invalidateQueries`, o React Query só
+      // marca a query como stale — o refetch real é assíncrono e o componente
+      // continua renderizando com a lista antiga nesse meio-tempo. Resultado
+      // prático: o `activeGroup` ficava `null` (porque o grupo novo ainda não
+      // estava em `groups`), o card do grupo sumia e o usuário pensava que a
+      // tela tinha "travado" — só voltava ao normal depois de um F5.
+      // Escrever direto no cache + invalidar depois garante que (a) a UI já
+      // mostra o grupo novo no mesmo tick, e (b) o refetch seguinte
+      // re-sincroniza memberCount/inviteCode/etc com a verdade do servidor.
+      queryClient.setQueryData<GroupSummary[]>(queryKeys.groups, (old) => {
+        const existing = old ?? [];
+        // Se por algum motivo o grupo já estiver na lista (race com outro
+        // refetch), substitui em vez de duplicar.
+        const withoutDup = existing.filter((g) => g.id !== group.id);
+        return [...withoutDup, group];
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.groups });
+
       setSelectedGroupId(group.id);
       setCreateOpen(false);
       setGroupName("");
@@ -282,7 +301,17 @@ export function GameView() {
     setBusy(true);
     try {
       const { group } = await apiPost<{ group: GroupSummary }>("/api/groups/join", { inviteCode: inviteCode.trim() });
+
+      // Mesma atualização otimista do `handleCreateGroup` — ver comentário
+      // lá. Sem isso, o grupo novo demora um tick pra aparecer e o card do
+      // grupo ativo fica em branco até o refetch do /api/groups terminar.
+      queryClient.setQueryData<GroupSummary[]>(queryKeys.groups, (old) => {
+        const existing = old ?? [];
+        const withoutDup = existing.filter((g) => g.id !== group.id);
+        return [...withoutDup, group];
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.groups });
+
       setSelectedGroupId(group.id);
       setJoinOpen(false);
       setInviteCode("");

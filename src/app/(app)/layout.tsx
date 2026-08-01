@@ -253,6 +253,63 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, activeWorkoutId, pathname]);
 
+  // Sincroniza o `user` do layout com a query de perfil. Sem isso, quando o
+  // usuário ativa/desativa o mini-game em /perfil, a tela de Perfil atualiza
+  // o cache `queryKeys.profile` (ver `handleToggleGame` em
+  // components/views/profile.tsx) — mas o layout, que mantém seu próprio
+  // `useState<AppUser>` pra alimentar a Sidebar e o menu mobile, nunca fica
+  // sabendo. Resultado: o item "Mini-game" no menu lateral só aparecia (ou
+  // sumia) depois de F5 / logout-login. A correção é subscrever à mesma
+  // query e fazer merge superficial dos campos que afetam a navegação.
+  // Roda uma vez só na montagem do layout: o callback usa `setUser` com
+  // updater function (referência estável), então não precisa recriar.
+  //
+  // A query `queryKeys.profile` guarda o `user` diretamente (ver
+  // `queryFn` e `setQueryData` em components/views/profile.tsx) — não
+  // `data?.user`.
+  useEffect(() => {
+    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
+      if (event.type !== "updated") return;
+      const query = event.query;
+      if (query.queryKey[0] !== queryKeys.profile[0]) return;
+      const updated = query.state.data as Partial<AppUser> | undefined;
+      if (!updated) return;
+      setUser((prev) => {
+        // Sem mudança real → retorna a mesma referência pra não causar
+        // re-render desnecessário (importante: a Sidebar filtra `items`
+        // por `user.gameEnabled`; uma ref estável evita remontagem).
+        if (
+          prev &&
+          prev.gameEnabled === updated.gameEnabled &&
+          prev.name === updated.name &&
+          prev.email === updated.email &&
+          prev.role === updated.role
+        ) {
+          return prev;
+        }
+        // `Partial<AppUser>` significa que qualquer campo pode chegar
+        // `undefined`, mas a Sidebar e o menu mobile precisam de valores
+        // concretos em `name`/`email` (são exibidos). Mantemos os antigos
+        // como fallback quando o update trouxer `undefined` em algum
+        // desses campos — é mais seguro que quebrar a UI.
+        const base: AppUser = prev ?? { name: "", email: "" };
+        const merged: AppUser = {
+          name: updated.name ?? base.name,
+          email: updated.email ?? base.email,
+          role: updated.role ?? base.role,
+          gameEnabled: updated.gameEnabled ?? base.gameEnabled,
+        };
+        // Atualiza também o cache local (USER_CACHE_KEY) pra o próximo
+        // cold-start já pegar o gameEnabled novo sem depender do
+        // /api/auth/me.
+        setCachedUser(merged);
+        return merged;
+      });
+    });
+    return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryClient]);
+
   const handleAuth = (u: unknown, token?: string, rememberMe = true, isSignup = false) => {
     if (token) setToken(token, rememberMe);
     setUser(u as AppUser);

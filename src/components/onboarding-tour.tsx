@@ -11,6 +11,8 @@ import {
   Trophy,
   TrendingUp,
   Flame,
+  Share2,
+  Star,
   ChevronRight,
   ChevronLeft,
   X,
@@ -149,6 +151,78 @@ function HistoryStatsMock() {
   );
 }
 
+/**
+ * Mock estático do cartão de compartilhamento. Espelha o visual do
+ * `share-workout-card.tsx` em miniatura, com dados de exemplo — não está
+ * conectado à API, é só pra dar contexto visual de como o card gerado
+ * fica antes da pessoa decidir usar o recurso.
+ */
+function ShareCardMock() {
+  return (
+    <div
+      className="w-full max-w-[230px] mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
+      style={{
+        background: "linear-gradient(160deg, #0a0c10 0%, #10131a 45%, #0b0f0d 100%)",
+        fontFamily: "var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif)",
+      }}
+    >
+      <div className="px-3.5 pt-3.5 pb-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <div className="w-4 h-4 rounded-md bg-green-500/20 flex items-center justify-center">
+            <Dumbbell className="w-2.5 h-2.5 text-green-400" />
+          </div>
+          <span className="text-[9px] font-extrabold tracking-wide text-white/90">GEMgym</span>
+        </div>
+        <span className="text-[8px] font-semibold text-white/50">Hoje</span>
+      </div>
+
+      <div className="text-center px-3.5">
+        <div className="w-8 h-8 mx-auto rounded-xl bg-green-500/20 flex items-center justify-center shadow-[0_0_18px_rgba(34,197,94,0.4)]">
+          <Trophy className="w-4 h-4 text-green-400" />
+        </div>
+        <p className="mt-1.5 text-[11px] font-black text-white tracking-wide">TREINO CONCLUÍDO</p>
+        <p className="text-[10px] font-semibold text-white/65">Peito &amp; Tríceps</p>
+
+        <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-400/15 border border-yellow-400/35 text-yellow-300 text-[8px] font-extrabold">
+          <Star className="w-2 h-2 fill-current" /> 2 novos recordes
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-1 px-3.5 mt-2.5">
+        {[
+          { label: "duração", value: "52min" },
+          { label: "volume", value: "2.1k" },
+          { label: "séries", value: "16" },
+          { label: "PRs", value: "2" },
+        ].map((s) => (
+          <div key={s.label} className="rounded-lg bg-white/5 border border-white/10 py-1.5 text-center">
+            <p className="text-[10px] font-black text-white tabular-nums leading-none">{s.value}</p>
+            <p className="text-[7px] font-bold text-white/50 uppercase tracking-wider mt-0.5">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="px-3.5 py-2.5 grid grid-cols-2 gap-1">
+        {[
+          { count: "4×", name: "Supino Reto" },
+          { count: "3×", name: "Crucifixo" },
+          { count: "3×", name: "Paralelas" },
+          { count: "3×", name: "Tríceps Corda" },
+        ].map((ex) => (
+          <div key={ex.name} className="flex items-center gap-1 rounded-md bg-white/5 border border-white/10 px-1.5 py-1 min-w-0">
+            <span className="text-[8px] font-black text-green-400 shrink-0">{ex.count}</span>
+            <span className="text-[8px] font-bold text-white/90 truncate">{ex.name}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="px-3.5 pb-2.5 pt-1 border-t border-white/10 text-center">
+        <span className="text-[8px] font-semibold text-white/45">Feito no <span className="text-green-400 font-extrabold">GEMgym</span> 💪</span>
+      </div>
+    </div>
+  );
+}
+
 const slides = [
   {
     key: "criar",
@@ -176,6 +250,15 @@ const slides = [
     description:
       "Todo treino finalizado fica no seu histórico, com volume, duração e recordes — e vira gráfico automaticamente na aba Stats.",
     mock: <HistoryStatsMock />,
+  },
+  {
+    key: "compartilhar",
+    badge: "4. Compartilhe",
+    icon: <Share2 className="w-6 h-6" />,
+    title: "Mostre seu treino (e motive a galera)",
+    description:
+      "Ao finalizar, toque em “Compartilhar treino” pra gerar um cartão com seus PRs, volume e manequim muscular — pronto pra postar no Stories ou mandar no WhatsApp.",
+    mock: <ShareCardMock />,
   },
 ];
 
