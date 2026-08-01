@@ -58,8 +58,10 @@ export async function notifyRestDone(exerciseName?: string): Promise<void> {
     badge: "/icons/icon-192.png",
     tag: "gemgym-rest-timer", // substitui uma notificação anterior em vez de empilhar
     renotify: true,
-    vibrate: [200, 100, 200],
-    requireInteraction: false,
+    // Padrão mais perceptível — em muitos mobiles o SO faz ducking
+    // automático da música de fundo ao tocar notificação com som.
+    vibrate: [220, 80, 220, 80, 320],
+    requireInteraction: true, // fica visível até o usuário interagir
     silent: false,
   };
 

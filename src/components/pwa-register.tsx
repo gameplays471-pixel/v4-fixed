@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { getPersistedActiveWorkoutId } from "@/lib/workout-draft";
 
 /**
  * Registra o service worker do app e avisa o usuário quando uma nova
@@ -63,6 +64,16 @@ export function PwaRegister() {
       action: {
         label: "Atualizar",
         onClick: () => {
+          // Se tem treino em andamento, confirma antes — o progresso fica
+          // salvo (autosave local), mas a página vai recarregar na hora.
+          if (
+            getPersistedActiveWorkoutId() &&
+            !window.confirm(
+              "Você tem um treino em andamento. Seu progresso está salvo, mas a página vai recarregar para atualizar. Continuar?"
+            )
+          ) {
+            return;
+          }
           waitingWorker.postMessage("SKIP_WAITING");
         },
       },
