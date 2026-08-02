@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { verifyPassword, needsRehash, hashPassword, createSession, setSessionCookie } from "@/lib/auth";
+import { verifyPassword, needsRehash, hashPassword, createSession, setSessionCookie, BEARER_TOKEN_EXPIRY_SECONDS } from "@/lib/auth";
 import { checkRateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
 import { unauthorized, withErrorHandling } from "@/lib/api-error";
 import { parseBody, loginSchema } from "@/lib/validation";
@@ -44,15 +44,18 @@ export const POST = withErrorHandling("Login", async (req: NextRequest) => {
     });
   }
 
-  const token = await createSession(user.id);
-  await setSessionCookie(token, !!rememberMe);
+  const cookieToken = await createSession(user.id);
+  await setSessionCookie(cookieToken, !!rememberMe);
+  // Token curto pro localStorage/sessionStorage (cross-origin/preview) —
+  // prazo bem menor que o cookie httpOnly, ver comentário em auth.ts.
+  const bearerToken = await createSession(user.id, BEARER_TOKEN_EXPIRY_SECONDS);
 
   return NextResponse.json({
     id: user.id,
     email: user.email,
     name: user.name,
     role: user.role,
-    token, // token também no body para localStorage (suporte cross-origin)
+    token: bearerToken, // token também no body para localStorage (suporte cross-origin)
     rememberMe: !!rememberMe,
   });
 });

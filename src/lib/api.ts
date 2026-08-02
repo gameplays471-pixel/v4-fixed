@@ -3,8 +3,24 @@
 
 export const TOKEN_KEY = "gemgym_token";
 
+// O token em localStorage só existe pra suportar o preview em iframe
+// (`*.space-z.ai` / `preview-*.space-z.ai`, ver `allowedDevOrigins` em
+// next.config.ts) — cenário em que cookies podem não ser confiáveis
+// (partição/bloqueio de cookie de terceiro em iframe). Em produção, front
+// e API estão sempre na mesma origem na Vercel (só o banco é externo), e
+// aí o cookie httpOnly já basta sozinho — não precisa de token legível
+// por JS voando por aí. Fora dessa origem de preview, o token devolvido
+// pelo login NUNCA é gravado em localStorage/sessionStorage: um XSS em
+// produção não tem mais nenhum token de sessão pra roubar por lá, só o
+// cookie httpOnly (inacessível a JS).
+function isPreviewSandboxOrigin(): boolean {
+  if (typeof window === "undefined") return false;
+  return /(^|\.)space-z\.ai$/.test(window.location.hostname);
+}
+
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
+  if (!isPreviewSandboxOrigin()) return null;
   // Prioriza localStorage (login persistente); cai para sessionStorage
   // (login válido só nesta aba/sessão do navegador) se não achar.
   return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
@@ -15,13 +31,18 @@ export function getToken(): string | null {
  * @param remember Se true (padrão), usa localStorage e o login persiste
  *   entre sessões do navegador ("Manter conectado"). Se false, usa
  *   sessionStorage e a sessão termina ao fechar a aba/navegador.
+ *
+ * Fora da origem de preview, gravar um token não-nulo é sempre um no-op —
+ * ver comentário acima de `isPreviewSandboxOrigin`. `setToken(null)` (usado
+ * no logout) continua funcionando em qualquer origem, pra sempre limpar
+ * resíduo de uma sessão anterior de preview.
  */
 export function setToken(token: string | null, remember: boolean = true) {
   if (typeof window === "undefined") return;
   // Sempre limpa os dois primeiro para não deixar token velho para trás.
   localStorage.removeItem(TOKEN_KEY);
   sessionStorage.removeItem(TOKEN_KEY);
-  if (token) {
+  if (token && isPreviewSandboxOrigin()) {
     if (remember) {
       localStorage.setItem(TOKEN_KEY, token);
     } else {

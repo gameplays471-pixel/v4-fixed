@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { hashPassword, createSession, setSessionCookie } from "@/lib/auth";
+import { hashPassword, createSession, setSessionCookie, BEARER_TOKEN_EXPIRY_SECONDS } from "@/lib/auth";
 import { checkRateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
 import { badRequest, withErrorHandling } from "@/lib/api-error";
 import { parseBody, signupSchema } from "@/lib/validation";
@@ -31,13 +31,14 @@ export const POST = withErrorHandling("Signup", async (req: NextRequest) => {
     },
   });
 
-  const token = await createSession(user.id);
-  await setSessionCookie(token);
+  const cookieToken = await createSession(user.id);
+  await setSessionCookie(cookieToken);
+  const bearerToken = await createSession(user.id, BEARER_TOKEN_EXPIRY_SECONDS);
 
   return NextResponse.json({
     id: user.id,
     email: user.email,
     name: user.name,
-    token,
+    token: bearerToken,
   });
 });

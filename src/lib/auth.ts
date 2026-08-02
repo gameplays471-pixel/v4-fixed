@@ -26,6 +26,15 @@ export const SESSION_COOKIE = "gemgym_session";
 export const TOKEN_LOCALSTORAGE_KEY = "gemgym_token";
 const SESSION_EXPIRY_DAYS = 30;
 const SESSION_EXPIRY_SECONDS = SESSION_EXPIRY_DAYS * 24 * 60 * 60;
+// Token devolvido no corpo da resposta de login/signup, guardado em
+// localStorage/sessionStorage no cliente pra suportar auth cross-origin
+// (preview URLs) — ver src/lib/api.ts. localStorage é legível por
+// qualquer script na página, então um XSS bem-sucedido rouba esse token;
+// prazo bem mais curto que o cookie httpOnly (30 dias) limita por quanto
+// tempo um token vazado continua valendo. Sem refresh automático ainda —
+// expirado, a próxima call 401 e o app manda pra tela de login de novo.
+const BEARER_TOKEN_EXPIRY_DAYS = 7;
+export const BEARER_TOKEN_EXPIRY_SECONDS = BEARER_TOKEN_EXPIRY_DAYS * 24 * 60 * 60;
 
 // ─── Segredo de assinatura ─────────────────────────────────────────────────
 // Obrigatório em produção. Em desenvolvimento, cai para um valor fixo (com
@@ -118,8 +127,10 @@ interface SessionPayload {
  * Cria um token de sessão assinado (JWT HS256): header.payload.signature.
  * Só quem conhece SESSION_SECRET consegue gerar uma assinatura válida —
  * portanto não dá para forjar um token só conhecendo o id de outro usuário.
+ * `expirySeconds` opcional — default é o prazo do cookie (30 dias); use
+ * `BEARER_TOKEN_EXPIRY_SECONDS` para o token exposto ao JS (localStorage).
  */
-export async function createSession(userId: string): Promise<string> {
+export async function createSession(userId: string, expirySeconds: number = SESSION_EXPIRY_SECONDS): Promise<string> {
   const secret = getSessionSecret();
   const now = Math.floor(Date.now() / 1000);
 
@@ -127,7 +138,7 @@ export async function createSession(userId: string): Promise<string> {
   const payload: SessionPayload = {
     sub: userId,
     iat: now,
-    exp: now + SESSION_EXPIRY_SECONDS,
+    exp: now + expirySeconds,
   };
 
   const headerPart = base64url(JSON.stringify(header));

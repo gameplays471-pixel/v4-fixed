@@ -37,7 +37,7 @@ function loadEnvFile(): Record<string, string> {
 
 /**
  * Ajusta a URL do Postgres para serverless (Vercel) + Supabase pooler:
- * - connection_limit=1 → cada instância Prisma não abre um pool grande
+ * - connection_limit → quantas conexões ESSE processo Prisma pode abrir
  * - pgbouncer=true → desativa prepared statements (obrigatório no transaction mode)
  * - pool_timeout → falha rápido em vez de segurar a lambda
  */
@@ -53,8 +53,20 @@ export function withServerlessPoolParams(rawUrl: string): string {
       u.searchParams.set("pgbouncer", "true");
     }
     if (!u.searchParams.has("connection_limit")) {
-      // 1 conexão por isolate serverless — o PgBouncer faz o multiplex
-      u.searchParams.set("connection_limit", process.env.PRISMA_CONNECTION_LIMIT || "1");
+      // BUG DE PERFORMANCE (corrigido): o valor era fixo em "1" pensando em
+      // "1 isolate serverless = 1 conexão, o PgBouncer multiplexa entre
+      // isolates". Isso só é seguro quando cada request roda numa isolate
+      // nova de verdade. Aqui o app roda como processo Node ÚNICO e
+      // persistente (`next dev` / `bun .next/standalone/server.js`), então
+      // connection_limit=1 forçava TODAS as queries — de todos os usuários,
+      // todas as abas, todas as chamadas em paralelo da própria tela do
+      // jogo (summary + groups + ranking) — a competir por UMA única
+      // conexão com o Postgres, enfileiradas. Sob qualquer concorrência
+      // isso estourava o pool_timeout (10s) e a UI ficava travada até
+      // reload. 10 conexões é folgado o bastante pro tráfego desse
+      // processo único e ainda continua barato pro pooler (que já existe
+      // justamente pra aguentar muito mais que isso).
+      u.searchParams.set("connection_limit", process.env.PRISMA_CONNECTION_LIMIT || "10");
     }
     if (!u.searchParams.has("pool_timeout")) {
       u.searchParams.set("pool_timeout", process.env.PRISMA_POOL_TIMEOUT || "10");
