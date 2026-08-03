@@ -127,7 +127,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const created = [];
+    const created: Array<{
+  id: string;
+  name: string;
+  exercises: unknown[];
+  // add other fields you actually use if needed
+}> = [];
     for (let i = 0; i < workouts.length; i++) {
       const w = workouts[i];
       const workout = await db.workout.create({
