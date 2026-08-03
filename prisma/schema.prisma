@@ -79,6 +79,11 @@ model Workout {
   description String?
   defaultRest Int      @default(90) // descanso padrão em segundos
   color       String?
+  // "Inativar" um treino tira ele da lista/dashboard sem apagar nada —
+  // sessões, sets e PRs continuam ligados ao exercício normalmente.
+  // Usado quando uma periodização acaba e um treino novo entra no lugar,
+  // mas o histórico do treino antigo precisa ser preservado.
+  active      Boolean  @default(true)
   shareSlug   String?  @unique // token opaco pro link público de compartilhamento (/w/[slug]); gerado sob demanda, fixo por treino
   // Templates do painel admin — treinos pré-setados atribuíveis a alunos.
   // isTemplate=true não aparece na lista de treinos do usuário dono; só no
@@ -98,6 +103,7 @@ model Workout {
   @@index([userId])
   @@index([isTemplate])
   @@index([userId, isTemplate])
+  @@index([userId, active])
 }
 
 model WorkoutExercise {

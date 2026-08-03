@@ -92,6 +92,36 @@ export const PUT = withErrorHandling<{ params: Promise<{ id: string }> }>(
   }
 );
 
+// Inativar/reativar um treino. Não mexe em exercícios, sessões ou sets —
+// só esconde o treino da lista/dashboard mantendo todo o histórico
+// (cargas, PRs, gráficos por exercício) intacto, já que essas coisas são
+// ligadas ao exerciseId, não ao workoutId.
+export const PATCH = withErrorHandling<{ params: Promise<{ id: string }> }>(
+  "Toggle workout active status",
+  async (req, { params }) => {
+    const user = await requireUser(req);
+
+    const { id } = await params;
+    const existing = await db.workout.findFirst({
+      where: { id, userId: user.id },
+    });
+    if (!existing) {
+      throw notFound("Treino não encontrado");
+    }
+
+    const body = await req.json().catch(() => ({}));
+    const active = typeof body?.active === "boolean" ? body.active : !existing.active;
+
+    const updated = await db.workout.update({
+      where: { id },
+      data: { active },
+      include: { exercises: { include: { exercise: true }, orderBy: { order: "asc" } } },
+    });
+
+    return NextResponse.json({ workout: updated });
+  }
+);
+
 export const DELETE = withErrorHandling<{ params: Promise<{ id: string }> }>(
   "Delete workout",
   async (req, { params }) => {
