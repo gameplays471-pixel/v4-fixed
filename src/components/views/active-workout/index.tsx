@@ -17,7 +17,7 @@ import { ExerciseCard } from "./components/ExerciseCard";
 import { FinishModal } from "./components/FinishModal";
 import type { WorkoutExercise } from "./types";
 
-interface ActiveWorkoutViewProps {
+export interface ActiveWorkoutViewProps {
   workoutId: string;
 }
 

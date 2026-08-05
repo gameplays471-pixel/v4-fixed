@@ -1,13 +1,10 @@
-"use client";
-
 import { ActiveWorkoutView } from "@/components/views/active-workout";
-import { use } from "react";
 
-export default function ActiveWorkoutPage({
+export default async function ActiveWorkoutPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
+  const { id } = await params;
   return <ActiveWorkoutView workoutId={id} />;
 }
