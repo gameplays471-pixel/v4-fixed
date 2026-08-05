@@ -3,6 +3,25 @@
 
 export const TOKEN_KEY = "gemgym_token";
 
+// Cache do objeto de usuário (nome/email/role/gameEnabled) usado pelo
+// AppShellLayout para renderizar a UI otimisticamente antes de /api/auth/me
+// responder. Ao contrário do token acima, este cache NÃO é restrito à
+// origem de preview — existe em produção também, de propósito, para dar
+// um "cold start" mais rápido. Por isso é essencial limpá-lo aqui sempre
+// que um 401 confirma que a sessão está mesmo inválida: caso contrário,
+// um usuário deslogado continua sendo tratado como "logado" (com dados
+// velhos) na próxima vez que o app abrir, até a rede falhar de novo.
+export const USER_CACHE_KEY = "gemgym:user-cache";
+
+export function clearCachedUser() {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(USER_CACHE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 // O token em localStorage só existe pra suportar o preview em iframe
 // (`*.space-z.ai` / `preview-*.space-z.ai`, ver `allowedDevOrigins` em
 // next.config.ts) — cenário em que cookies podem não ser confiáveis
@@ -64,6 +83,7 @@ const RELOAD_GUARD_KEY = "gemgym_401_reload_guard";
 
 function handleUnauthorized() {
   setToken(null);
+  clearCachedUser();
   if (typeof window === "undefined") return;
   // Evita loop infinito de reload: o app não tem uma rota /auth própria
   // (a tela de login aparece sem trocar a URL), então checar o pathname

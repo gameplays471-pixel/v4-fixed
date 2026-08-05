@@ -231,14 +231,34 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
         if (!data.user) setToken(null);
       })
       .catch(() => {
-        // Se a rede caiu mas temos um token OU cache de usuário,
-        // não derrubar — o usuário pode estar no meio de um treino.
-        // O token será verificado quando a conexão voltar.
+        // Só confiamos no cache de usuário quando há evidência REAL de
+        // que estamos offline (navigator.onLine === false) — nesse caso
+        // sim vale manter a pessoa "logada" com dados antigos (pode estar
+        // no meio de um treino e a rede da academia caiu); quando a
+        // conexão voltar, o token/cookie é revalidado normalmente.
+        //
+        // Se o fetch de /api/auth/me falhou por outro motivo (bloqueador
+        // de conteúdo/extensão, engasgo pontual de rede, etc.) COM a rede
+        // no ar, confiar no cache aqui é perigoso: a sessão pode já estar
+        // realmente inválida (cookie expirado), e a Dashboard vai montar
+        // achando que está logada, disparar 5 chamadas autenticadas em
+        // paralelo (workouts, stats, plans, gamification, sessions), TODAS
+        // tomarem 401 do servidor, e forçar um reload — pior experiência
+        // (flash de dashboard + storm de erros) do que só mostrar a tela
+        // de login direto. Esse fallback otimista era a causa raiz dos
+        // 401 em cascata reportados: /api/auth/me falhava na rede,
+        // caíamos aqui, e "logávamos" a pessoa com o cache mesmo sem a
+        // sessão ter sido revalidada de fato.
+        const trulyOffline = typeof navigator !== "undefined" && navigator.onLine === false;
         const cached = getCachedUser();
-        if (token || cached) {
+        if (trulyOffline && (token || cached)) {
           if (cached && !user) setUser(cached);
           setLoading(false);
+          return;
         }
+        setUser(null);
+        setCachedUser(null);
+        setLoading(false);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

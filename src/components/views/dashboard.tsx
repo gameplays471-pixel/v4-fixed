@@ -88,8 +88,7 @@ export function DashboardView() {
       console.error("Erro ao carregar dashboard:", statsQuery.error || workoutsQuery.error || sessionsQuery.error);
       toast.error("Não foi possível carregar seus dados. Puxe para atualizar ou tente novamente.");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasError]);
+  }, [hasError, statsQuery.error, workoutsQuery.error, sessionsQuery.error]);
 
   const startWorkout = (id: string) => { router.push(`/treinos/${id}/ativo`); };
 
