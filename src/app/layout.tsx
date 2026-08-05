@@ -1,7 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
+import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
+import { PwaRegister } from "@/components/pwa-register";
+import { QueryProvider } from "@/lib/query-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,33 +20,68 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hevy Web — Treinos de Musculação",
+  title: "GEMgym — Treinos de Musculação",
   description:
     "Aplicação web para registro de treinos de musculação, controle de evolução e biblioteca de exercícios.",
-  keywords: ["musculação", "treino", "exercícios", "academia", "hevy"],
+  keywords: ["musculação", "treino", "exercícios", "academia", "gemgym"],
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "GEMgym",
+  },
 };
 
-export default function RootLayout({
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#04060a" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+};
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Setado pelo middleware.ts a cada request — sem ele, o script inline
+  // que o next-themes injeta (evita flash de tema errado antes do
+  // hydrate) seria bloqueado pelo script-src estrito da CSP.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
-    <html lang="pt-BR" className="dark" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange nonce={nonce}>
+          <QueryProvider>{children}</QueryProvider>
+        </ThemeProvider>
+        <PwaRegister />
         <Toaster
           position="top-center"
           toastOptions={{
             style: {
-              background: "oklch(0.205 0 0)",
-              color: "oklch(0.985 0 0)",
-              border: "1px solid oklch(1 0 0 / 10%)",
+              background: "var(--card-bg)",
+              color: "var(--fg)",
+              border: "1px solid var(--border)",
             },
           }}
         />
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

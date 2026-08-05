@@ -30,15 +30,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (NEVER commit secrets — Supabase password lives here)
-.env
-.env.*
-!.env.example
-
-# local databases (migrated to Supabase — kept locally only)
-db/*.db
-db/*.sqlite*
-*.sqlite
+# env files (can opt-in for committing if needed)
+.env*
 
 # vercel
 .vercel
@@ -57,13 +50,5 @@ test
 prompt
 
 server.log
-
 # Skills directory
 /skills/
-
-# Agent work artifacts (internal, not for GitHub)
-worklog.md
-upload/
-tool-results/
-.zscripts/
-agent-ctx/

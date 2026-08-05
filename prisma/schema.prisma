@@ -1,4 +1,4 @@
-// Hevy Web - Prisma Schema
+// GEMgym - Prisma Schema
 
 generator client {
   provider = "prisma-client-js"
@@ -14,6 +14,7 @@ model User {
   id           String   @id @default(cuid())
   email        String   @unique
   name         String
+  phone        String?  // obrigatório no cadastro (app), opcional aqui pra não quebrar contas já existentes sem o campo — usado para avisos/marketing
   passwordHash String
   bio          String?
   weight       Float?
@@ -22,12 +23,27 @@ model User {
   birthDate    DateTime?
   goal         String?
   avatarUrl    String?
+  role         String   @default("user") // "user" | "admin" | "support" — controla acesso ao painel /admin
+  disabled     Boolean  @default(false) // admin pode bloquear acesso do usuário
+  disabledAt   DateTime? // quando foi bloqueado (para estatísticas)
+  gameEnabled  Boolean  @default(false) // liga/desliga o mini-game (metas diárias/semanais + ranking em grupo) — via Perfil
+  waterGoalMl  Int      @default(2000)  // meta diária de água (ml), usada pelo mini-game
+  weeklyWorkoutGoal Int @default(3)     // meta semanal de treinos, usada pelo mini-game
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   workouts  Workout[]
   sessions  WorkoutSession[]
   favorites Favorite[]
+  bodyWeightLogs BodyWeightLog[]
+  progressPhotos ProgressPhoto[]
+  liveWorkoutSession LiveWorkoutSession?
+  dailyLogs DailyLog[]
+  ownedGroups Group[] @relation("GroupOwner")
+  groupMemberships GroupMember[]
+  workoutPlans    WorkoutPlan[]
+  @@index([role])
+  @@index([disabled])
 }
 
 model Exercise {
@@ -44,12 +60,16 @@ model Exercise {
   executionSteps  String?  // passo a passo (separado por \n)
   commonMistakes  String?
   tips            String?
+  images          String[] @default([]) // URLs das imagens/gif de demonstração (posição inicial e final)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   workoutExercises WorkoutExercise[]
   sessionSets     SessionSet[]
   favorites       Favorite[]
+  @@index([muscleGroup])
+  @@index([category])
+  @@index([level])
 }
 
 model Workout {
@@ -59,14 +79,31 @@ model Workout {
   description String?
   defaultRest Int      @default(90) // descanso padrão em segundos
   color       String?
+  // "Inativar" um treino tira ele da lista/dashboard sem apagar nada —
+  // sessões, sets e PRs continuam ligados ao exercício normalmente.
+  // Usado quando uma periodização acaba e um treino novo entra no lugar,
+  // mas o histórico do treino antigo precisa ser preservado.
+  active      Boolean  @default(true)
+  shareSlug   String?  @unique // token opaco pro link público de compartilhamento (/w/[slug]); gerado sob demanda, fixo por treino
+  // Templates do painel admin — treinos pré-setados atribuíveis a alunos.
+  // isTemplate=true não aparece na lista de treinos do usuário dono; só no
+  // painel de atribuição. Metadados abaixo alimentam filtros e rótulos.
+  isTemplate     Boolean @default(false)
+  templateGoal   String? // "emagrecimento" | "hipertrofia"
+  templateSex    String? // "M" | "F"
+  templateLevel  String? // "iniciante" | "intermediario"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercises WorkoutExercise[]
   sessions  WorkoutSession[]
+  planItems WorkoutPlanItem[]
 
   @@index([userId])
+  @@index([isTemplate])
+  @@index([userId, isTemplate])
+  @@index([userId, active])
 }
 
 model WorkoutExercise {
@@ -78,11 +115,15 @@ model WorkoutExercise {
   targetReps  Int     @default(10)
   restSeconds Int     @default(90)
   notes       String?
+  targetDurationSec Int?   // exercícios de cardio: duração alvo em segundos
+  targetDistanceKm  Float? // exercícios de cardio: distância alvo em km (opcional)
+  targetIntensity   String? // exercícios de cardio: "Leve" | "Moderada" | "Intensa"
 
   workout  Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   exercise Exercise @relation(fields: [exerciseId], references: [id])
 
   @@index([workoutId])
+  @@index([exerciseId])
 }
 
 model WorkoutSession {
@@ -102,6 +143,7 @@ model WorkoutSession {
 
   @@index([userId])
   @@index([startedAt])
+  @@index([userId, startedAt])
 }
 
 model SessionSet {
@@ -117,12 +159,17 @@ model SessionSet {
   restSeconds Int     @default(90)
   completedAt DateTime @default(now())
   isPR        Boolean @default(false)
+  durationSec Int?    // exercícios de cardio: duração real em segundos
+  distanceKm  Float?  // exercícios de cardio: distância percorrida
+  avgBpm      Int?    // exercícios de cardio: batimento médio
+  intensity   String? // exercícios de cardio: "Leve" | "Moderada" | "Intensa"
 
   session  WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   exercise Exercise       @relation(fields: [exerciseId], references: [id])
 
   @@index([sessionId])
   @@index([exerciseId])
+  @@index([exerciseId, weight])
 }
 
 model Favorite {
@@ -135,4 +182,186 @@ model Favorite {
   exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, exerciseId])
+}
+
+// Histórico de peso corporal — permite registrar a evolução do peso ao
+// longo do tempo (diferente do User.weight, que é só o valor "atual").
+model BodyWeightLog {
+  id        String   @id @default(cuid())
+  userId    String
+  weight    Float
+  bodyFatPercent Float? // % de gordura corporal (opcional, ex: bioimpedância, adipômetro)
+  loggedAt  DateTime @default(now())
+  notes     String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([loggedAt])
+}
+
+// Fotos de progresso — para comparação visual lado a lado ao longo do
+// tempo (complementa o BodyWeightLog, que é só o número). O arquivo em
+// si fica no Vercel Blob Storage; aqui só guardamos a URL pública.
+model ProgressPhoto {
+  id        String   @id @default(cuid())
+  userId    String
+  url       String
+  pathname  String   // caminho do blob, usado para deletar o arquivo depois
+  takenAt   DateTime @default(now())
+  weight    Float?   // peso do dia, se registrado (facilita o comparativo)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([takenAt])
+}
+
+// Transmissão ao vivo de um treino em andamento — completamente separada de
+// WorkoutSession (que só é criada quando o treino é finalizado). Existe só
+// enquanto a pessoa decide compartilhar (@@unique em userId: no máximo uma
+// transmissão ativa por vez); "parar de compartilhar", finalizar ou cancelar
+// o treino apaga a linha, e o link público volta a não funcionar — o treino
+// nunca é visível "ao vivo" a não ser que o dono ative isso explicitamente.
+model LiveWorkoutSession {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  workoutId   String
+  workoutName String
+  slug        String   @unique
+  startedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // JSON com o progresso atual (exercícios, sets concluídos, tempo
+  // decorrido etc.) — ver buildLiveSnapshot no client. Guardado como texto,
+  // no mesmo espírito do AuditLog (sem depender de coluna Json nativa).
+  snapshot    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Registro diário do mini-game: se o usuário seguiu a dieta no dia e
+// quanta água bebeu. Um registro por usuário por dia — `date` é sempre
+// gravado à meia-noite (hora do servidor, mesma convenção já usada em
+// /api/stats para sequência de treinos) e serve de chave de agrupamento
+// tanto para as metas diárias quanto para o cálculo do ranking semanal.
+model DailyLog {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime // meia-noite do dia em questão
+  dietOnTrack Boolean  @default(false) // "segui a dieta hoje"
+  waterMl     Int      @default(0)     // água registrada no dia (ml)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+// Grupo (turma da academia, grupo de amigos etc.) usado pro ranking
+// semanal do mini-game. Quem cria vira dono; os demais entram através do
+// código de convite (`inviteCode`), sem precisar de aprovação.
+model Group {
+  id         String   @id @default(cuid())
+  name       String
+  inviteCode String   @unique
+  ownerId    String
+  createdAt  DateTime @default(now())
+
+  owner   User          @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members GroupMember[]
+
+  @@index([ownerId])
+}
+
+model GroupMember {
+  id       String   @id @default(cuid())
+  groupId  String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId])
+}
+
+// Log de auditoria do painel administrativo — toda ação de escrita feita
+// por um admin (criar/editar/excluir exercício, alterar usuário, etc.)
+// grava uma linha aqui. Guardamos snapshots antes/depois como JSON string
+// (não um campo Json nativo, pra manter compatibilidade com o modo como o
+// resto do schema já representa dados semiestruturados como texto) —
+// permite reconstruir "o que mudou" sem depender de triggers no banco.
+// Plano semanal (template do admin ou cópia do aluno)
+model WorkoutPlan {
+  id             String   @id @default(cuid())
+  userId         String
+  name           String
+  description    String?
+  daysPerWeek    Int      @default(3)
+  isTemplate     Boolean  @default(false)
+  templateGoal   String?
+  templateSex    String?
+  templateLevel  String?
+  fromTemplateId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items WorkoutPlanItem[]
+
+  @@index([userId])
+  @@index([isTemplate])
+  @@index([userId, isTemplate])
+}
+
+model WorkoutPlanItem {
+  id               String  @id @default(cuid())
+  planId           String
+  order            Int
+  label            String
+  suggestedWeekday Int?
+  workoutId        String
+
+  plan    WorkoutPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  workout Workout     @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, order])
+  @@index([planId])
+  @@index([workoutId])
+}
+
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String   // id do admin que executou a ação
+  actorEmail String   // snapshot do e-mail no momento (sobrevive a troca de e-mail do admin)
+  action     String   // "create" | "update" | "delete"
+  entityType String   // "exercise" | "user" | "site_config" | ...
+  entityId   String
+  before     String?  // snapshot JSON do estado anterior (null em "create")
+  after      String?  // snapshot JSON do estado novo (null em "delete")
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+// Rate limiting de endpoints sensíveis (login, signup) contra brute force.
+// Cada tentativa (bem ou mal sucedida) grava uma linha; a contagem de
+// linhas dentro da janela de tempo decide se a próxima tentativa é
+// bloqueada. Ver src/lib/rate-limit.ts.
+model RateLimitAttempt {
+  id        String   @id @default(cuid())
+  key       String   // ex: "login:ip:203.0.113.4" | "login:email:foo@bar.com" | "signup:ip:203.0.113.4"
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
 }

@@ -1,58 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { hashPassword, createSession, setSessionCookie } from "@/lib/auth";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { SignupSchema, parseBody } from "@/lib/schemas";
+import { hashPassword, createSession, setSessionCookie, BEARER_TOKEN_EXPIRY_SECONDS } from "@/lib/auth";
+import { checkRateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
+import { badRequest, withErrorHandling } from "@/lib/api-error";
+import { parseBody, signupSchema } from "@/lib/validation";
 
-// 5 cadastros por IP a cada hora
-const SIGNUP_LIMIT = { limit: 5, windowMs: 60 * 60 * 1000 };
+// Barra criação automatizada/massiva de contas a partir de um mesmo IP.
+const SIGNUP_IP_LIMIT = { limit: 5, windowMs: 60 * 60 * 1000 }; // 5 cadastros / hora
 
-export async function POST(req: NextRequest) {
-  // Rate limiting por IP
+export const POST = withErrorHandling("Signup", async (req: NextRequest) => {
+  const parsed = await parseBody(req, signupSchema, "POST /api/auth/signup");
+  if (!parsed.success) return parsed.response;
+  const { email, password, name, phone } = parsed.data;
+
   const ip = getClientIp(req);
-  const rl = rateLimit(`signup:${ip}`, SIGNUP_LIMIT);
-  if (!rl.success) {
-    return NextResponse.json(
-      { error: `Muitas tentativas. Tente novamente em ${rl.retryAfter}s.` },
-      {
-        status: 429,
-        headers: {
-          "Retry-After": String(rl.retryAfter),
-          "X-RateLimit-Limit": String(SIGNUP_LIMIT.limit),
-          "X-RateLimit-Remaining": "0",
-        },
-      }
-    );
+  const ipCheck = await checkRateLimit(`signup:ip:${ip}`, SIGNUP_IP_LIMIT);
+  if (!ipCheck.allowed) return rateLimitResponse(ipCheck);
+
+  const existing = await db.user.findUnique({ where: { email } });
+  if (existing) {
+    throw badRequest("Email já cadastrado");
   }
-  try {
-    const body = await req.json();
-    const parsed = parseBody(SignupSchema, body);
-    if (!parsed.success) return parsed.response;
-    const { email, password, name } = parsed.data;
 
-    const existing = await db.user.findUnique({ where: { email } });
-    if (existing) {
-      return NextResponse.json({ error: "Email já cadastrado" }, { status: 400 });
-    }
+  const user = await db.user.create({
+    data: {
+      email,
+      name: name || email.split("@")[0],
+      phone,
+      passwordHash: await hashPassword(password),
+    },
+  });
 
-    const user = await db.user.create({
-      data: {
-        email,
-        name: name || email.split("@")[0],
-        passwordHash: await hashPassword(password),
-      },
-    });
+  const cookieToken = await createSession(user.id);
+  await setSessionCookie(cookieToken);
+  const bearerToken = await createSession(user.id, BEARER_TOKEN_EXPIRY_SECONDS);
 
-    const token = await createSession(user.id);
-    await setSessionCookie(token);
-
-    return NextResponse.json({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-    });
-  } catch (e) {
-    console.error("Signup error:", e);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
-  }
-}
+  return NextResponse.json({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    token: bearerToken,
+  });
+});

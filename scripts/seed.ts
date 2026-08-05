@@ -48,6 +48,7 @@ async function main() {
         executionSteps: ex.executionSteps ?? null,
         commonMistakes: ex.commonMistakes ?? null,
         tips: ex.tips ?? null,
+        images: ex.images ?? [],
       },
     });
   }

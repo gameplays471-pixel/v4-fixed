@@ -1,37 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { notFound, withErrorHandling } from "@/lib/api-error";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
+export const GET = withErrorHandling<{ params: Promise<{ id: string }> }>(
+  "Get exercise",
+  async (_req: NextRequest, { params }) => {
     const { id } = await params;
-
-    // Busca o exercício sem incluir favoritos (evita vazar userId de outros usuários)
     const exercise = await db.exercise.findUnique({
       where: { id },
+      include: {
+        favorites: true,
+      },
     });
 
     if (!exercise) {
-      return NextResponse.json({ error: "Exercício não encontrado" }, { status: 404 });
+      throw notFound("Exercício não encontrado");
     }
 
-    // Se o usuário estiver autenticado, informa se ele favoritou o exercício
-    let isFavorited = false;
-    const user = await getCurrentUser(req);
-    if (user) {
-      const fav = await db.favorite.findUnique({
-        where: { userId_exerciseId: { userId: user.id, exerciseId: id } },
-        select: { id: true },
-      });
-      isFavorited = fav !== null;
-    }
-
-    return NextResponse.json({ exercise, isFavorited });
-  } catch (e) {
-    console.error("Get exercise error:", e);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    return NextResponse.json({ exercise });
   }
-}
+);

@@ -1,167 +1,218 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { withErrorHandling } from "@/lib/api-error";
 
-// Estatísticas do usuário
-export async function GET(req: NextRequest) {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) {
-      return NextResponse.json({ stats: null });
-    }
+/** Stats via agregações SQL — não carrega o histórico inteiro na memória. */
+export const GET = withErrorHandling("Get stats", async (req: NextRequest) => {
+  const user = await getCurrentUser(req);
+  if (!user) {
+    return NextResponse.json({ stats: null });
+  }
 
-    const sessions = await db.workoutSession.findMany({
-      where: { userId: user.id },
-      include: { sets: true },
-      orderBy: { startedAt: "asc" },
+  const userId = user.id;
+
+  const now = new Date();
+  const weekStart = new Date(now);
+  const day = weekStart.getDay();
+  const diffToMonday = day === 0 ? 6 : day - 1;
+  weekStart.setDate(weekStart.getDate() - diffToMonday);
+  weekStart.setHours(0, 0, 0, 0);
+
+  const heatmapStart = new Date(now);
+  heatmapStart.setDate(heatmapStart.getDate() - 90);
+  heatmapStart.setHours(0, 0, 0, 0);
+
+  type HeatmapRow = { day: Date; sessions: number; volume: number };
+  type DayRow = { day: Date };
+  type ExerciseAggRow = {
+    exerciseName: string;
+    max_weight: number;
+    max_reps: number;
+    max_volume: number;
+    total_volume: number;
+    set_count: number;
+  };
+  type MuscleRow = { muscleGroup: string; c: number };
+
+  type WeeklyRow = { week_start: Date; volume: number; sessions: number };
+
+  const eightWeeksAgo = new Date(weekStart);
+  eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 7 * 7);
+
+  const [sessionAgg, weeklyAgg, weeklyRows, heatmapRows, distinctDays, exerciseAggs, topMuscleRows] =
+    await Promise.all([
+      db.workoutSession.aggregate({
+        where: { userId },
+        _count: { _all: true },
+        _sum: { totalVolume: true, durationSec: true },
+      }),
+      db.workoutSession.aggregate({
+        where: { userId, startedAt: { gte: weekStart } },
+        _sum: { totalVolume: true },
+        _count: { _all: true },
+      }),
+      db.$queryRaw<WeeklyRow[]>`
+        SELECT
+          date_trunc('week', "startedAt")::date AS week_start,
+          COALESCE(SUM("totalVolume"), 0)::float AS volume,
+          COUNT(*)::int AS sessions
+        FROM "WorkoutSession"
+        WHERE "userId" = ${userId}
+          AND "startedAt" >= ${eightWeeksAgo}
+        GROUP BY 1
+        ORDER BY 1
+      `,
+      db.$queryRaw<HeatmapRow[]>`
+        SELECT
+          date_trunc('day', "startedAt")::date AS day,
+          COUNT(*)::int AS sessions,
+          COALESCE(SUM("totalVolume"), 0)::float AS volume
+        FROM "WorkoutSession"
+        WHERE "userId" = ${userId}
+          AND "startedAt" >= ${heatmapStart}
+        GROUP BY 1
+        ORDER BY 1
+      `,
+      db.$queryRaw<DayRow[]>`
+        SELECT DISTINCT date_trunc('day', "startedAt")::date AS day
+        FROM "WorkoutSession"
+        WHERE "userId" = ${userId}
+        ORDER BY 1 DESC
+      `,
+      db.$queryRaw<ExerciseAggRow[]>`
+        SELECT
+          ss."exerciseName" AS "exerciseName",
+          MAX(ss.weight)::float AS max_weight,
+          MAX(ss.reps)::int AS max_reps,
+          MAX(ss.weight * ss.reps)::float AS max_volume,
+          COALESCE(SUM(ss.weight * ss.reps), 0)::float AS total_volume,
+          COUNT(*)::int AS set_count
+        FROM "SessionSet" ss
+        INNER JOIN "WorkoutSession" ws ON ws.id = ss."sessionId"
+        WHERE ws."userId" = ${userId}
+        GROUP BY ss."exerciseName"
+      `,
+      db.$queryRaw<MuscleRow[]>`
+        SELECT
+          e."muscleGroup" AS "muscleGroup",
+          COUNT(DISTINCT ss."exerciseName")::int AS c
+        FROM "SessionSet" ss
+        INNER JOIN "WorkoutSession" ws ON ws.id = ss."sessionId"
+        INNER JOIN "Exercise" e ON e.id = ss."exerciseId"
+        WHERE ws."userId" = ${userId}
+        GROUP BY e."muscleGroup"
+        ORDER BY c DESC
+        LIMIT 1
+      `,
+    ]);
+
+  const totalSessions = sessionAgg._count._all;
+  const totalVolume = sessionAgg._sum.totalVolume ?? 0;
+  const totalDuration = sessionAgg._sum.durationSec ?? 0;
+  const avgDuration = totalSessions > 0 ? totalDuration / totalSessions : 0;
+  // Mapa semana ISO → dados; preenche as últimas 8 semanas (mesmo sem treino)
+  const weeklyMap = new Map<string, { volume: number; sessions: number }>();
+  for (const row of weeklyRows) {
+    const d = new Date(row.week_start);
+    d.setHours(0, 0, 0, 0);
+    // date_trunc('week') no Postgres = segunda (ISO) em muitos locales
+    const key = d.toISOString().split("T")[0];
+    weeklyMap.set(key, {
+      volume: Number(row.volume),
+      sessions: Number(row.sessions),
     });
+  }
 
-    const totalSessions = sessions.length;
-    const totalVolume = sessions.reduce((acc, s) => acc + s.totalVolume, 0);
-    const totalDuration = sessions.reduce((acc, s) => acc + s.durationSec, 0);
-    const avgDuration = totalSessions > 0 ? totalDuration / totalSessions : 0;
+  const weeklyVolume: Array<{ week: string; weekLabel: string; volume: number; sessions: number }> = [];
+  for (let i = 7; i >= 0; i--) {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() - i * 7);
+    d.setHours(0, 0, 0, 0);
+    const key = d.toISOString().split("T")[0];
+    const cell = weeklyMap.get(key) ?? { volume: 0, sessions: 0 };
+    const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+    weeklyVolume.push({
+      week: key,
+      weekLabel: label,
+      volume: cell.volume,
+      sessions: cell.sessions,
+    });
+  }
 
-    // Dias consecutivos
-    const uniqueDates = new Set(
-      sessions.map((s) => new Date(s.startedAt).toISOString().split("T")[0])
-    );
-    const sortedDates = Array.from(uniqueDates).sort().reverse();
+  const weeklyVolumeCurrent = weeklyAgg._sum.totalVolume ?? 0;
+  const weeklySessionsCurrent = weeklyAgg._count._all ?? 0;
 
-    let streak = 0;
-    let currentDate = new Date();
-    for (let i = 0; i < sortedDates.length; i++) {
-      const sessionDate = new Date(sortedDates[i]);
-      const diffDays = Math.floor(
-        (currentDate.getTime() - sessionDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
+  const daySet = new Set(
+    distinctDays.map((d) => new Date(d.day).toISOString().split("T")[0])
+  );
 
-      if (i === 0 && diffDays > 1) break;
-      if (i === 0 && diffDays === 0) {
-        streak = 1;
-        currentDate.setDate(currentDate.getDate() - 1);
-        continue;
-      }
-      if (diffDays === streak) {
-        streak++;
-        currentDate.setDate(currentDate.getDate() - 1);
-      } else {
-        break;
-      }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = today.toISOString().split("T")[0];
+  const yesterdayStr = new Date(today.getTime() - 86400000).toISOString().split("T")[0];
+
+  let streak = 0;
+  if (daySet.has(todayStr) || daySet.has(yesterdayStr)) {
+    let checkDate = daySet.has(todayStr) ? new Date(today) : new Date(today.getTime() - 86400000);
+    while (daySet.has(checkDate.toISOString().split("T")[0])) {
+      streak++;
+      checkDate = new Date(checkDate.getTime() - 86400000);
     }
+  }
 
-    // Volume por semana (últimas 8 semanas)
-    const eightWeeksAgo = new Date();
-    eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 56);
-    const recentSessions = sessions.filter((s) => s.startedAt >= eightWeeksAgo);
+  const heatmapMap = new Map<string, { sessions: number; volume: number }>();
+  for (const row of heatmapRows) {
+    const key = new Date(row.day).toISOString().split("T")[0];
+    heatmapMap.set(key, { sessions: Number(row.sessions), volume: Number(row.volume) });
+  }
 
-    const weeklyVolume: Array<{ week: string; volume: number; sessions: number }> = [];
-    for (let i = 7; i >= 0; i--) {
-      const weekStart = new Date();
-      weekStart.setDate(weekStart.getDate() - i * 7 - 6);
-      const weekEnd = new Date();
-      weekEnd.setDate(weekEnd.getDate() - i * 7);
+  const heatmap: Array<{ date: string; sessions: number; volume: number }> = [];
+  for (let i = 90; i >= 0; i--) {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split("T")[0];
+    const cell = heatmapMap.get(dateStr);
+    heatmap.push({
+      date: dateStr,
+      sessions: cell?.sessions ?? 0,
+      volume: cell?.volume ?? 0,
+    });
+  }
 
-      const weekSessions = recentSessions.filter((s) => {
-        return s.startedAt >= weekStart && s.startedAt <= weekEnd;
-      });
+  const totalWeightLifted = exerciseAggs.reduce((acc, r) => acc + Number(r.total_volume), 0);
+  const favoriteExercise =
+    exerciseAggs.length === 0
+      ? "-"
+      : [...exerciseAggs].sort((a, b) => Number(b.set_count) - Number(a.set_count))[0].exerciseName;
 
-      weeklyVolume.push({
-        week: `${weekStart.getDate().toString().padStart(2, "0")}/${(weekStart.getMonth() + 1).toString().padStart(2, "0")}`,
-        volume: weekSessions.reduce((acc, s) => acc + s.totalVolume, 0),
-        sessions: weekSessions.length,
-      });
-    }
+  const records = [...exerciseAggs]
+    .map((r) => ({
+      exercise: r.exerciseName,
+      weight: Number(r.max_weight),
+      reps: Number(r.max_reps),
+      volume: Number(r.max_volume),
+    }))
+    .sort((a, b) => b.weight - a.weight)
+    .slice(0, 10);
 
-    // Grupo muscular mais treinado - usar sets das sessões do usuário
-    const muscleGroupCount: Record<string, number> = {};
-    const exerciseCount: Record<string, number> = {};
-    const allSetsData: Array<{ exerciseName: string; weight: number; reps: number; exercise: { muscleGroup: string } }> = [];
+  const topMuscleGroup = topMuscleRows[0]?.muscleGroup || "-";
 
-    for (const s of sessions) {
-      const setsWithExercise = await db.sessionSet.findMany({
-        where: { sessionId: s.id },
-        include: { exercise: { select: { muscleGroup: true } } },
-      });
-      const seenExercises = new Set<string>();
-      for (const set of setsWithExercise) {
-        const mg = set.exercise.muscleGroup;
-        if (!seenExercises.has(set.exerciseName)) {
-          muscleGroupCount[mg] = (muscleGroupCount[mg] || 0) + 1;
-          seenExercises.add(set.exerciseName);
-        }
-        exerciseCount[set.exerciseName] = (exerciseCount[set.exerciseName] || 0) + 1;
-        allSetsData.push({
-          exerciseName: set.exerciseName,
-          weight: set.weight,
-          reps: set.reps,
-          exercise: set.exercise,
-        });
-      }
-    }
-    const topMuscleGroup = Object.entries(muscleGroupCount).sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
-
-    // Exercício favorito (mais realizado)
-    const favoriteExercise = Object.entries(exerciseCount).sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
-
-    // Recordes pessoais (por exercício)
-    const allSets = allSetsData;
-
-    const prsByExercise: Record<string, { weight: number; reps: number; volume: number }> = {};
-    for (const set of allSets) {
-      const name = set.exerciseName;
-      if (!prsByExercise[name]) {
-        prsByExercise[name] = {
-          weight: set.weight,
-          reps: set.reps,
-          volume: set.weight * set.reps,
-        };
-      } else {
-        prsByExercise[name].weight = Math.max(prsByExercise[name].weight, set.weight);
-        prsByExercise[name].reps = Math.max(prsByExercise[name].reps, set.reps);
-        prsByExercise[name].volume = Math.max(prsByExercise[name].volume, set.weight * set.reps);
-      }
-    }
-
-    const records = Object.entries(prsByExercise)
-      .map(([name, pr]) => ({ exercise: name, ...pr }))
-      .sort((a, b) => b.weight - a.weight)
-      .slice(0, 10);
-
-    // Heatmap (últimos 91 dias = 13 semanas)
-    const heatmap: Array<{ date: string; sessions: number; volume: number }> = [];
-    for (let i = 90; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split("T")[0];
-      const daySessions = sessions.filter(
-        (s) => new Date(s.startedAt).toISOString().split("T")[0] === dateStr
-      );
-      heatmap.push({
-        date: dateStr,
-        sessions: daySessions.length,
-        volume: daySessions.reduce((acc, s) => acc + s.totalVolume, 0),
-      });
-    }
-
-    // Carga total levantada (todas as sessões)
-    const totalWeightLifted = allSets.reduce((acc, s) => acc + s.weight * s.reps, 0);
-
-    const stats = {
+  return NextResponse.json({
+    stats: {
       totalSessions,
       totalVolume,
       totalWeightLifted,
       avgDuration,
       streak,
       weeklyVolume,
+      weeklyVolumeCurrent,
+      weeklySessionsCurrent,
       topMuscleGroup,
       favoriteExercise,
       records,
       heatmap,
-    };
-
-    return NextResponse.json({ stats });
-  } catch (e) {
-    console.error("Get stats error:", e);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
-  }
-}
+    },
+  });
+});

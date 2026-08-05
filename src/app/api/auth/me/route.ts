@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { withErrorHandling } from "@/lib/api-error";
 
-export async function GET(req: NextRequest) {
+export const GET = withErrorHandling("GET /api/auth/me", async (req: NextRequest) => {
   const user = await getCurrentUser(req);
-  if (!user) {
-    return NextResponse.json({ user: null }, { status: 200 });
-  }
-  return NextResponse.json({ user });
-}
+  return NextResponse.json({ user: user ?? null });
+});

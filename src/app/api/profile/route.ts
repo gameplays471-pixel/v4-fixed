@@ -1,62 +1,67 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { UpdateProfileSchema, parseBody } from "@/lib/schemas";
+import { requireUser, withErrorHandling } from "@/lib/api-error";
+import { parseBody, profileSchema } from "@/lib/validation";
+import { publicAvatarUrl, isDataUrlAvatar } from "@/lib/avatar";
+import { badRequest } from "@/lib/api-error";
 
-export async function GET(req: NextRequest) {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) {
-      return NextResponse.json({ user: null });
-    }
-    return NextResponse.json({ user });
-  } catch (e) {
-    console.error("Get profile error:", e);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+export const GET = withErrorHandling("Get profile", async (req: NextRequest) => {
+  const user = await getCurrentUser(req);
+  if (!user) {
+    return NextResponse.json({ user: null });
   }
-}
+  return NextResponse.json({
+    user: { ...user, avatarUrl: publicAvatarUrl(user.avatarUrl) },
+  });
+});
 
-export async function PUT(req: NextRequest) {
-  try {
-    const user = await getCurrentUser(req);
-    if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-    }
+export const PUT = withErrorHandling("Update profile", async (req: NextRequest) => {
+  const user = await requireUser(req);
 
-    const body = await req.json();
-    const parsed = parseBody(UpdateProfileSchema, body);
-    if (!parsed.success) return parsed.response;
-    const { name, bio, weight, height, sex, birthDate, goal, avatarUrl } = parsed.data;
+  const parsed = await parseBody(req, profileSchema, "PUT /api/profile");
+  if (!parsed.success) return parsed.response;
+  const { name, phone, bio, weight, height, sex, birthDate, goal, avatarUrl, gameEnabled, waterGoalMl, weeklyWorkoutGoal } = parsed.data;
 
-    const updated = await db.user.update({
-      where: { id: user.id },
-      data: {
-        name,
-        bio: bio ?? null,
-        weight: weight ?? null,
-        height: height ?? null,
-        sex: sex ?? null,
-        birthDate: birthDate ? new Date(birthDate) : null,
-        goal: goal ?? null,
-        avatarUrl: avatarUrl ?? null,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        bio: true,
-        weight: true,
-        height: true,
-        sex: true,
-        birthDate: true,
-        goal: true,
-        avatarUrl: true,
-      },
-    });
-
-    return NextResponse.json({ user: updated });
-  } catch (e) {
-    console.error("Update profile error:", e);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+  if (isDataUrlAvatar(avatarUrl)) {
+    throw badRequest("Envie a foto via /api/profile/avatar (não use base64 no perfil)");
   }
-}
+
+  const updated = await db.user.update({
+    where: { id: user.id },
+    data: {
+      name,
+      phone: phone ?? null,
+      bio: bio ?? null,
+      weight: weight ?? null,
+      height: height ?? null,
+      sex: sex ?? null,
+      birthDate: birthDate ?? null,
+      goal: goal ?? null,
+      ...(avatarUrl !== undefined ? { avatarUrl: publicAvatarUrl(avatarUrl) } : {}),
+      ...(gameEnabled !== undefined ? { gameEnabled } : {}),
+      ...(waterGoalMl !== undefined ? { waterGoalMl } : {}),
+      ...(weeklyWorkoutGoal !== undefined ? { weeklyWorkoutGoal } : {}),
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      phone: true,
+      bio: true,
+      weight: true,
+      height: true,
+      sex: true,
+      birthDate: true,
+      goal: true,
+      avatarUrl: true,
+      gameEnabled: true,
+      waterGoalMl: true,
+      weeklyWorkoutGoal: true,
+    },
+  });
+
+  return NextResponse.json({
+    user: { ...updated, avatarUrl: publicAvatarUrl(updated.avatarUrl) },
+  });
+});

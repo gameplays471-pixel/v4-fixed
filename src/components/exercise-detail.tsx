@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { apiGet } from "@/lib/api";
-import { Heart, Dumbbell, ListChecks, AlertCircle, Lightbulb } from "lucide-react";
+import { Heart, ListChecks, AlertCircle, Lightbulb } from "lucide-react";
+import { ExerciseMedia } from "@/components/exercise-media";
 
 type Exercise = {
   id: string;
@@ -25,6 +26,7 @@ type Exercise = {
   executionSteps: string | null;
   commonMistakes: string | null;
   tips: string | null;
+  images: string[];
 };
 
 interface ExerciseDetailProps {
@@ -34,16 +36,34 @@ interface ExerciseDetailProps {
   onClose: () => void;
 }
 
+function splitLines(text: string): string[] {
+  // Alguns dados foram importados via CSV e ficaram com a sequência literal
+  // "\n" (barra + n) em vez de quebra de linha real. Normaliza os dois casos.
+  return text.replace(/\\n/g, "\n").split("\n");
+}
+
 export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClose }: ExerciseDetailProps) {
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
 
-  useEffect(() => {
+  const load = () => {
     setLoading(true);
+    setLoadFailed(false);
     apiGet<{ exercise: Exercise }>(`/api/exercises/${exerciseId}`)
       .then((data) => setExercise(data.exercise))
+      .catch((e) => {
+        // Antes, qualquer falha aqui (rede, 500 transitório) caía no mesmo
+        // "else" de exercise=null que o 404 real usa, mostrando "Exercício
+        // não encontrado" — mensagem enganosa quando o problema era só de
+        // carregamento, não de o exercício não existir.
+        console.error("Erro ao carregar exercício:", e);
+        setLoadFailed(true);
+      })
       .finally(() => setLoading(false));
-  }, [exerciseId]);
+  };
+
+  useEffect(load, [exerciseId]);
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -82,10 +102,8 @@ export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClo
           </div>
         ) : exercise ? (
           <div className="space-y-5">
-            {/* Ícone decorativo */}
-            <div className="aspect-video rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent flex items-center justify-center border border-border">
-              <Dumbbell className="w-16 h-16 text-primary/60" />
-            </div>
+            {/* Demonstração do exercício */}
+            <ExerciseMedia images={exercise.images} name={exercise.name} />
 
             {/* Descrição */}
             {exercise.description && (
@@ -117,7 +135,7 @@ export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClo
                   <h3 className="font-semibold text-sm">Como executar</h3>
                 </div>
                 <ol className="space-y-2">
-                  {exercise.executionSteps.split("\n").map((step, i) => {
+                  {splitLines(exercise.executionSteps).map((step, i) => {
                     const clean = step.replace(/^\d+\.\s*/, "").trim();
                     if (!clean) return null;
                     return (
@@ -140,7 +158,7 @@ export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClo
                   <AlertCircle className="w-4 h-4 text-destructive" />
                   <h3 className="font-semibold text-sm text-destructive">Erros comuns</h3>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{exercise.commonMistakes}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{splitLines(exercise.commonMistakes).join("\n")}</p>
               </div>
             )}
 
@@ -151,7 +169,7 @@ export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClo
                   <Lightbulb className="w-4 h-4 text-primary" />
                   <h3 className="font-semibold text-sm text-primary">Dicas do coach</h3>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{exercise.tips}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{splitLines(exercise.tips).join("\n")}</p>
               </div>
             )}
 
@@ -164,7 +182,16 @@ export function ExerciseDetail({ exerciseId, isFavorite, onToggleFavorite, onClo
             </div>
           </div>
         ) : (
-          <p className="text-center text-muted-foreground py-8">Exercício não encontrado.</p>
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">
+              {loadFailed ? "Não foi possível carregar este exercício." : "Exercício não encontrado."}
+            </p>
+            {loadFailed && (
+              <button onClick={load} className="mt-3 text-sm text-primary font-semibold hover:opacity-80">
+                Tentar de novo
+              </button>
+            )}
+          </div>
         )}
       </DialogContent>
     </Dialog>
