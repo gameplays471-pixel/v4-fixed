@@ -27,6 +27,9 @@ interface AppState {
   
   selectedSessionId: string | null;
   setSelectedSessionId: (id: string | null) => void;
+
+  showOnboarding: boolean;
+  setShowOnboarding: (show: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -44,4 +47,7 @@ export const useAppStore = create<AppState>((set) => ({
   
   selectedSessionId: null,
   setSelectedSessionId: (id) => set({ selectedSessionId: id }),
+
+  showOnboarding: false,
+  setShowOnboarding: (show) => set({ showOnboarding: show }),
 }));

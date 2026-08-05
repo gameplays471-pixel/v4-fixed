@@ -17,12 +17,12 @@ import { z } from "zod";
 
 export const LoginSchema = z.object({
   email: z
-    .string({ required_error: "Email é obrigatório" })
+    .string({ error: "Email é obrigatório" })
     .trim()
     .email("Email inválido")
     .max(254, "Email muito longo"),
   password: z
-    .string({ required_error: "Senha é obrigatória" })
+    .string({ error: "Senha é obrigatória" })
     .min(6, "Senha deve ter pelo menos 6 caracteres")
     .max(128, "Senha muito longa"),
 });
@@ -30,12 +30,12 @@ export type LoginInput = z.infer<typeof LoginSchema>;
 
 export const SignupSchema = z.object({
   email: z
-    .string({ required_error: "Email é obrigatório" })
+    .string({ error: "Email é obrigatório" })
     .trim()
     .email("Email inválido")
     .max(254, "Email muito longo"),
   password: z
-    .string({ required_error: "Senha é obrigatória" })
+    .string({ error: "Senha é obrigatória" })
     .min(6, "Senha deve ter pelo menos 6 caracteres")
     .max(128, "Senha muito longa"),
   name: z
@@ -54,7 +54,7 @@ const SEX_VALUES = ["M", "F", "Outro"] as const;
 
 export const UpdateProfileSchema = z.object({
   name: z
-    .string({ required_error: "Nome é obrigatório" })
+    .string({ error: "Nome é obrigatório" })
     .trim()
     .min(1, "Nome não pode ser vazio")
     .max(100, "Nome muito longo"),
@@ -102,7 +102,7 @@ const WorkoutExerciseSchema = z.object({
 
 export const CreateWorkoutSchema = z.object({
   name: z
-    .string({ required_error: "Nome é obrigatório" })
+    .string({ error: "Nome é obrigatório" })
     .trim()
     .min(1, "Nome não pode ser vazio")
     .max(100, "Nome muito longo"),
@@ -136,7 +136,7 @@ const SessionSetSchema = z.object({
 export const CreateSessionSchema = z.object({
   workoutId: z.string().cuid("ID de treino inválido").optional().nullable(),
   workoutName: z
-    .string({ required_error: "Nome do treino é obrigatório" })
+    .string({ error: "Nome do treino é obrigatório" })
     .trim()
     .min(1)
     .max(150),
@@ -170,7 +170,7 @@ export function parseBody<T>(
 ): { success: true; data: T } | { success: false; response: ReturnType<typeof NextResponse.json> } {
   const result = schema.safeParse(data);
   if (!result.success) {
-    const errors = result.error.errors.map((e) => ({
+    const errors = result.error.issues.map((e) => ({
       field: e.path.join("."),
       message: e.message,
     }));

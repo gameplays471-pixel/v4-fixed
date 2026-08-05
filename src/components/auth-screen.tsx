@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 interface AuthScreenProps {
-  onAuth: (user: unknown) => void;
+  onAuth: (user: { name: string; email: string }) => void;
 }
 
 export function AuthScreen({ onAuth }: AuthScreenProps) {
@@ -40,7 +40,7 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
 
       toast.success(mode === "login" ? "Bem-vindo de volta!" : "Conta criada com sucesso!");
       // Cookie httpOnly definido pelo servidor — apenas repassa o user para o estado
-      onAuth(data);
+      onAuth(data.user);
     } catch (err) {
       console.error(err);
       toast.error("Erro de conexão");
@@ -59,7 +59,7 @@ export function AuthScreen({ onAuth }: AuthScreenProps) {
       });
       const data = await res.json();
       if (res.ok) {
-        onAuth(data);
+        onAuth(data.user);
       } else {
         toast.error(data.error);
       }

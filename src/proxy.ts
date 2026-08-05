@@ -96,7 +96,7 @@ function extractToken(req: NextRequest): string | null {
 // ---------------------------------------------------------------------------
 // Middleware principal
 // ---------------------------------------------------------------------------
-export async function middleware(req: NextRequest): Promise<NextResponse> {
+export async function proxy(req: NextRequest): Promise<NextResponse> {
   const { pathname } = req.nextUrl;
 
   // Só intercepta rotas de API privadas

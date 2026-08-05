@@ -15,7 +15,7 @@ import "@/lib/api"; // importado para side-effects (formatters usados em outros 
 
 export default function Home() {
   const view = useAppStore((s) => s.view);
-  const [user, setUser] = useState<unknown>(null);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function Home() {
       .catch(() => setLoading(false));
   }, []);
 
-  const handleAuth = (u: unknown) => {
+  const handleAuth = (u: { name: string; email: string }) => {
     setUser(u);
     useAppStore.getState().setView("dashboard");
   };
