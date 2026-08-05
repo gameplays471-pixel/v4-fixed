@@ -102,7 +102,7 @@ export function getToken(): null {
 }
 
 /** @deprecated Auth é gerenciada via cookie httpOnly. Esta função não faz nada. */
-export function setToken(_token: string): void {
+export function setToken(_token: string | null): void {
   // no-op: o token de sessão é definido pelo servidor via cookie httpOnly
 }
 
