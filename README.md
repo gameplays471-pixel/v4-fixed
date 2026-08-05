@@ -1,51 +1,76 @@
-# GEMgym — App de Treinos de Academia
+# Hevy Web — App de Treinos (Academia)
 
-Aplicação web para registro e acompanhamento de treinos de musculação (estilo Hevy), com biblioteca de exercícios, planos semanais, estatísticas de evolução, gamificação e um painel admin para academias que atribuem treinos a alunos.
-
-Stack: **Next.js 16 (App Router) + TypeScript + Tailwind CSS 4 + Prisma 6 + PostgreSQL (Supabase)**.
+Aplicação web para registro e acompanhamento de treinos de academia (estilo Hevy).
+Stack: **Next.js 16 + TypeScript + Tailwind + Prisma + PostgreSQL (Supabase)**.
 
 ## Funcionalidades
 
-**Treino**
-- Biblioteca com 183 exercícios cobrindo todos os grupos musculares, com imagens e busca
-- Criar/editar treinos (Treino A, B, C, PPL, Upper/Lower etc.) com exercícios personalizados
-- Executar treino ao vivo com cronômetro, timer de descanso e controle de séries
-- "Última vez": ao iniciar um treino, mostra peso/reps da última sessão como referência (cross-workout)
-- Progressão automática sugerida ao final do treino (carga, reps, RIR)
-- Favoritos para acesso rápido aos exercícios preferidos
+- **Biblioteca com 180 exercícios** cobrindo todos os grupos musculares
+- **Criar/editar treinos** (Treino A, B, C, etc.) com exercícios personalizados
+- **Executar treino ao vivo** com cronômetro, timer de descanso, controle de séries
+- **Histórico de sessões** com volume total, duração e recordes pessoais (PR)
+- **Estatísticas** com gráficos de progresso
+- **"Última vez"**: ao iniciar um treino, mostra o peso/reps da última sessão como referência (cross-workout)
+- **Favoritos** para acessar exercícios preferidos rapidamente
 
-**Acompanhamento**
-- Histórico de sessões com volume total, duração e recordes pessoais (PR)
-- Estatísticas com gráficos de progressão de carga por exercício
-- Registro de peso corporal e fotos de progresso
-- Mapa muscular (frente/costas) mostrando grupos trabalhados por sessão
+## Usuário demo
 
-**Social e planos**
-- Planos semanais (templates com atribuição pelo admin e progresso % no dashboard)
-- Cartões compartilháveis (treino concluído / ficha de treino) para Stories/feed
-- Sessões ao vivo compartilháveis publicamente (`/l/[slug]`, `/w/[slug]`)
-- Grupos de treino e gamificação (pontos/progresso)
+```
+Email:    demo@hevy.com
+Senha:    demo123
+```
 
-**Admin**
-- Atribuição de treinos e planos pré-setados a alunos
-- Gestão de usuários, exercícios e log de auditoria
-- Feature flags
+## Deploy no Vercel
 
-**Plataforma**
-- PWA instalável (manifest + service worker + modo offline)
-- Auth híbrida (cookie + Bearer token) com suporte a cenários cross-origin
-- Monitoramento de erros com Sentry
+### 1. Subir o código para o GitHub
 
+```bash
+git init
+git add .
+git commit -m "Initial commit — Hevy Web app"
+git branch -M main
+git remote add origin https://github.com/SEU_USER/hevy-web.git
+git push -u origin main
+```
+
+### 2. Importar no Vercel
+
+1. Acesse https://vercel.com/new
+2. Escolha o repositório `hevy-web`
+3. Framework preset: **Next.js** (auto-detectado)
+4. Build command: `bun run vercel-build` (já configurado no `vercel.json`)
+5. Install command: `bun install` (já configurado)
+
+### 3. Configurar variáveis de ambiente
+
+No Vercel → Settings → Environment Variables, adicionar:
+
+| Nome | Valor | Ambientes |
+|---|---|---|
+| `DATABASE_URL` | `postgresql://postgres.<PROJECT-REF>:<SUA-SENHA>@aws-1-us-west-2.pooler.supabase.com:6543/postgres?pgbouncer=true` | Production, Preview, Development |
+| `DIRECT_URL` | `postgresql://postgres.<PROJECT-REF>:<SUA-SENHA>@aws-1-us-west-2.pooler.supabase.com:5432/postgres` | Production, Preview, Development |
+
+> Substitua `<PROJECT-REF>` pelo ref do seu projeto Supabase e `<SUA-SENHA>` pela senha do banco. Pegue as URLs prontas em: Supabase → Project Settings → Connectivity → Pooler (Transaction mode).
+
+> ⚠️ **Não faça commit do `.env`** — ele está no `.gitignore`. As variáveis precisam ser cadastradas no Vercel.
+
+### 4. Deploy
+
+Clique em **Deploy**. O build vai:
+1. Rodar `bun install` (com `postinstall: prisma generate`)
+2. Rodar `bun run vercel-build` (que roda `prisma generate && next build`)
+3. Publicar a aplicação em `https://hevy-web.vercel.app` (ou similar)
+
+### 5. Deploy automático
+
+A partir de agora, todo `git push` para a `main` dispara um novo deploy automático.
+Cada PR/branch gera uma URL de preview (ex.: `https://hevy-web-git-feature.vercel.app`).
 
 ## Desenvolvimento local
 
 ```bash
-# Instalar dependências (o projeto usa Bun como package manager — veja bun.lock)
+# Instalar dependências
 bun install
-
-# Configurar variáveis de ambiente
-cp .env.example .env
-# preencha DATABASE_URL (Supabase) e demais chaves necessárias
 
 # Rodar migrations (criar/atualizar tabelas no Supabase)
 bun run db:push
@@ -59,21 +84,44 @@ bun run dev
 
 Acesse http://localhost:3000
 
-## Testes
+## Estrutura do projeto
 
-```bash
-bun run test          # testes unitários (Vitest)
-bun run test:watch    # modo watch
-bun run test:coverage # com cobertura
-bun run test:e2e      # fluxo end-to-end contra Supabase
+```
+src/
+├── app/
+│   ├── api/              # API routes (auth, workouts, sessions, exercises, etc.)
+│   ├── page.tsx          # Entry point
+│   └── layout.tsx        # Root layout
+├── components/
+│   ├── views/            # Páginas: dashboard, workouts, library, history, stats
+│   ├── active-workout.tsx # Tela de treino em execução
+│   ├── auth-screen.tsx   # Login/cadastro
+│   ├── exercise-detail.tsx
+│   └── sidebar.tsx
+└── lib/
+    ├── api.ts            # Cliente HTTP com Bearer token
+    ├── auth.ts           # Sistema de auth híbrido (token + cookie)
+    ├── db.ts             # Prisma Client com fallback de .env
+    ├── store.ts          # Zustand store
+    └── exercises-data.ts # 180 exercícios hardcoded para seed
+
+prisma/
+└── schema.prisma         # Schema do banco (PostgreSQL)
+
+scripts/
+├── seed.ts               # Popula banco com 180 exercícios + treinos demo
+├── export-all-csv.ts     # Exporta todas as tabelas para CSV
+├── import-csv-to-supabase.ts # Importa CSVs para o Supabase
+└── test-e2e-supabase.sh  # Teste end-to-end
 ```
 
-## Deploy no Vercel
+## Tecnologia
 
-1. Suba o código para o GitHub.
-2. Importe o repositório em https://vercel.com/new — o preset **Next.js** é detectado automaticamente.
-3. Build command: `bun run vercel-build` (já configurado em `vercel.json`).
-4. Install command: `bun install` (roda `prisma generate` via `postinstall`).
-5. Configure as variáveis de ambiente do `.env.example` no painel do projeto.
-6. Deploy. A partir daí, todo `git push` para `main` dispara um novo deploy; cada PR/branch gera uma URL de preview.
-
+- **Next.js 16** (App Router, Turbopack, Standalone output)
+- **TypeScript 5**
+- **Tailwind CSS 4** + **shadcn/ui**
+- **Prisma 6** (PostgreSQL)
+- **Supabase** (PostgreSQL gerenciado)
+- **Framer Motion** (animações)
+- **Zustand** (state management)
+- **Sonner** (toasts)

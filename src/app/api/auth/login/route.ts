@@ -1,61 +1,65 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { verifyPassword, needsRehash, hashPassword, createSession, setSessionCookie, BEARER_TOKEN_EXPIRY_SECONDS } from "@/lib/auth";
-import { checkRateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
-import { unauthorized, withErrorHandling } from "@/lib/api-error";
-import { parseBody, loginSchema } from "@/lib/validation";
+import { verifyPassword, hashPassword, createSession, setSessionCookie } from "@/lib/auth";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { LoginSchema, parseBody } from "@/lib/schemas";
 
-// Por IP: barra brute force vindo de uma única origem.
-const IP_LIMIT = { limit: 10, windowMs: 15 * 60 * 1000 }; // 10 tentativas / 15 min
-// Por e-mail: barra credential stuffing contra UMA conta vindo de várias
-// origens/IPs. Limite um pouco mais folgado que o de IP para reduzir o
-// risco de alguém travar a conta de outra pessoa só de propósito.
-const EMAIL_LIMIT = { limit: 15, windowMs: 15 * 60 * 1000 };
+// 10 tentativas por IP a cada 15 minutos
+const LOGIN_LIMIT = { limit: 10, windowMs: 15 * 60 * 1000 };
 
-export const POST = withErrorHandling("Login", async (req: NextRequest) => {
-  const parsed = await parseBody(req, loginSchema, "POST /api/auth/login");
-  if (!parsed.success) return parsed.response;
-  const { email, password, rememberMe = true } = parsed.data;
-
+export async function POST(req: NextRequest) {
+  // Rate limiting por IP
   const ip = getClientIp(req);
-  const ipCheck = await checkRateLimit(`login:ip:${ip}`, IP_LIMIT);
-  if (!ipCheck.allowed) return rateLimitResponse(ipCheck);
-
-  const emailKey = `login:email:${email.toLowerCase()}`;
-  const emailCheck = await checkRateLimit(emailKey, EMAIL_LIMIT);
-  if (!emailCheck.allowed) return rateLimitResponse(emailCheck);
-
-  const user = await db.user.findUnique({ where: { email } });
-  if (!user) {
-    throw unauthorized("Credenciais inválidas");
+  const rl = rateLimit(`login:${ip}`, LOGIN_LIMIT);
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: `Muitas tentativas. Tente novamente em ${rl.retryAfter}s.` },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rl.retryAfter),
+          "X-RateLimit-Limit": String(LOGIN_LIMIT.limit),
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
   }
+  try {
+    const body = await req.json();
+    const parsed = parseBody(LoginSchema, body);
+    if (!parsed.success) return parsed.response;
+    const { email, password } = parsed.data;
 
-  const isValid = await verifyPassword(password, user.passwordHash);
-  if (!isValid) {
-    throw unauthorized("Credenciais inválidas");
-  }
+    const user = await db.user.findUnique({ where: { email } });
+    if (!user) {
+      // Resposta genérica para não vazar se o email existe
+      return NextResponse.json({ error: "Credenciais inválidas" }, { status: 401 });
+    }
 
-  // Migração transparente: contas ainda no hash antigo (sha256 sem salt
-  // ou texto puro) são re-hasheadas com bcrypt neste login bem-sucedido.
-  if (needsRehash(user.passwordHash)) {
-    await db.user.update({
-      where: { id: user.id },
-      data: { passwordHash: await hashPassword(password) },
+    const isValid = await verifyPassword(password, user.passwordHash);
+    if (!isValid) {
+      return NextResponse.json({ error: "Credenciais inválidas" }, { status: 401 });
+    }
+
+    // Migração transparente: se o hash ainda é SHA-256 legado, re-hash para bcrypt
+    if (!user.passwordHash.startsWith("$2")) {
+      const newHash = await hashPassword(password);
+      await db.user.update({
+        where: { id: user.id },
+        data: { passwordHash: newHash },
+      });
+    }
+
+    const token = await createSession(user.id);
+    await setSessionCookie(token);
+
+    return NextResponse.json({
+      id: user.id,
+      email: user.email,
+      name: user.name,
     });
+  } catch (e) {
+    console.error("Login error:", e);
+    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
-
-  const cookieToken = await createSession(user.id);
-  await setSessionCookie(cookieToken, !!rememberMe);
-  // Token curto pro localStorage/sessionStorage (cross-origin/preview) —
-  // prazo bem menor que o cookie httpOnly, ver comentário em auth.ts.
-  const bearerToken = await createSession(user.id, BEARER_TOKEN_EXPIRY_SECONDS);
-
-  return NextResponse.json({
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-    token: bearerToken, // token também no body para localStorage (suporte cross-origin)
-    rememberMe: !!rememberMe,
-  });
-});
+}

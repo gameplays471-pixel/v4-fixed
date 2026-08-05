@@ -1,325 +1,228 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
-import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
-import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical, CheckSquare, Square, Share2, Check, Copy, Repeat, MoreVertical, FileText, Archive, ArchiveRestore } from "lucide-react";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlanShareDialog } from "@/components/plan-share-dialog";
-import { motion, AnimatePresence } from "framer-motion";
+import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical } from "lucide-react";
+import { motion } from "framer-motion";
 import { muscleGroups } from "@/lib/exercises-data";
-import { ExerciseThumb, ExerciseImageDialog } from "@/components/exercise-media";
-import { ExerciseSubstituteDialog, type SubstitutableExercise } from "@/components/exercise-substitute-dialog";
 
 type Exercise = {
-  id: string; name: string; muscleGroup: string; equipment: string | null;
-  equipmentType: string | null; level: string; category: string; images: string[];
+  id: string;
+  name: string;
+  muscleGroup: string;
+  equipment: string | null;
+  equipmentType: string | null;
+  level: string;
 };
 
 type WorkoutExercise = {
-  id: string; exerciseId: string; order: number; targetSets: number; targetReps: number;
-  restSeconds: number; notes: string | null; targetDurationSec: number | null;
-  targetDistanceKm: number | null; targetIntensity: string | null; exercise: Exercise;
+  id: string;
+  exerciseId: string;
+  order: number;
+  targetSets: number;
+  targetReps: number;
+  restSeconds: number;
+  notes: string | null;
+  exercise: Exercise;
 };
 
 type Workout = {
-  id: string; name: string; description: string | null; defaultRest: number;
-  color: string | null; active: boolean; exercises: WorkoutExercise[]; _count: { sessions: number };
+  id: string;
+  name: string;
+  description: string | null;
+  defaultRest: number;
+  color: string | null;
+  exercises: WorkoutExercise[];
+  _count: { sessions: number };
 };
 
-const COLOR_OPTIONS = ["#ef4444","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ec4899","#06b6d4","#84cc16"];
-const INTENSITY_OPTIONS = ["Leve","Moderada","Intensa"];
+const COLOR_OPTIONS = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
 
 export function WorkoutsView() {
-  const router = useRouter();
-  const queryClient = useQueryClient();
+  const setView = useAppStore((s) => s.setView);
+  const setActiveWorkoutId = useAppStore((s) => s.setActiveWorkoutId);
   const editingWorkoutId = useAppStore((s) => s.editingWorkoutId);
   const setEditingWorkoutId = useAppStore((s) => s.setEditingWorkoutId);
-  const [showEditor, setShowEditor] = useState(false);
-  const [sharingWorkout, setSharingWorkout] = useState<Workout | null>(null);
-  const [exportingWorkout, setExportingWorkout] = useState<Workout | null>(null);
-  const [tab, setTab] = useState<"active" | "inactive">("active");
 
-  const workoutsQuery = useQuery({
-    queryKey: queryKeys.workouts,
-    queryFn: () => apiGet<{ workouts: Workout[] }>("/api/workouts").then((d) => d.workouts),
-  });
-  const allWorkouts = workoutsQuery.data ?? [];
-  const activeWorkouts = allWorkouts.filter((w) => w.active);
-  const inactiveWorkouts = allWorkouts.filter((w) => !w.active);
-  const workouts = tab === "active" ? activeWorkouts : inactiveWorkouts;
-  const loading = workoutsQuery.isLoading;
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showEditor, setShowEditor] = useState(false);
+
+  const load = () => {
+    setLoading(true);
+    apiGet<{ workouts: Workout[] }>("/api/workouts")
+      .then((d) => setWorkouts(d.workouts))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    if (workoutsQuery.isError) {
-      console.error("Erro ao carregar treinos:", workoutsQuery.error);
-      toast.error("Não foi possível carregar seus treinos.");
-    }
-  }, [workoutsQuery.isError, workoutsQuery.error]);
+    load();
+  }, []);
 
-  useEffect(() => { if (editingWorkoutId) setShowEditor(true); }, [editingWorkoutId]);
+  useEffect(() => {
+    if (editingWorkoutId) {
+      setShowEditor(true);
+    }
+  }, [editingWorkoutId]);
+
+  const startWorkout = (id: string) => {
+    setActiveWorkoutId(id);
+    setView("active-workout");
+  };
+
+  const handleEdit = (id: string) => {
+    setEditingWorkoutId(id);
+    setShowEditor(true);
+  };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Excluir este treino?")) return;
-    await apiDelete(`/api/workouts/${id}`)
-      .then(() => {
-        toast.success("Treino excluído");
-        queryClient.invalidateQueries({ queryKey: queryKeys.workouts });
-      })
-      .catch(() => toast.error("Erro ao excluir"));
-  };
-  const handleToggleActive = async (w: Workout) => {
-    const nextActive = !w.active;
+    if (!confirm("Tem certeza que deseja excluir este treino?")) return;
     try {
-      await apiPatch(`/api/workouts/${w.id}`, { active: nextActive });
-      toast.success(nextActive ? "Treino reativado" : "Treino movido para Finalizados");
-      queryClient.invalidateQueries({ queryKey: queryKeys.workouts });
-    } catch {
-      toast.error(nextActive ? "Erro ao reativar treino" : "Erro ao inativar treino");
+      await apiDelete(`/api/workouts/${id}`);
+      toast.success("Treino excluído");
+      load();
+    } catch (e) {
+      toast.error("Erro ao excluir");
     }
   };
+
   const handleCloseEditor = () => {
     setShowEditor(false);
     setEditingWorkoutId(null);
-    queryClient.invalidateQueries({ queryKey: queryKeys.workouts });
+    load();
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight">Meus Treinos</h1>
-          <p className="text-sm text-muted-foreground mt-1">Organize suas divisões e inicie treinos.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Meus Treinos</h1>
+          <p className="text-sm text-muted-foreground mt-1">Crie divisões (ABC, PPL, Upper/Lower) e personalize.</p>
         </div>
-        <Button onClick={() => { setEditingWorkoutId(null); setShowEditor(true); }}
-          className="shrink-0 rounded-xl h-10 px-5 gap-2 bg-primary shadow-lg shadow-primary/25 hover:opacity-90 transition-opacity font-semibold">
-          <Plus className="w-4 h-4" /> Criar
+        <Button
+          onClick={() => {
+            setEditingWorkoutId(null);
+            setShowEditor(true);
+          }}
+          className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Criar treino
         </Button>
       </div>
 
-      {inactiveWorkouts.length > 0 && (
-        <Tabs value={tab} onValueChange={(v) => setTab(v as "active" | "inactive")}>
-          <TabsList className="grid grid-cols-2 w-full max-w-xs">
-            <TabsTrigger value="active">Ativos ({activeWorkouts.length})</TabsTrigger>
-            <TabsTrigger value="inactive">Finalizados ({inactiveWorkouts.length})</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      )}
-
-      {allWorkouts.length === 0 && !loading && (
-        <Card className="p-5">
-          <p className="text-sm font-semibold mb-3 text-muted-foreground">Divisões populares para começar</p>
+      {/* Sugestões de divisão */}
+      {workouts.length === 0 && !loading && (
+        <Card className="p-6">
+          <h2 className="font-semibold mb-3">Comece com uma divisão popular:</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {[{name:"Treino A",desc:"Peito + Tríceps",color:"#ef4444"},{name:"Treino B",desc:"Costas + Bíceps",color:"#10b981"},{name:"Treino C",desc:"Pernas",color:"#f59e0b"},{name:"Push/Pull",desc:"Empurrar/Puxar",color:"#8b5cf6"}].map((t) => (
-              <button key={t.name} onClick={() => { setEditingWorkoutId(null); setShowEditor(true); }}
-                className="text-left p-3 rounded-xl border border-border hover:border-primary/40 hover:bg-accent/30 transition-all group">
-                <div className="w-9 h-9 rounded-xl mb-2 shadow-sm group-hover:scale-105 transition-transform" style={{ background: t.color }} />
-                <p className="font-semibold text-sm">{t.name}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{t.desc}</p>
+            {[
+              { name: "Treino A", desc: "Peito + Tríceps", color: "#ef4444" },
+              { name: "Treino B", desc: "Costas + Bíceps", color: "#10b981" },
+              { name: "Treino C", desc: "Pernas", color: "#f59e0b" },
+              { name: "Push", desc: "Empurrar", color: "#3b82f6" },
+            ].map((t) => (
+              <button
+                key={t.name}
+                onClick={() => {
+                  setEditingWorkoutId(null);
+                  setShowEditor(true);
+                }}
+                className="text-left p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-md mb-2" style={{ background: t.color }} />
+                <p className="font-medium text-sm">{t.name}</p>
+                <p className="text-xs text-muted-foreground">{t.desc}</p>
               </button>
             ))}
           </div>
         </Card>
       )}
 
-      {allWorkouts.length > 0 && workouts.length === 0 && !loading && (
-        <Card className="p-5 text-center">
-          <p className="text-sm text-muted-foreground">
-            {tab === "active" ? "Nenhum treino ativo. Reative um treino finalizado ou crie um novo." : "Nenhum treino finalizado ainda."}
-          </p>
-        </Card>
-      )}
-
+      {/* Lista de treinos */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <LoadingSkeleton key={i} className="h-48 rounded-2xl border border-border/60" style={{ animationDelay: `${i*0.1}s` }} />
+            <div key={i} className="h-40 bg-card rounded-xl animate-pulse" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {workouts.map((w, i) => (
-            <motion.div key={w.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <Card className={`p-5 flex flex-col gap-4 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 ${!w.active ? "opacity-70" : ""}`}>
-                <div className="flex items-center justify-between">
+            <motion.div
+              key={w.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+            >
+              <Card className="p-5">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-md group-hover:scale-105 transition-transform"
-                      style={{ background: w.color || "var(--primary)", boxShadow: `0 4px 12px ${w.color || "var(--primary)"}40` }}>
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg" style={{ background: w.color || "var(--primary)" }}>
                       {w.name.charAt(0)}
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold leading-tight">{w.name}</p>
-                        {!w.active && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">Finalizado</Badge>}
-                      </div>
-                      <p className="text-[11px] text-muted-foreground">{w._count.sessions}× realizado · {w.exercises.length} exercícios</p>
+                      <h3 className="font-semibold">{w.name}</h3>
+                      <p className="text-xs text-muted-foreground">{w._count.sessions}× realizado</p>
                     </div>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:bg-accent shrink-0">
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-52">
-                      <DropdownMenuItem onClick={() => setSharingWorkout(w)}>
-                        <Share2 className="w-3.5 h-3.5 mr-2" /> Compartilhar link
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setExportingWorkout(w)}>
-                        <FileText className="w-3.5 h-3.5 mr-2" /> Exportar (foto/PDF)
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => { setEditingWorkoutId(w.id); setShowEditor(true); }}>
-                        <Edit2 className="w-3.5 h-3.5 mr-2" /> Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      {w.active ? (
-                        <DropdownMenuItem onClick={() => handleToggleActive(w)}>
-                          <Archive className="w-3.5 h-3.5 mr-2" /> Inativar (finalizar)
-                        </DropdownMenuItem>
-                      ) : (
-                        <DropdownMenuItem onClick={() => handleToggleActive(w)}>
-                          <ArchiveRestore className="w-3.5 h-3.5 mr-2" /> Reativar
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(w.id)}>
-                        <Trash2 className="w-3.5 h-3.5 mr-2" /> Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(w.id)}>
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive" onClick={() => handleDelete(w.id)}>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex-1 space-y-1.5 min-h-[60px]">
-                  {w.exercises.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic">Nenhum exercício — clique em editar para adicionar</p>
-                  ) : (
-                    <>
-                      {w.exercises.slice(0, 5).map((ex) => (
-                        <div key={ex.id} className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground truncate flex-1 pr-2">{ex.exercise.name}</span>
-                          <span className="text-[11px] text-muted-foreground/60 shrink-0 tabular-nums font-medium">
-                            {ex.exercise.category === "Cardio" ? `${Math.round((ex.targetDurationSec ?? 1800) / 60)}min` : `${ex.targetSets}×${ex.targetReps}`}
-                          </span>
-                        </div>
-                      ))}
-                      {w.exercises.length > 5 && <p className="text-[11px] text-muted-foreground/50">+{w.exercises.length - 5} exercícios</p>}
-                    </>
+
+                {w.description && <p className="text-xs text-muted-foreground mb-3">{w.description}</p>}
+
+                <div className="space-y-2 mb-4">
+                  {w.exercises.map((ex) => (
+                    <div key={ex.id} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground truncate flex-1">{ex.exercise.name}</span>
+                      <span className="text-xs text-muted-foreground ml-2 shrink-0">
+                        {ex.targetSets}×{ex.targetReps} · {ex.restSeconds}s
+                      </span>
+                    </div>
+                  ))}
+                  {w.exercises.length === 0 && (
+                    <p className="text-xs text-muted-foreground italic">Sem exercícios</p>
                   )}
                 </div>
-                {w.active ? (
-                  <Button onClick={() => router.push(`/treinos/${w.id}/ativo`)}
-                    className="w-full h-10 rounded-xl font-semibold gap-2" style={{ background: w.color || "var(--primary)", boxShadow: `0 4px 16px ${w.color || "var(--primary)"}30` }}>
-                    <Play className="w-4 h-4 fill-current" /> Iniciar treino
-                  </Button>
-                ) : (
-                  <Button variant="outline" onClick={() => handleToggleActive(w)} className="w-full h-10 rounded-xl font-semibold gap-2">
-                    <ArchiveRestore className="w-4 h-4" /> Reativar treino
-                  </Button>
-                )}
+
+                <Button onClick={() => startWorkout(w.id)} className="w-full">
+                  <Play className="w-4 h-4 mr-2" />
+                  Iniciar treino
+                </Button>
               </Card>
             </motion.div>
           ))}
         </div>
       )}
+
       {showEditor && <WorkoutEditor workoutId={editingWorkoutId} onClose={handleCloseEditor} />}
-      {sharingWorkout && <ShareLinkDialog workout={sharingWorkout} onClose={() => setSharingWorkout(null)} />}
-      {exportingWorkout && (
-        <PlanShareDialog
-          workoutName={exportingWorkout.name}
-          description={exportingWorkout.description}
-          exercises={exportingWorkout.exercises.map((ex) => ({
-            name: ex.exercise.name,
-            muscleGroup: ex.exercise.muscleGroup,
-            isCardio: ex.exercise.category === "Cardio",
-            targetSets: ex.targetSets,
-            targetReps: ex.targetReps,
-            restSeconds: ex.restSeconds,
-            notes: ex.notes,
-            targetDurationSec: ex.targetDurationSec,
-            targetDistanceKm: ex.targetDistanceKm,
-            targetIntensity: ex.targetIntensity,
-          }))}
-          open
-          onOpenChange={(o) => !o && setExportingWorkout(null)}
-        />
-      )}
     </div>
   );
 }
 
-// ─── COMPARTILHAR TREINO (link público, gera sob demanda) ───────────────────
-function ShareLinkDialog({ workout, onClose }: { workout: Workout; onClose: () => void }) {
-  const [link, setLink] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    apiPost<{ shareSlug: string }>(`/api/workouts/${workout.id}/share`)
-      .then((d) => setLink(`${window.location.origin}/w/${d.shareSlug}`))
-      .catch((e) => {
-        console.error("Erro ao gerar link de compartilhamento:", e);
-        toast.error("Não foi possível gerar o link de compartilhamento.");
-      })
-      .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workout.id]);
-
-  const handleCopy = async () => {
-    if (!link) return;
-    try {
-      await navigator.clipboard.writeText(link);
-      setCopied(true);
-      toast.success("Link copiado!");
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      toast.error("Não foi possível copiar — selecione e copie manualmente.");
-    }
-  };
-
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-sm rounded-3xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Share2 className="w-4 h-4 text-primary" />
-            Compartilhar &quot;{workout.name}&quot;
-          </DialogTitle>
-        </DialogHeader>
-
-        <p className="text-sm text-muted-foreground">
-          Qualquer pessoa com este link pode ver o treino e clonar uma cópia pra própria conta — sem precisar fazer login pra visualizar.
-        </p>
-
-        {loading ? (
-          <LoadingSkeleton className="h-11 rounded-xl" />
-        ) : link ? (
-          <div className="flex items-center gap-2">
-            <Input value={link} readOnly onFocus={(e) => e.target.select()} className="h-11 text-sm" />
-            <Button type="button" onClick={handleCopy} className="h-11 w-11 shrink-0 rounded-xl p-0">
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            </Button>
-          </div>
-        ) : (
-          <p className="text-sm text-destructive">Não foi possível gerar o link agora. Tente novamente.</p>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ─── EDITOR ───────────────────────────────────────────────────────────────────
+// ============== EDITOR DE TREINO ==============
 function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClose: () => void }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -328,99 +231,105 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
   const [loading, setLoading] = useState(!!workoutId);
   const [saving, setSaving] = useState(false);
-  const [showPicker, setShowPicker] = useState(false);
-  const [lightbox, setLightbox] = useState<Exercise | null>(null);
-  const [substitutingIdx, setSubstitutingIdx] = useState<number | null>(null);
+  const [showExercisePicker, setShowExercisePicker] = useState(false);
 
   useEffect(() => {
-    if (!workoutId) return;
-    apiGet<{ workout: Workout }>(`/api/workouts/${workoutId}`).then(({ workout: w }) => {
-      setName(w.name); setDescription(w.description || ""); setColor(w.color || COLOR_OPTIONS[0]);
-      setDefaultRest(w.defaultRest); setExercises(w.exercises);
-    }).catch((e) => {
-      // Sem catch, uma falha aqui abria o editor de edição totalmente
-      // vazio (nome "", 0 exercícios) sem indicar que o treino original
-      // não carregou — risco de o usuário "salvar" por cima e apagar os
-      // exercícios de um treino existente sem perceber.
-      console.error("Erro ao carregar treino para edição:", e);
-      toast.error("Não foi possível carregar este treino para edição.");
-      onClose();
-    }).finally(() => setLoading(false));
+    if (workoutId) {
+      apiGet<{ workout: Workout }>(`/api/workouts/${workoutId}`)
+        .then((data) => {
+          const w = data.workout;
+          setName(w.name);
+          setDescription(w.description || "");
+          setColor(w.color || COLOR_OPTIONS[0]);
+          setDefaultRest(w.defaultRest);
+          setExercises(w.exercises);
+        })
+        .finally(() => setLoading(false));
+    }
   }, [workoutId]);
 
   const handleSave = async () => {
-    if (!name.trim()) return toast.error("Digite um nome");
-    if (exercises.length === 0) return toast.error("Adicione pelo menos um exercício");
+    if (!name.trim()) {
+      toast.error("Digite um nome para o treino");
+      return;
+    }
+    if (exercises.length === 0) {
+      toast.error("Adicione pelo menos um exercício");
+      return;
+    }
+
     setSaving(true);
     const payload = {
-      name, description, color, defaultRest,
+      name,
+      description,
+      color,
+      defaultRest,
       exercises: exercises.map((ex) => ({
-        exerciseId: ex.exerciseId, targetSets: ex.targetSets, targetReps: ex.targetReps,
-        restSeconds: ex.restSeconds, notes: ex.notes, targetDurationSec: ex.targetDurationSec,
-        targetDistanceKm: ex.targetDistanceKm, targetIntensity: ex.targetIntensity,
+        exerciseId: ex.exerciseId,
+        targetSets: ex.targetSets,
+        targetReps: ex.targetReps,
+        restSeconds: ex.restSeconds,
+        notes: ex.notes,
       })),
     };
+
     try {
-      if (workoutId) { await apiPut(`/api/workouts/${workoutId}`, payload); toast.success("Treino atualizado!"); }
-      else { await apiPost("/api/workouts", payload); toast.success("Treino criado!"); }
+      if (workoutId) {
+        await apiPut(`/api/workouts/${workoutId}`, payload);
+        toast.success("Treino atualizado!");
+      } else {
+        await apiPost("/api/workouts", payload);
+        toast.success("Treino criado!");
+      }
       onClose();
-    } catch { toast.error("Erro ao salvar"); } finally { setSaving(false); }
+    } catch (e) {
+      toast.error("Erro ao salvar treino");
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  // addExercises now accepts an array (multi-select)
-  const addExercises = (exList: Exercise[]) => {
-    const newOnes = exList.map((ex) => {
-      const isCardio = ex.category === "Cardio";
-      return {
-        id: `temp-${Date.now()}-${ex.id}`, exerciseId: ex.id, order: exercises.length + 1,
-        targetSets: 3, targetReps: 10, restSeconds: defaultRest, notes: null,
-        targetDurationSec: isCardio ? 1800 : null, targetDistanceKm: null,
-        targetIntensity: isCardio ? "Moderada" : null, exercise: ex,
-      } as WorkoutExercise;
-    });
-    setExercises((prev) => [...prev, ...newOnes]);
-    setShowPicker(false);
+  const addExercise = (ex: Exercise) => {
+    setExercises([
+      ...exercises,
+      {
+        id: `temp-${Date.now()}`,
+        exerciseId: ex.id,
+        order: exercises.length + 1,
+        targetSets: 3,
+        targetReps: 10,
+        restSeconds: defaultRest,
+        notes: null,
+        exercise: ex,
+      },
+    ]);
+    setShowExercisePicker(false);
   };
 
-  // Troca o exercício de um slot mantendo séries/reps/descanso já
-  // configurados. Se a nova opção cruzar a fronteira força↔cardio (algo
-  // que o dialog já filtra por categoria, mas fica como segurança extra),
-  // reaplica os defaults do tipo certo em vez de manter metas sem sentido.
-  const substituteExercise = (idx: number, newEx: Exercise) => {
-    setExercises((prev) =>
-      prev.map((ex, i) => {
-        if (i !== idx) return ex;
-        const wasCardio = ex.exercise.category === "Cardio";
-        const isCardio = newEx.category === "Cardio";
-        if (wasCardio === isCardio) return { ...ex, exerciseId: newEx.id, exercise: newEx };
-        return {
-          ...ex,
-          exerciseId: newEx.id,
-          exercise: newEx,
-          targetDurationSec: isCardio ? 1800 : null,
-          targetDistanceKm: null,
-          targetIntensity: isCardio ? "Moderada" : null,
-          targetSets: isCardio ? ex.targetSets : 3,
-          targetReps: isCardio ? ex.targetReps : 10,
-        };
-      })
-    );
-    setSubstitutingIdx(null);
-    toast.success(`Substituído por ${newEx.name}`);
+  const removeExercise = (idx: number) => {
+    setExercises(exercises.filter((_, i) => i !== idx));
   };
 
-  const removeExercise = (idx: number) => setExercises(exercises.filter((_, i) => i !== idx));
-  const updateExercise = (idx: number, u: Partial<WorkoutExercise>) => setExercises(exercises.map((ex, i) => i === idx ? { ...ex, ...u } : ex));
+  const updateExercise = (idx: number, updates: Partial<WorkoutExercise>) => {
+    setExercises(exercises.map((ex, i) => (i === idx ? { ...ex, ...updates } : ex)));
+  };
+
   const moveExercise = (idx: number, dir: -1 | 1) => {
-    const n = idx + dir; if (n < 0 || n >= exercises.length) return;
-    const a = [...exercises]; [a[idx], a[n]] = [a[n], a[idx]]; setExercises(a);
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= exercises.length) return;
+    const newArr = [...exercises];
+    [newArr[idx], newArr[newIdx]] = [newArr[newIdx], newArr[idx]];
+    setExercises(newArr);
   };
 
   if (loading) {
     return (
       <Dialog open onOpenChange={() => onClose()}>
         <DialogContent className="max-w-2xl">
-          <div className="py-16 flex justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
+          <div className="py-12 flex justify-center">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
         </DialogContent>
       </Dialog>
     );
@@ -428,272 +337,254 @@ function WorkoutEditor({ workoutId, onClose }: { workoutId: string | null; onClo
 
   return (
     <>
-      <Dialog open onOpenChange={(open) => { if (!open) { if (showPicker) { setShowPicker(false); return; } onClose(); } }}>
-        <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto">
-          {showPicker ? (
-            <ExercisePickerContent
-              onAdd={addExercises}
-              onBack={() => setShowPicker(false)}
-              excludeIds={exercises.map((e) => e.exerciseId)}
-            />
-          ) : (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-xl font-black">{workoutId ? "Editar treino" : "Criar treino"}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-5 py-1">
-                <div className="space-y-1.5">
-                  <Label htmlFor="wname">Nome do treino</Label>
-                  <Input id="wname" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Treino A — Peito e Tríceps" className="h-11" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Cor</Label>
-                  <div className="flex gap-2 flex-wrap">
-                    {COLOR_OPTIONS.map((c) => (
-                      <button key={c} onClick={() => setColor(c)}
-                        className={`w-8 h-8 rounded-full transition-all ${color === c ? "ring-2 ring-offset-2 ring-offset-background ring-white scale-110" : "opacity-60 hover:opacity-100 hover:scale-105"}`}
-                        style={{ background: c }} />
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="wdesc">Descrição <span className="text-muted-foreground font-normal">(opcional)</span></Label>
-                  <Textarea id="wdesc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Notas sobre este treino" rows={2} />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="wrest">Descanso padrão (segundos)</Label>
-                  <Input id="wrest" type="number" value={defaultRest} onChange={(e) => setDefaultRest(parseInt(e.target.value) || 90)} className="h-10 w-32" />
-                </div>
+      <Dialog open onOpenChange={() => onClose()}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{workoutId ? "Editar treino" : "Criar treino"}</DialogTitle>
+          </DialogHeader>
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label>Exercícios <span className="text-muted-foreground font-normal">({exercises.length})</span></Label>
-                    <Button size="sm" variant="outline" onClick={() => setShowPicker(true)} className="h-9 rounded-xl gap-1.5 font-semibold">
-                      <Plus className="w-3.5 h-3.5" /> Adicionar
-                    </Button>
-                  </div>
-                  {exercises.length === 0 ? (
-                    <button onClick={() => setShowPicker(true)}
-                      className="w-full py-10 text-sm text-muted-foreground border-2 border-dashed border-border/50 rounded-2xl hover:border-primary/40 hover:text-primary transition-all flex flex-col items-center gap-2">
-                      <Plus className="w-6 h-6" />
-                      Toque para adicionar exercícios
-                    </button>
-                  ) : (
-                    <div className="space-y-2">
-                      {exercises.map((ex, idx) => (
-                        <div key={ex.id} className="bg-muted/30 rounded-xl p-3 border border-border/40 hover:border-border/70 transition-colors">
-                          <div className="flex items-center gap-2 mb-3">
-                            <GripVertical className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-                            <ExerciseThumb images={ex.exercise.images} name={ex.exercise.name} className="w-9 h-9 rounded-lg shrink-0" onClick={() => setLightbox(ex.exercise)} />
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-sm truncate">{ex.exercise.name}</p>
-                              <p className="text-[11px] text-muted-foreground">{ex.exercise.muscleGroup}</p>
-                            </div>
-                            <div className="flex gap-0.5">
-                              <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-muted-foreground" onClick={() => moveExercise(idx, -1)} disabled={idx === 0}>↑</Button>
-                              <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-muted-foreground" onClick={() => moveExercise(idx, 1)} disabled={idx === exercises.length - 1}>↓</Button>
-                              <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-muted-foreground hover:text-primary" title="Substituir exercício" onClick={() => setSubstitutingIdx(idx)}><Repeat className="w-3.5 h-3.5" /></Button>
-                              <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg hover:text-destructive" onClick={() => removeExercise(idx)}><X className="w-3.5 h-3.5" /></Button>
-                            </div>
-                          </div>
-                          {ex.exercise.category === "Cardio" ? (
-                            <div className="grid grid-cols-3 gap-2 pl-5">
-                              <div><label className="text-[10px] text-muted-foreground">Duração (min)</label><Input type="number" value={Math.round((ex.targetDurationSec ?? 1800) / 60)} onChange={(e) => updateExercise(idx, { targetDurationSec: (parseInt(e.target.value) || 30) * 60 })} className="h-8 text-sm mt-1" /></div>
-                              <div><label className="text-[10px] text-muted-foreground">Distância (km)</label><Input type="number" step="0.1" placeholder="—" value={ex.targetDistanceKm ?? ""} onChange={(e) => updateExercise(idx, { targetDistanceKm: e.target.value ? parseFloat(e.target.value) : null })} className="h-8 text-sm mt-1" /></div>
-                              <div><label className="text-[10px] text-muted-foreground">Intensidade</label><select value={ex.targetIntensity ?? "Moderada"} onChange={(e) => updateExercise(idx, { targetIntensity: e.target.value })} className="h-8 w-full text-sm rounded-lg border border-input bg-background px-2 mt-1">{INTENSITY_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}</select></div>
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-3 gap-2 pl-5">
-                              <div><label className="text-[10px] text-muted-foreground">Séries</label><Input type="number" value={ex.targetSets} onChange={(e) => updateExercise(idx, { targetSets: parseInt(e.target.value) || 3 })} className="h-8 text-sm mt-1" /></div>
-                              <div><label className="text-[10px] text-muted-foreground">Reps</label><Input type="number" value={ex.targetReps} onChange={(e) => updateExercise(idx, { targetReps: parseInt(e.target.value) || 10 })} className="h-8 text-sm mt-1" /></div>
-                              <div><label className="text-[10px] text-muted-foreground">Descanso (s)</label><Input type="number" value={ex.restSeconds} onChange={(e) => updateExercise(idx, { restSeconds: parseInt(e.target.value) || 90 })} className="h-8 text-sm mt-1" /></div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+          <div className="space-y-4">
+            {/* Nome */}
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome do treino</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ex: Treino A - Peito e Tríceps"
+              />
+            </div>
+
+            {/* Cor */}
+            <div className="space-y-2">
+              <Label>Cor</Label>
+              <div className="flex gap-2 flex-wrap">
+                {COLOR_OPTIONS.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setColor(c)}
+                    className={`w-8 h-8 rounded-full transition-transform ${color === c ? "ring-2 ring-offset-2 ring-offset-background ring-foreground scale-110" : ""}`}
+                    style={{ background: c }}
+                  />
+                ))}
               </div>
-              <DialogFooter className="pt-2 gap-2">
-                <Button variant="outline" onClick={onClose} disabled={saving} className="h-11 rounded-xl">Cancelar</Button>
-                <Button onClick={handleSave} disabled={saving} className="h-11 rounded-xl bg-primary font-semibold shadow-lg shadow-primary/20">
-                  {saving ? "Salvando..." : workoutId ? "Salvar alterações" : "Criar treino"}
+            </div>
+
+            {/* Descrição */}
+            <div className="space-y-2">
+              <Label htmlFor="desc">Descrição (opcional)</Label>
+              <Textarea
+                id="desc"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Notas gerais sobre este treino"
+                rows={2}
+              />
+            </div>
+
+            {/* Descanso padrão */}
+            <div className="space-y-2">
+              <Label htmlFor="rest">Descanso padrão (segundos)</Label>
+              <Input
+                id="rest"
+                type="number"
+                value={defaultRest}
+                onChange={(e) => setDefaultRest(parseInt(e.target.value) || 90)}
+              />
+            </div>
+
+            {/* Exercícios */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Exercícios ({exercises.length})</Label>
+                <Button size="sm" variant="outline" onClick={() => setShowExercisePicker(true)}>
+                  <Plus className="w-4 h-4 mr-1" />
+                  Adicionar
                 </Button>
-              </DialogFooter>
-            </>
-          )}
+              </div>
+
+              {exercises.length === 0 ? (
+                <div className="text-center py-8 text-sm text-muted-foreground border border-dashed border-border rounded-lg">
+                  Nenhum exercício. Clique em "Adicionar".
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {exercises.map((ex, idx) => (
+                    <div key={ex.id} className="bg-card rounded-lg p-3 border border-border">
+                      <div className="flex items-center gap-2 mb-2">
+                        <GripVertical className="w-4 h-4 text-muted-foreground" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{ex.exercise.name}</p>
+                          <p className="text-xs text-muted-foreground">{ex.exercise.muscleGroup}</p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            onClick={() => moveExercise(idx, -1)}
+                            disabled={idx === 0}
+                          >
+                            ↑
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            onClick={() => moveExercise(idx, 1)}
+                            disabled={idx === exercises.length - 1}
+                          >
+                            ↓
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 hover:text-destructive"
+                            onClick={() => removeExercise(idx)}
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 pl-6">
+                        <div>
+                          <label className="text-[10px] text-muted-foreground">Séries</label>
+                          <Input
+                            type="number"
+                            value={ex.targetSets}
+                            onChange={(e) => updateExercise(idx, { targetSets: parseInt(e.target.value) || 3 })}
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-muted-foreground">Reps</label>
+                          <Input
+                            type="number"
+                            value={ex.targetReps}
+                            onChange={(e) => updateExercise(idx, { targetReps: parseInt(e.target.value) || 10 })}
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-muted-foreground">Descanso (s)</label>
+                          <Input
+                            type="number"
+                            value={ex.restSeconds}
+                            onChange={(e) => updateExercise(idx, { restSeconds: parseInt(e.target.value) || 90 })}
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={onClose} disabled={saving}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "Salvando..." : workoutId ? "Salvar alterações" : "Criar treino"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
-      <ExerciseImageDialog open={!!lightbox} onOpenChange={(o) => !o && setLightbox(null)} images={lightbox?.images} name={lightbox?.name || ""} />
-      {substitutingIdx !== null && (
-        <ExerciseSubstituteDialog
-          currentExercise={exercises[substitutingIdx].exercise as SubstitutableExercise}
-          excludeIds={exercises.filter((_, i) => i !== substitutingIdx).map((e) => e.exerciseId)}
-          onSelect={(newEx) => substituteExercise(substitutingIdx, newEx as Exercise)}
-          onClose={() => setSubstitutingIdx(null)}
+
+      {showExercisePicker && (
+        <ExercisePicker
+          onPick={addExercise}
+          onClose={() => setShowExercisePicker(false)}
+          excludeIds={exercises.map((e) => e.exerciseId)}
         />
       )}
     </>
   );
 }
 
-// ─── SELETOR MULTI-SELECT ─────────────────────────────────────────────────────
-function ExercisePickerContent({
-  onAdd, onBack, excludeIds,
-}: { onAdd: (exList: Exercise[]) => void; onBack: () => void; excludeIds: string[] }) {
+// ============== SELETOR DE EXERCÍCIOS ==============
+function ExercisePicker({
+  onPick,
+  onClose,
+  excludeIds,
+}: {
+  onPick: (ex: Exercise) => void;
+  onClose: () => void;
+  excludeIds: string[];
+}) {
   const [search, setSearch] = useState("");
-  const [filterMuscles, setFilterMuscles] = useState<string[]>([]);
-  const [lightbox, setLightbox] = useState<Exercise | null>(null);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-
-  // Mesma queryKey usada em Biblioteca: se a lista já estiver em cache
-  // (usuário já visitou a Biblioteca), o picker abre instantâneo em vez de
-  // esperar uma nova requisição. Busca e filtro de músculo são aplicados
-  // no cliente, então digitar não dispara requisição nenhuma.
-  const exercisesQuery = useQuery({
-    queryKey: queryKeys.exercises,
-    queryFn: () => apiGet<{ exercises: Exercise[] }>("/api/exercises").then((d) => d.exercises),
-  });
-  const allExercises = exercisesQuery.data ?? [];
-  const loading = exercisesQuery.isLoading;
+  const [filterMuscle, setFilterMuscle] = useState("");
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (exercisesQuery.isError) {
-      console.error("Erro ao carregar exercícios:", exercisesQuery.error);
-      toast.error("Não foi possível carregar a lista de exercícios.");
-    }
-  }, [exercisesQuery.isError, exercisesQuery.error]);
-
-  const exercises = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    return allExercises.filter((ex) => {
-      if (filterMuscles.length > 0 && !filterMuscles.includes(ex.muscleGroup)) return false;
-      if (term && !ex.name.toLowerCase().includes(term) && !ex.muscleGroup.toLowerCase().includes(term)) return false;
-      return true;
-    });
-  }, [allExercises, search, filterMuscles]);
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (filterMuscle) params.set("muscleGroup", filterMuscle);
+    apiGet<{ exercises: Exercise[] }>(`/api/exercises?${params.toString()}`)
+      .then((d) => setExercises(d.exercises))
+      .finally(() => setLoading(false));
+  }, [search, filterMuscle]);
 
   const filtered = exercises.filter((e) => !excludeIds.includes(e.id));
 
-  const toggleSelect = (id: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
-
-  const toggleAll = () => {
-    if (selected.size === filtered.length) setSelected(new Set());
-    else setSelected(new Set(filtered.map((e) => e.id)));
-  };
-
-  const handleAdd = () => {
-    const toAdd = exercises.filter((e) => selected.has(e.id));
-    if (toAdd.length === 0) return toast.error("Selecione pelo menos um exercício");
-    onAdd(toAdd);
-  };
-
   return (
-    <div className="flex flex-col gap-3" style={{ maxHeight: "80vh" }}>
-      <DialogHeader>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="ghost" size="icon" className="h-8 w-8 -ml-2 rounded-xl" onClick={onBack}>
-            <ChevronRight className="w-4 h-4 rotate-180" />
-          </Button>
-          <DialogTitle className="font-black">Adicionar exercícios</DialogTitle>
-        </div>
-      </DialogHeader>
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Adicionar exercício</DialogTitle>
+        </DialogHeader>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder="Buscar exercício ou músculo..." value={search}
-          onChange={(e) => setSearch(e.target.value)} className="pl-9 h-11" autoFocus />
-      </div>
-
-      {/* Filtros de músculo */}
-      <div className="flex flex-wrap gap-1.5 pb-1">
-        {muscleGroups.map((m) => (
-          <button key={m} type="button"
-            onClick={() => setFilterMuscles((p) => p.includes(m) ? p.filter((x) => x !== m) : [...p, m])}
-            className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${filterMuscles.includes(m) ? "bg-primary text-primary-foreground border-primary shadow-sm" : "bg-card text-muted-foreground border-border hover:bg-accent hover:border-primary/30"}`}>
-            {m}
-          </button>
-        ))}
-        {filterMuscles.length > 0 && (
-          <button type="button" onClick={() => setFilterMuscles([])}
-            className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2">Limpar</button>
-        )}
-      </div>
-
-      {/* Seleção em massa */}
-      {filtered.length > 0 && (
-        <div className="flex items-center justify-between px-1 text-xs text-muted-foreground">
-          <button type="button" onClick={toggleAll}
-            className="flex items-center gap-1.5 hover:text-foreground transition-colors font-medium">
-            {selected.size === filtered.length && filtered.length > 0
-              ? <CheckSquare className="w-3.5 h-3.5 text-primary" />
-              : <Square className="w-3.5 h-3.5" />}
-            {selected.size === filtered.length && filtered.length > 0 ? "Desmarcar todos" : "Selecionar todos"}
-          </button>
-          <span>{filtered.length} exercício{filtered.length !== 1 ? "s" : ""}</span>
-        </div>
-      )}
-
-      {/* Lista */}
-      <div className="flex-1 overflow-y-auto -mx-1 px-1 space-y-0.5 min-h-0" style={{ maxHeight: "45vh" }}>
-        {loading ? (
-          <div className="space-y-0.5">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 px-2 py-2.5">
-                <LoadingSkeleton className="w-5 h-5 rounded-md shrink-0" style={{ animationDelay: `${i*0.05}s` }} />
-                <LoadingSkeleton className="w-10 h-10 rounded-lg shrink-0" style={{ animationDelay: `${i*0.05}s` }} />
-                <div className="flex-1 space-y-1.5">
-                  <LoadingSkeleton className="h-3.5 w-2/3 rounded" style={{ animationDelay: `${i*0.05}s` }} />
-                  <LoadingSkeleton className="h-2.5 w-1/3 rounded" style={{ animationDelay: `${i*0.05}s` }} />
-                </div>
-              </div>
-            ))}
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar exercício..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+              autoFocus
+            />
           </div>
-        ) : filtered.length === 0 ? (
-          <div className="py-10 text-center text-sm text-muted-foreground">Nenhum exercício encontrado</div>
-        ) : filtered.map((ex) => {
-          const isSel = selected.has(ex.id);
-          return (
-            <div key={ex.id}
-              className={`flex items-center gap-3 px-2 py-2.5 rounded-xl transition-all cursor-pointer ${isSel ? "bg-primary/10 border border-primary/20" : "hover:bg-accent/50"}`}
-              onClick={() => toggleSelect(ex.id)}>
-              <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${isSel ? "bg-primary border-primary" : "border-border"}`}>
-                {isSel && <svg className="w-3 h-3 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-              </div>
-              <div onClick={(e) => e.stopPropagation()} className="shrink-0">
-                <ExerciseThumb images={ex.images} name={ex.name} className="w-10 h-10 rounded-lg"
-                  onClick={() => setLightbox(ex)} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm truncate">{ex.name}</p>
-                <p className="text-[11px] text-muted-foreground">{ex.muscleGroup} · {ex.equipment}</p>
-              </div>
-              {isSel && <Badge className="shrink-0 bg-primary/15 text-primary border-primary/20 text-[10px] rounded-full">✓</Badge>}
-            </div>
-          );
-        })}
-      </div>
+          <select
+            value={filterMuscle}
+            onChange={(e) => setFilterMuscle(e.target.value)}
+            className="w-full h-9 px-3 rounded-md bg-card border border-border text-sm"
+          >
+            <option value="">Todos os músculos</option>
+            {muscleGroups.map((m) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+        </div>
 
-      {/* Botão confirmar */}
-      <AnimatePresence>
-        {selected.size > 0 && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
-            <Button onClick={handleAdd}
-              className="w-full h-12 rounded-xl font-bold text-base bg-primary shadow-lg shadow-primary/25">
-              Adicionar {selected.size} exercício{selected.size !== 1 ? "s" : ""}
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <ExerciseImageDialog open={!!lightbox} onOpenChange={(o) => !o && setLightbox(null)} images={lightbox?.images} name={lightbox?.name || ""} />
-    </div>
+        <div className="flex-1 overflow-y-auto -mx-2 px-2 space-y-1 mt-2">
+          {loading ? (
+            <div className="text-center py-8 text-sm text-muted-foreground">Carregando...</div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-8 text-sm text-muted-foreground">Nenhum exercício encontrado</div>
+          ) : (
+            filtered.map((ex) => (
+              <button
+                key={ex.id}
+                onClick={() => onPick(ex)}
+                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors text-left"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold shrink-0">
+                  {ex.name.charAt(0)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{ex.name}</p>
+                  <p className="text-xs text-muted-foreground">{ex.muscleGroup} · {ex.equipment}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
+            ))
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
