@@ -2,7 +2,16 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // "standalone" é usado só pelo script `build` (self-hosting/Docker), que
+  // copia .next/standalone manualmente depois. Na Vercel (`vercel-build`)
+  // esse modo não é usado pra nada — o deploy é empacotado de outro jeito —
+  // e combinado com o Turbopack (padrão a partir do Next 16) ele dispara um
+  // bug conhecido onde o arquivo de trace `middleware.js.nft.json` não é
+  // gerado, quebrando o build com ENOENT. A Vercel sempre define a env var
+  // VERCEL=1 durante o build, então usamos isso pra desativar o standalone
+  // só nesse ambiente. Ver: github.com/vercel/next.js/issues (múltiplas
+  // issues abertas sobre Turbopack + output:standalone + middleware).
+  output: process.env.VERCEL ? undefined : "standalone",
   /* config options here */
   typescript: {
     ignoreBuildErrors: false,
