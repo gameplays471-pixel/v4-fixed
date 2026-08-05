@@ -9,6 +9,7 @@ import { useAppStore } from "@/lib/store";
 import { AuthScreen } from "@/components/auth-screen";
 import { Sidebar } from "@/components/sidebar";
 import { OnboardingTour } from "@/components/onboarding-tour";
+import { PersoGemChat } from "@/components/persogem/persogem-chat";
 import { getToken, setToken, apiPost } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { LogOut, User, Gamepad2 } from "lucide-react";
@@ -423,6 +424,8 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       </main>
 
       <MobileBottomNav />
+
+      <PersoGemChat />
 
       <OnboardingTour
         open={showOnboarding}
