@@ -62,6 +62,22 @@ export async function apiPut<T>(url: string, body?: unknown): Promise<T> {
   return data;
 }
 
+export async function apiPatch<T>(url: string, body?: unknown): Promise<T> {
+  const res = await fetch(url, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) {
+    handleUnauthorized();
+    throw new Error(data.error || "Sessão expirada");
+  }
+  if (!res.ok) throw new Error(data.error || `API error: ${res.status}`);
+  return data;
+}
+
 export async function apiDelete<T>(url: string): Promise<T> {
   const res = await fetch(url, {
     method: "DELETE",
@@ -73,6 +89,21 @@ export async function apiDelete<T>(url: string): Promise<T> {
   }
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Compatibilidade: getToken/setToken — auth migrou para cookie httpOnly.
+// Mantidos como no-ops para não quebrar imports existentes.
+// ---------------------------------------------------------------------------
+
+/** @deprecated Auth é gerenciada via cookie httpOnly. Sempre retorna null. */
+export function getToken(): null {
+  return null;
+}
+
+/** @deprecated Auth é gerenciada via cookie httpOnly. Esta função não faz nada. */
+export function setToken(_token: string): void {
+  // no-op: o token de sessão é definido pelo servidor via cookie httpOnly
 }
 
 // ---------------------------------------------------------------------------
