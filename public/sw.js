@@ -4,7 +4,7 @@
 // dados já vistos (treinos, exercícios, stats) continuam visíveis, e
 // nada quebra silenciosamente quando a rede volta.
 
-const SW_VERSION = "v2";
+const SW_VERSION = "v3";
 const APP_SHELL_CACHE = `gemgym-shell-${SW_VERSION}`;
 const RUNTIME_CACHE = `gemgym-runtime-${SW_VERSION}`;
 const API_CACHE = `gemgym-api-${SW_VERSION}`;

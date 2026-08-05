@@ -49,6 +49,9 @@ export function setToken(token: string | null, remember: boolean = true) {
       sessionStorage.setItem(TOKEN_KEY, token);
     }
   }
+  // Login válido novo: libera a trava de reload-guard (ver handleUnauthorized)
+  // pra próxima expiração de sessão ainda conseguir recarregar 1x.
+  if (token) sessionStorage.removeItem(RELOAD_GUARD_KEY);
 }
 
 function authHeaders(): HeadersInit {
@@ -57,14 +60,27 @@ function authHeaders(): HeadersInit {
 }
 
 /** Trata resposta 401 limpando a sessão local e recarregando p/ tela de login */
+const RELOAD_GUARD_KEY = "gemgym_401_reload_guard";
+
 function handleUnauthorized() {
   setToken(null);
-  // Evita loop infinito se já estamos em contexto de auth
-  if (typeof window !== "undefined" && !window.location.pathname.startsWith("/auth")) {
-    // Avisa o usuário e recarrega para que o page.tsx detecte user=null
-    console.warn("Sessão expirada. Recarregando para tela de login.");
-    window.location.reload();
+  if (typeof window === "undefined") return;
+  // Evita loop infinito de reload: o app não tem uma rota /auth própria
+  // (a tela de login aparece sem trocar a URL), então checar o pathname
+  // nunca funcionava como proteção real. Em vez disso, usamos uma trava em
+  // sessionStorage: só permitimos 1 reload automático por "rodada". Se
+  // mesmo depois de recarregar o 401 persistir (ex.: cache de service
+  // worker desatualizado, ou qualquer outra causa que um reload sozinho
+  // não resolve), paramos de tentar — a tela de login aparece assim que
+  // /api/auth/me também refletir a sessão inválida, sem ficar recarregando
+  // pra sempre. A trava é limpa a cada login bem-sucedido (ver setToken).
+  if (sessionStorage.getItem(RELOAD_GUARD_KEY)) {
+    console.warn("Sessão expirada, mas evitando novo reload automático (possível loop).");
+    return;
   }
+  sessionStorage.setItem(RELOAD_GUARD_KEY, "1");
+  console.warn("Sessão expirada. Recarregando para tela de login.");
+  window.location.reload();
 }
 
 export async function apiGet<T>(url: string): Promise<T> {
