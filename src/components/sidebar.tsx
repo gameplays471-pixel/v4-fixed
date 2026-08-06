@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LogOut, User, Gamepad2 } from "lucide-react";
+import { LogOut, User, Gamepad2, Bot } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface SidebarProps {
@@ -15,6 +15,10 @@ const navItems: Array<{ href: string; label: string; emoji: string; icon: React.
   {
     href: "/", label: "Início", emoji: "🏠",
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4.5 h-4.5"><path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1V9.5z" /></svg>,
+  },
+  {
+    href: "/coach", label: "PersoGem", emoji: "🤖",
+    icon: <Bot className="w-4.5 h-4.5" />,
   },
   {
     href: "/treinos", label: "Treinos", emoji: "🏋️", matchPrefix: true,

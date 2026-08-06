@@ -80,11 +80,22 @@ export function GameView() {
   const summaryQuery = useQuery({
     queryKey: queryKeys.gameSummary,
     queryFn: () => apiGet<GameSummary>("/api/gamification/summary"),
+    // O default global (query-provider.tsx) é staleTime 60s + sem refetch
+    // no foco — bom pra a maioria das telas, mas aqui os números do dia
+    // mudam a cada clique (às vezes de outro dispositivo/aba do próprio
+    // usuário) e o placar do grupo muda com a ação de QUALQUER membro, não
+    // só a sua. Sem polling, essas mudanças só apareciam quando o
+    // componente desmontava e remontava — daí a sensação de "demora pra
+    // atualizar" mesmo a UI local respondendo na hora. Poll leve + refetch
+    // ao voltar o foco resolve sem sobrecarregar o pooler do banco.
+    refetchInterval: 20_000,
+    refetchOnWindowFocus: true,
   });
   const groupsQuery = useQuery({
     queryKey: queryKeys.groups,
     queryFn: () => apiGet<{ groups: GroupSummary[] }>("/api/groups").then((d) => d.groups),
     enabled: !!summaryQuery.data?.enabled,
+    refetchOnWindowFocus: true,
   });
 
   const groups = groupsQuery.data ?? [];
@@ -95,6 +106,13 @@ export function GameView() {
     queryKey: activeGroupId ? queryKeys.groupRanking(activeGroupId) : ["groups", "none", "ranking"],
     queryFn: () => apiGet<{ ranking: RankingEntry[]; week: { start: string; end: string } }>(`/api/groups/${activeGroupId}/ranking`),
     enabled: !!activeGroupId,
+    // Aqui é onde a demora mais incomodava: água/dieta/treino de QUALQUER
+    // membro do grupo só chegava na sua tela quando você saía e voltava
+    // pro /jogo. Poll de 15s (pausado automaticamente quando a aba não
+    // está em foco — comportamento default do React Query) deixa o
+    // ranking quase em tempo real sem virar polling agressivo.
+    refetchInterval: activeGroupId ? 15_000 : false,
+    refetchOnWindowFocus: true,
   });
 
   // Dispara o pulse dos contadores quando o valor muda (pós-otimização ou

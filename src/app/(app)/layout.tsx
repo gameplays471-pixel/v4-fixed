@@ -11,7 +11,7 @@ import { Sidebar } from "@/components/sidebar";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { getToken, setToken, apiPost } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
-import { LogOut, User, Gamepad2 } from "lucide-react";
+import { LogOut, User, Gamepad2, Bot } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { PENDING_CLONE_KEY } from "@/app/w/[slug]/clone-workout-button";
@@ -92,6 +92,14 @@ function MobileTopbar({ user, onLogout }: { user: AppUser; onLogout: () => void 
               >
                 <User className="w-4 h-4 text-muted-foreground" />
                 Meu perfil
+              </Link>
+              <Link
+                href="/coach"
+                onClick={() => setMenuOpen(false)}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium hover:bg-accent transition-colors"
+              >
+                <Bot className="w-4 h-4 text-muted-foreground" />
+                PersoGem
               </Link>
               {user.gameEnabled && (
                 <Link

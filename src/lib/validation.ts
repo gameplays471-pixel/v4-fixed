@@ -132,6 +132,45 @@ export const workoutSchema = z.object({
   exercises: z.array(workoutExerciseSchema).max(200).optional(),
 });
 
+// ─── PersoGem (coach IA via Groq) ────────────────────────────────────────────
+
+export const coachMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().trim().min(1).max(8000),
+});
+
+export const coachChatSchema = z.object({
+  mode: z.enum(["treinador", "duvidas"]),
+  // Histórico completo mandado pelo cliente a cada request — o servidor
+  // não guarda estado de conversa (ver src/app/api/coach/chat/route.ts).
+  messages: z.array(coachMessageSchema).min(1).max(60),
+});
+
+// Mesma forma usada na tool `propose_workout` (src/lib/coach-prompts.ts) —
+// por slug em vez de exerciseId, já que o modelo não conhece os cuids do banco.
+const coachWorkoutExerciseSchema = z.object({
+  slug: z.string().trim().min(1).max(120),
+  targetSets: z.coerce.number().int().positive().max(50).optional(),
+  targetReps: z.coerce.number().int().positive().max(2000).optional(),
+  restSeconds: z.coerce.number().int().nonnegative().max(3600).optional(),
+  notes: optionalNullableString(1000),
+  targetDurationSec: z.coerce.number().int().positive().max(86400).optional().nullable(),
+  targetDistanceKm: z.coerce.number().positive().max(1000).optional().nullable(),
+  targetIntensity: optionalNullableString(50),
+});
+
+const coachWorkoutSchema = z.object({
+  name: z.string().trim().min(1, "Nome é obrigatório").max(100),
+  description: optionalNullableString(2000),
+  defaultRest: z.coerce.number().int().nonnegative().max(3600).optional(),
+  color: optionalNullableString(30),
+  exercises: z.array(coachWorkoutExerciseSchema).min(1, "Treino precisa de ao menos 1 exercício").max(30),
+});
+
+export const coachSaveWorkoutSchema = z.object({
+  workouts: z.array(coachWorkoutSchema).min(1).max(8),
+});
+
 // Substituir o exercício de um item de treino (mesmo slot, mesmas metas
 // configuradas — só troca de qual `Exercise` ele aponta). Usado tanto no
 // editor de treino quanto no treino ativo, pra adequar o treino à
