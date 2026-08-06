@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false,
   },
   reactStrictMode: true,
-    // FIX: Next.js 16 + Turbopack não gera middleware.js.nft.json,
+  // FIX: Next.js 16 + Turbopack não gera middleware.js.nft.json,
   // causando ENOENT no Vercel build. Excluir do file tracing resolve.
   experimental: {
     outputFileTracingExcludes: {
