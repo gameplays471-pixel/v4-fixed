@@ -12,12 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
-import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from "@/lib/api";
+import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { toast } from "sonner";
-import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical, CheckSquare, Square, Share2, Check, Copy, Repeat, MoreVertical, FileText, Archive, ArchiveRestore } from "lucide-react";
+import { Plus, Play, Edit2, Trash2, ChevronRight, X, Search, GripVertical, CheckSquare, Square, Share2, Check, Copy, Repeat, MoreVertical, FileText } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlanShareDialog } from "@/components/plan-share-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { muscleGroups } from "@/lib/exercises-data";
@@ -37,7 +36,7 @@ type WorkoutExercise = {
 
 type Workout = {
   id: string; name: string; description: string | null; defaultRest: number;
-  color: string | null; active: boolean; exercises: WorkoutExercise[]; _count: { sessions: number };
+  color: string | null; exercises: WorkoutExercise[]; _count: { sessions: number };
 };
 
 const COLOR_OPTIONS = ["#ef4444","#f59e0b","#10b981","#3b82f6","#8b5cf6","#ec4899","#06b6d4","#84cc16"];
@@ -51,16 +50,12 @@ export function WorkoutsView() {
   const [showEditor, setShowEditor] = useState(false);
   const [sharingWorkout, setSharingWorkout] = useState<Workout | null>(null);
   const [exportingWorkout, setExportingWorkout] = useState<Workout | null>(null);
-  const [tab, setTab] = useState<"active" | "inactive">("active");
 
   const workoutsQuery = useQuery({
     queryKey: queryKeys.workouts,
     queryFn: () => apiGet<{ workouts: Workout[] }>("/api/workouts").then((d) => d.workouts),
   });
-  const allWorkouts = workoutsQuery.data ?? [];
-  const activeWorkouts = allWorkouts.filter((w) => w.active);
-  const inactiveWorkouts = allWorkouts.filter((w) => !w.active);
-  const workouts = tab === "active" ? activeWorkouts : inactiveWorkouts;
+  const workouts = workoutsQuery.data ?? [];
   const loading = workoutsQuery.isLoading;
 
   useEffect(() => {
@@ -81,16 +76,6 @@ export function WorkoutsView() {
       })
       .catch(() => toast.error("Erro ao excluir"));
   };
-  const handleToggleActive = async (w: Workout) => {
-    const nextActive = !w.active;
-    try {
-      await apiPatch(`/api/workouts/${w.id}`, { active: nextActive });
-      toast.success(nextActive ? "Treino reativado" : "Treino movido para Finalizados");
-      queryClient.invalidateQueries({ queryKey: queryKeys.workouts });
-    } catch {
-      toast.error(nextActive ? "Erro ao reativar treino" : "Erro ao inativar treino");
-    }
-  };
   const handleCloseEditor = () => {
     setShowEditor(false);
     setEditingWorkoutId(null);
@@ -110,16 +95,7 @@ export function WorkoutsView() {
         </Button>
       </div>
 
-      {inactiveWorkouts.length > 0 && (
-        <Tabs value={tab} onValueChange={(v) => setTab(v as "active" | "inactive")}>
-          <TabsList className="grid grid-cols-2 w-full max-w-xs">
-            <TabsTrigger value="active">Ativos ({activeWorkouts.length})</TabsTrigger>
-            <TabsTrigger value="inactive">Finalizados ({inactiveWorkouts.length})</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      )}
-
-      {allWorkouts.length === 0 && !loading && (
+      {workouts.length === 0 && !loading && (
         <Card className="p-5">
           <p className="text-sm font-semibold mb-3 text-muted-foreground">Divisões populares para começar</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -135,14 +111,6 @@ export function WorkoutsView() {
         </Card>
       )}
 
-      {allWorkouts.length > 0 && workouts.length === 0 && !loading && (
-        <Card className="p-5 text-center">
-          <p className="text-sm text-muted-foreground">
-            {tab === "active" ? "Nenhum treino ativo. Reative um treino finalizado ou crie um novo." : "Nenhum treino finalizado ainda."}
-          </p>
-        </Card>
-      )}
-
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -153,7 +121,7 @@ export function WorkoutsView() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {workouts.map((w, i) => (
             <motion.div key={w.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <Card className={`p-5 flex flex-col gap-4 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 ${!w.active ? "opacity-70" : ""}`}>
+              <Card className="p-5 flex flex-col gap-4 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-md group-hover:scale-105 transition-transform"
@@ -161,10 +129,7 @@ export function WorkoutsView() {
                       {w.name.charAt(0)}
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold leading-tight">{w.name}</p>
-                        {!w.active && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">Finalizado</Badge>}
-                      </div>
+                      <p className="font-bold leading-tight">{w.name}</p>
                       <p className="text-[11px] text-muted-foreground">{w._count.sessions}× realizado · {w.exercises.length} exercícios</p>
                     </div>
                   </div>
@@ -184,16 +149,6 @@ export function WorkoutsView() {
                       <DropdownMenuItem onClick={() => { setEditingWorkoutId(w.id); setShowEditor(true); }}>
                         <Edit2 className="w-3.5 h-3.5 mr-2" /> Editar
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      {w.active ? (
-                        <DropdownMenuItem onClick={() => handleToggleActive(w)}>
-                          <Archive className="w-3.5 h-3.5 mr-2" /> Inativar (finalizar)
-                        </DropdownMenuItem>
-                      ) : (
-                        <DropdownMenuItem onClick={() => handleToggleActive(w)}>
-                          <ArchiveRestore className="w-3.5 h-3.5 mr-2" /> Reativar
-                        </DropdownMenuItem>
-                      )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(w.id)}>
                         <Trash2 className="w-3.5 h-3.5 mr-2" /> Excluir
@@ -218,16 +173,10 @@ export function WorkoutsView() {
                     </>
                   )}
                 </div>
-                {w.active ? (
-                  <Button onClick={() => router.push(`/treinos/${w.id}/ativo`)}
-                    className="w-full h-10 rounded-xl font-semibold gap-2" style={{ background: w.color || "var(--primary)", boxShadow: `0 4px 16px ${w.color || "var(--primary)"}30` }}>
-                    <Play className="w-4 h-4 fill-current" /> Iniciar treino
-                  </Button>
-                ) : (
-                  <Button variant="outline" onClick={() => handleToggleActive(w)} className="w-full h-10 rounded-xl font-semibold gap-2">
-                    <ArchiveRestore className="w-4 h-4" /> Reativar treino
-                  </Button>
-                )}
+                <Button onClick={() => router.push(`/treinos/${w.id}/ativo`)}
+                  className="w-full h-10 rounded-xl font-semibold gap-2" style={{ background: w.color || "var(--primary)", boxShadow: `0 4px 16px ${w.color || "var(--primary)"}30` }}>
+                  <Play className="w-4 h-4 fill-current" /> Iniciar treino
+                </Button>
               </Card>
             </motion.div>
           ))}

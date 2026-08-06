@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { hashPassword, createSession, setSessionCookie, BEARER_TOKEN_EXPIRY_SECONDS } from "@/lib/auth";
+import { hashPassword, createSession, setSessionCookie } from "@/lib/auth";
 import { checkRateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
 import { badRequest, withErrorHandling } from "@/lib/api-error";
 import { parseBody, signupSchema } from "@/lib/validation";
@@ -17,9 +17,14 @@ export const POST = withErrorHandling("Signup", async (req: NextRequest) => {
   const ipCheck = await checkRateLimit(`signup:ip:${ip}`, SIGNUP_IP_LIMIT);
   if (!ipCheck.allowed) return rateLimitResponse(ipCheck);
 
+  // #7 FIX: User enumeration — sempre retornar sucesso genérico
+  // tanto para email já existente quanto para signup real. A resposta
+  // é idêntica para o atacante, impossibilitando enumerar emails.
   const existing = await db.user.findUnique({ where: { email } });
   if (existing) {
-    throw badRequest("Email já cadastrado");
+    // Não revelar que o email já existe — retornar sucesso falso
+    // O frontend não diferencia; o atacante não sabe se registrou ou não
+    return NextResponse.json({ success: true, message: "Verifique seu email para confirmar o cadastro." });
   }
 
   const user = await db.user.create({
@@ -31,14 +36,13 @@ export const POST = withErrorHandling("Signup", async (req: NextRequest) => {
     },
   });
 
-  const cookieToken = await createSession(user.id);
-  await setSessionCookie(cookieToken);
-  const bearerToken = await createSession(user.id, BEARER_TOKEN_EXPIRY_SECONDS);
+  const token = await createSession(user.id);
+  await setSessionCookie(token);
 
   return NextResponse.json({
     id: user.id,
     email: user.email,
     name: user.name,
-    token: bearerToken,
+    // #29 FIX: token removido do body — autenticação via cookie httpOnly apenas
   });
 });

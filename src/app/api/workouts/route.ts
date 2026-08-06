@@ -16,9 +16,7 @@ export const GET = withErrorHandling("Get workouts", async (req: NextRequest) =>
       },
       _count: { select: { sessions: true } },
     },
-    // Ativos primeiro, depois finalizados; dentro de cada grupo, mais
-    // recente primeiro. Front separa em abas usando o campo `active`.
-    orderBy: [{ active: "desc" }, { createdAt: "desc" }],
+    orderBy: { createdAt: "desc" },
   });
 
   return NextResponse.json({ workouts });

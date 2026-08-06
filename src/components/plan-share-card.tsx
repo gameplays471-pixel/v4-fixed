@@ -21,118 +21,14 @@ interface PlanShareCardProps {
   exercises: PlanCardExercise[];
 }
 
-/**
- * Lista de exercícios com auto-scaling, mesma estratégia aplicada em
- * `share-workout-card.tsx` (`ExerciseList`).
- *
- * A versão antiga cortava tudo além de `maxItems = 9` num "+N exercícios" —
- * bom o bastante pra um treino curto, mas fichas planejadas com 12-15
- * exercícios (divisão por grupo muscular) ficavam truncadas sem chance de
- * mostrar o treino inteiro. A nova versão:
- *  1. muda pra 2 colunas automaticamente quando a quantidade passa de 6, e
- *  2. reduz fonte/padding/gap em degraus conforme a quantidade cresce,
- * para caber o treino inteiro dentro da altura fixa do card. Só aplicamos
- * o "+N" como último recurso, com um teto bem mais alto (`hardCap`) — na
- * prática cobre qualquer treino razoável (raramente > 20 exercícios).
- */
-function ExerciseList({
-  exercises,
-  hardCap,
-}: {
-  exercises: PlanCardExercise[];
-  hardCap: number;
-}) {
-  const shown = exercises.slice(0, hardCap);
-  const extra = exercises.length - shown.length;
-  const count = shown.length;
-
-  // 2 colunas quando passa de 6 exercícios. Para a ficha planejada, como
-  // não tem manequim competindo por espaço, podemos ser menos agressivos
-  // do que no card de treino concluído e manter 1 coluna em fichas curtas,
-  // que ficam mais legíveis.
-  const effectiveColumns: 1 | 2 = count > 6 ? 2 : 1;
-
-  // Degraus de tamanho — quanto mais exercícios, mais compacto cada item.
-  const tier =
-    count <= 6 ? 0 :
-    count <= 10 ? 1 :
-    count <= 16 ? 2 : 3;
-  const fontSize = [12, 11, 10, 9][tier];
-  const padding = ["8px 10px", "6px 8px", "5px 7px", "4px 5px"][tier];
-  const gap = [7, 5, 4, 3][tier];
-  const targetFontSize = fontSize + 0.5;
-
-  return (
-    <div style={{ width: "100%", display: "grid", gridTemplateColumns: `repeat(${effectiveColumns}, 1fr)`, gap }}>
-      {shown.map((ex, i) => (
-        <div
-          key={i}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 10,
-            padding,
-            minWidth: 0,
-          }}
-        >
-          <span
-            style={{
-              flexShrink: 0,
-              fontWeight: 900,
-              fontSize: targetFontSize,
-              color: "#4ade80",
-              fontVariantNumeric: "tabular-nums",
-            }}
-          >
-            {ex.isCardio
-              ? `${Math.round((ex.targetDurationSec ?? 1800) / 60)}min`
-              : `${ex.targetSets}×${ex.targetReps}`}
-          </span>
-          <span
-            style={{
-              fontWeight: 700,
-              fontSize,
-              color: "rgba(245,245,245,0.9)",
-              lineHeight: 1.25,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {ex.name}
-          </span>
-        </div>
-      ))}
-      {extra > 0 && (
-        <div
-          style={{
-            gridColumn: `span ${effectiveColumns}`,
-            textAlign: "center",
-            fontSize: 11,
-            color: "rgba(245,245,245,0.45)",
-            fontWeight: 700,
-            marginTop: 2,
-          }}
-        >
-          +{extra} exercício{extra > 1 ? "s" : ""}
-        </div>
-      )}
-    </div>
-  );
-}
-
 /** Ficha estática do treino planejado — visual similar ao card de treino concluído, mas sem duração/volume/PR (o treino ainda não aconteceu). */
 export const PlanShareCard = forwardRef<HTMLDivElement, PlanShareCardProps>(
   function PlanShareCard({ workoutName, description, exercises }, ref) {
     const { width, height } = PLAN_CARD_SIZE;
     const totalSets = exercises.reduce((acc, ex) => acc + (ex.isCardio ? 1 : ex.targetSets), 0);
-    // Teto alto — a lista mesma decide colunas/tamanho de fonte conforme a
-    // quantidade (ver ExerciseList). Isso evita truncar fichas planejadas
-    // comuns de 10-15 exercícios num "+N exercícios" quase vazio.
-    const listHardCap = 20;
+    const maxItems = 9;
+    const shown = exercises.slice(0, maxItems);
+    const extra = exercises.length - shown.length;
 
     return (
       <div
@@ -196,8 +92,24 @@ export const PlanShareCard = forwardRef<HTMLDivElement, PlanShareCardProps>(
             ))}
           </div>
 
-          <div style={{ flex: 1, minHeight: 0, marginTop: 14, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <ExerciseList exercises={exercises} hardCap={listHardCap} />
+          <div style={{ flex: 1, minHeight: 0, marginTop: 14, display: "flex", flexDirection: "column", justifyContent: "center", gap: 6 }}>
+            {shown.map((ex, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(245,245,245,0.92)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {ex.name}
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#4ade80", flexShrink: 0 }}>
+                  {ex.isCardio
+                    ? `${Math.round((ex.targetDurationSec ?? 1800) / 60)}min${ex.targetIntensity ? ` · ${ex.targetIntensity}` : ""}`
+                    : `${ex.targetSets}×${ex.targetReps}`}
+                </span>
+              </div>
+            ))}
+            {extra > 0 && (
+              <p style={{ textAlign: "center", fontSize: 11, color: "rgba(245,245,245,0.45)", fontWeight: 700, marginTop: 2 }}>
+                +{extra} exercício{extra > 1 ? "s" : ""}
+              </p>
+            )}
           </div>
 
           <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>

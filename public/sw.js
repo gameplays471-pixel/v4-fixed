@@ -4,7 +4,7 @@
 // dados já vistos (treinos, exercícios, stats) continuam visíveis, e
 // nada quebra silenciosamente quando a rede volta.
 
-const SW_VERSION = "v3";
+const SW_VERSION = "v1";
 const APP_SHELL_CACHE = `gemgym-shell-${SW_VERSION}`;
 const RUNTIME_CACHE = `gemgym-runtime-${SW_VERSION}`;
 const API_CACHE = `gemgym-api-${SW_VERSION}`;
@@ -53,18 +53,7 @@ self.addEventListener("install", (event) => {
           }
         })
       );
-      // NÃO chamamos self.skipWaiting() aqui de propósito. Se um novo SW
-      // assume controle na hora (skipWaiting + clients.claim no activate),
-      // toda aba já aberta — inclusive alguém no meio de um treino — sofre
-      // um "controllerchange" e o pwa-register.tsx recarrega a página na
-      // hora (ver listener lá). Isso já causou perda/interrupção de treino
-      // em andamento quando um deploy saía com o app aberto na academia.
-      // Sem skipWaiting aqui, o novo SW fica "esperando": só assume
-      // quando (a) o usuário toca "Atualizar" no toast (que manda
-      // SKIP_WAITING via postMessage, ver listener de "message" abaixo),
-      // ou (b) não sobra nenhuma aba controlada pelo SW antigo — ou seja,
-      // exatamente quando o navegador foi fechado de vez e reaberto depois,
-      // que é o momento seguro de trocar de versão.
+      self.skipWaiting();
     })()
   );
 });

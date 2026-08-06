@@ -42,8 +42,6 @@ export function ActiveWorkoutView({ workoutId }: ActiveWorkoutViewProps) {
   const handleCompleteSet = (exerciseId: string, setIdx: number, restSeconds: number, exerciseName: string) => {
     const justCompleted = session.toggleSetComplete(exerciseId, setIdx);
     if (justCompleted) restTimer.start(restSeconds, exerciseName);
-    // Atualiza transmissão quase na hora (série a série)
-    liveShare.schedulePush?.();
   };
 
   if (session.loading) {

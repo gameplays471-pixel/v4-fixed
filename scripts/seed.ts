@@ -1,6 +1,7 @@
 // Seed do banco de dados
 import { db } from "../src/lib/db";
 import { exercisesData } from "../src/lib/exercises-data";
+import { hashPassword } from "../src/lib/auth"; // #5 FIX: usar bcrypt em vez de texto puro
 
 async function main() {
   console.log("🌱 Iniciando seed...");
@@ -21,7 +22,7 @@ async function main() {
     data: {
       email: "demo@hevy.com",
       name: "Atleta Demo",
-      passwordHash: "demo123", // simplificado para demo
+      passwordHash: await hashPassword("demo123"), // #5 FIX: hash bcrypt em vez de texto puro
       bio: "Foco em hipertrofia há 3 anos. Treino ABC 5x na semana.",
       weight: 78.5,
       height: 178,

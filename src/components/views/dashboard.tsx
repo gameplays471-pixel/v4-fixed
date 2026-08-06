@@ -22,7 +22,7 @@ type Stats = {
 };
 type Workout = {
   id: string; name: string; description: string | null; defaultRest: number;
-  color: string | null; active: boolean; _count: { sessions: number };
+  color: string | null; _count: { sessions: number };
   exercises: Array<{ id: string; exercise: { name: string; muscleGroup: string } }>;
 };
 type Session = { id: string; workoutName: string; startedAt: string; durationSec: number; totalVolume: number; };
@@ -72,9 +72,7 @@ export function DashboardView() {
   });
 
   const stats = statsQuery.data ?? null;
-  // Só treinos ativos aparecem no "início rápido" do dashboard — treinos
-  // finalizados ficam disponíveis na aba "Finalizados" em Treinos.
-  const workouts = (workoutsQuery.data ?? []).filter((w) => w.active);
+  const workouts = workoutsQuery.data ?? [];
   const recentSessions = sessionsQuery.data ?? [];
   const myPlans = plansQuery.data ?? [];
   const loading = statsQuery.isLoading || workoutsQuery.isLoading || sessionsQuery.isLoading;
@@ -88,7 +86,8 @@ export function DashboardView() {
       console.error("Erro ao carregar dashboard:", statsQuery.error || workoutsQuery.error || sessionsQuery.error);
       toast.error("Não foi possível carregar seus dados. Puxe para atualizar ou tente novamente.");
     }
-  }, [hasError, statsQuery.error, workoutsQuery.error, sessionsQuery.error]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasError]);
 
   const startWorkout = (id: string) => { router.push(`/treinos/${id}/ativo`); };
 
@@ -207,13 +206,9 @@ export function DashboardView() {
         {workouts.length === 0 ? (
           <Card className="p-8 text-center border-dashed">
             <Dumbbell className="w-10 h-10 mx-auto mb-3 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground mb-4">
-              {(workoutsQuery.data ?? []).length > 0
-                ? "Todos os seus treinos estão finalizados. Reative um ou crie um novo."
-                : "Você ainda não criou nenhum treino."}
-            </p>
+            <p className="text-sm text-muted-foreground mb-4">Você ainda não criou nenhum treino.</p>
             <Button onClick={() => router.push("/treinos")} size="sm" className="bg-primary shadow-lg shadow-primary/20">
-              {(workoutsQuery.data ?? []).length > 0 ? "Ir para Treinos" : "Criar primeiro treino"}
+              Criar primeiro treino
             </Button>
           </Card>
         ) : (

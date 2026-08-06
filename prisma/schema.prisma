@@ -19,11 +19,11 @@ model User {
   bio          String?
   weight       Float?
   height       Float?
-  sex          String?  // "M" | "F" | "Outro"
+  sex          String?  // "M" | "F" | "Outro" — CHECK constraint via supabase-migrations.sql
   birthDate    DateTime?
   goal         String?
   avatarUrl    String?
-  role         String   @default("user") // "user" | "admin" | "support" — controla acesso ao painel /admin
+  role         String   @default("user") // "user" | "admin" | "support" — CHECK constraint via supabase-migrations.sql
   disabled     Boolean  @default(false) // admin pode bloquear acesso do usuário
   disabledAt   DateTime? // quando foi bloqueado (para estatísticas)
   gameEnabled  Boolean  @default(false) // liga/desliga o mini-game (metas diárias/semanais + ranking em grupo) — via Perfil
@@ -44,6 +44,10 @@ model User {
   workoutPlans    WorkoutPlan[]
   @@index([role])
   @@index([disabled])
+  // ⚠️ CHECK constraints not natively supported in Prisma schema —
+  // applied via supabase-migrations.sql:
+  //   ALTER TABLE "User" ADD CONSTRAINT "User_role_check" CHECK ("role" IN ('user', 'admin', 'support'));
+  //   ALTER TABLE "User" ADD CONSTRAINT "User_sex_check" CHECK ("sex" IS NULL OR "sex" IN ('M', 'F', 'Outro'));
 }
 
 model Exercise {
@@ -79,11 +83,6 @@ model Workout {
   description String?
   defaultRest Int      @default(90) // descanso padrão em segundos
   color       String?
-  // "Inativar" um treino tira ele da lista/dashboard sem apagar nada —
-  // sessões, sets e PRs continuam ligados ao exercício normalmente.
-  // Usado quando uma periodização acaba e um treino novo entra no lugar,
-  // mas o histórico do treino antigo precisa ser preservado.
-  active      Boolean  @default(true)
   shareSlug   String?  @unique // token opaco pro link público de compartilhamento (/w/[slug]); gerado sob demanda, fixo por treino
   // Templates do painel admin — treinos pré-setados atribuíveis a alunos.
   // isTemplate=true não aparece na lista de treinos do usuário dono; só no
@@ -103,7 +102,6 @@ model Workout {
   @@index([userId])
   @@index([isTemplate])
   @@index([userId, isTemplate])
-  @@index([userId, active])
 }
 
 model WorkoutExercise {

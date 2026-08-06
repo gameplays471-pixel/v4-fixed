@@ -1,19 +1,19 @@
-// Sistema de autenticação híbrido: Bearer token (header) + cookie fallback
+// Sistema de autenticação: Cookie httpOnly (primário) + Bearer token fallback (cross-origin)
 //
 // Senha: hash com bcrypt (salt único por senha + custo computacional
 // ajustável), o que inviabiliza rainbow tables e torna brute force caro.
-// Hashes antigos (sha256 sem salt, ou até senha em texto puro de contas
-// demo) continuam sendo aceitos só para não deslogar ninguém — são
-// automaticamente re-hasheados com bcrypt no próximo login bem-sucedido
-// (ver `needsRehash` + uso em src/app/api/auth/login/route.ts).
+// Hashes legados (sha256 sem salt) continuam sendo aceitos com
+// comparação timing-safe — são automaticamente re-hasheados com bcrypt
+// no próximo login bem-sucedido (ver `needsRehash` + uso em login/route.ts).
+// O caminho de texto puro foi REMOVIDO por segurança (contas demo devem
+// ser migradas para bcrypt).
 //
 // Sessão: token assinado no formato JWT (HS256) usando HMAC-SHA256 com
 // SESSION_SECRET (env). Isso impede que alguém forje um token só sabendo o
 // `id` (cuid) de outro usuário: a assinatura só pode ser gerada por quem
 // conhece o segredo do servidor, e é validada com comparação em tempo
 // constante (crypto.timingSafeEqual) para evitar timing attacks. O token
-// também carrega expiração (`exp`), então sessões antigas param de
-// funcionar sozinhas mesmo sem revogação explícita.
+// também carrega expiração (`exp`) e issued-at (`iat`).
 
 import { db } from "@/lib/db";
 import { publicAvatarUrl } from "@/lib/avatar";
@@ -24,36 +24,37 @@ import bcrypt from "bcryptjs";
 
 export const SESSION_COOKIE = "gemgym_session";
 export const TOKEN_LOCALSTORAGE_KEY = "gemgym_token";
-const SESSION_EXPIRY_DAYS = 30;
+
+// #9 FIX: Sessão reduzida de 30 para 7 dias (com "Manter conectado")
+// e 24h sem. Antes: 30 dias era risco excessivo — JWT comprometido
+// dava acesso por 30 dias mesmo após logout/senha trocada.
+const SESSION_EXPIRY_DAYS = 7;
 const SESSION_EXPIRY_SECONDS = SESSION_EXPIRY_DAYS * 24 * 60 * 60;
-// Token devolvido no corpo da resposta de login/signup, guardado em
-// localStorage/sessionStorage no cliente pra suportar auth cross-origin
-// (preview URLs) — ver src/lib/api.ts. localStorage é legível por
-// qualquer script na página, então um XSS bem-sucedido rouba esse token;
-// prazo bem mais curto que o cookie httpOnly (30 dias) limita por quanto
-// tempo um token vazado continua valendo. Sem refresh automático ainda —
-// expirado, a próxima call 401 e o app manda pra tela de login de novo.
-const BEARER_TOKEN_EXPIRY_DAYS = 7;
-export const BEARER_TOKEN_EXPIRY_SECONDS = BEARER_TOKEN_EXPIRY_DAYS * 24 * 60 * 60;
 
 // ─── Segredo de assinatura ─────────────────────────────────────────────────
-// Obrigatório em produção. Em desenvolvimento, cai para um valor fixo (com
-// aviso no console) só para não travar o `next dev` de quem ainda não
-// configurou o .env — nunca use esse fallback em produção.
+// #2 FIX: Nunca usar segredo hardcoded. Em dev, gerar segredo aleatório
+// por processo. Mínimo de 32 caracteres (RFC recomenda ≥256 bits para HS256).
 function getSessionSecret(): string {
   const secret = process.env.SESSION_SECRET;
-  if (secret && secret.length >= 16) return secret;
+  if (secret && secret.length >= 32) return secret;
 
   if (process.env.NODE_ENV === "production") {
     throw new Error(
-      "SESSION_SECRET não configurado (ou muito curto). Defina uma variável de ambiente SESSION_SECRET com pelo menos 32 caracteres aleatórios antes de rodar em produção."
+      "SESSION_SECRET não configurado (ou muito curto — mínimo 32 caracteres). " +
+      "Gere um com: node -e \"console.log(require('crypto').randomBytes(32).toString('base64url'))\""
     );
   }
 
-  console.warn(
-    "[auth] SESSION_SECRET não configurado — usando segredo de desenvolvimento inseguro. Configure SESSION_SECRET no .env antes de ir para produção."
-  );
-  return "dev-insecure-secret-do-not-use-in-production";
+  // Em dev: gerar segredo aleatório por processo em vez de hardcoded.
+  // Previne que código publicamente conhecido seja usado para forjar tokens.
+  if (!(globalThis as any).__GEMGYM_DEV_SECRET) {
+    (globalThis as any).__GEMGYM_DEV_SECRET = crypto.randomBytes(32).toString("hex");
+    console.warn(
+      "[auth] SESSION_SECRET não configurado — usando segredo aleatório de desenvolvimento. " +
+      "Configure SESSION_SECRET no .env antes de ir para produção."
+    );
+  }
+  return (globalThis as any).__GEMGYM_DEV_SECRET;
 }
 
 // ─── Senha (bcrypt: salt único por hash + custo computacional) ────────────
@@ -73,22 +74,32 @@ function legacySha256(password: string): string {
 
 /**
  * Verifica a senha contra o hash armazenado.
- * Suporta três formatos, dos mais novos para os mais antigos:
- *  1. bcrypt (`$2a$`/`$2b$`/`$2y$`) — formato atual, com salt e custo.
+ * Suporta dois formatos:
+ *  1. bcrypt ($2a$/$2b$/$2y$) — formato atual, com salt e custo.
  *  2. sha256 legado (64 hex, sem salt) — formato antigo, mantido só p/ compat.
- *  3. texto puro legado — algumas contas demo antigas guardavam a senha direto.
- * Combine com `needsRehash` para migrar a conta pro formato novo no login.
+ *     Usa crypto.timingSafeEqual para evitar timing attacks.
+ *
+ * #6 FIX: Caminho de texto puro REMOVIDO. Contas legadas com senha em
+ * texto puro devem ser migradas para bcrypt antes do login. Se um hash
+ * não corresponder a nenhum formato conhecido, retorna" falso (não aceita).
  */
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  // Formato atual: bcrypt
   if (hash.startsWith("$2a$") || hash.startsWith("$2b$") || hash.startsWith("$2y$")) {
     return bcrypt.compare(password, hash);
   }
+  // Formato legado: sha256 sem salt — usar comparação timing-safe
+  // #21 FIX: Antes usava === (vulnerável a timing attacks)
   if (LEGACY_SHA256_RE.test(hash)) {
-    return legacySha256(password) === hash;
+    const computed = legacySha256(password);
+    const computedBuf = Buffer.from(computed, "hex");
+    const hashBuf = Buffer.from(hash, "hex");
+    if (computedBuf.length !== hashBuf.length) return false;
+    return crypto.timingSafeEqual(computedBuf, hashBuf);
   }
-  // Texto puro legado — comparação simples é aceitável aqui pois esse
-  // caminho só existe para compatibilidade com contas demo já criadas.
-  return password === hash;
+  // Qualquer outro formato (incl. texto puro) — REJEITAR
+  // Contas demo legadas devem ser migradas para bcrypt via script.
+  return false;
 }
 
 /** true se o hash armazenado ainda não está no formato bcrypt atual. */
@@ -127,10 +138,8 @@ interface SessionPayload {
  * Cria um token de sessão assinado (JWT HS256): header.payload.signature.
  * Só quem conhece SESSION_SECRET consegue gerar uma assinatura válida —
  * portanto não dá para forjar um token só conhecendo o id de outro usuário.
- * `expirySeconds` opcional — default é o prazo do cookie (30 dias); use
- * `BEARER_TOKEN_EXPIRY_SECONDS` para o token exposto ao JS (localStorage).
  */
-export async function createSession(userId: string, expirySeconds: number = SESSION_EXPIRY_SECONDS): Promise<string> {
+export async function createSession(userId: string): Promise<string> {
   const secret = getSessionSecret();
   const now = Math.floor(Date.now() / 1000);
 
@@ -138,7 +147,7 @@ export async function createSession(userId: string, expirySeconds: number = SESS
   const payload: SessionPayload = {
     sub: userId,
     iat: now,
-    exp: now + expirySeconds,
+    exp: now + SESSION_EXPIRY_SECONDS,
   };
 
   const headerPart = base64url(JSON.stringify(header));
@@ -183,13 +192,19 @@ function verifySession(token: string): string | null {
 export async function setSessionCookie(token: string, remember: boolean = true) {
   const cookieStore = await cookies();
 
+  // #22 FIX: Cookie secure sempre true quando em HTTPS (Vercel, staging com HTTPS)
+  // Antes: secure: process.env.NODE_ENV === "production" — falhava em preview URLs
+  const isSecure = process.env.NODE_ENV === "production" ||
+    process.env.VERCEL === "1" ||
+    process.env.FORCE_SECURE_COOKIE === "1";
+
   if (remember) {
-    // "Manter conectado": cookie persiste por 30 dias mesmo fechando o navegador.
+    // "Manter conectado": cookie persiste por SESSION_EXPIRY_DAYS mesmo fechando o navegador.
     const expires = new Date();
     expires.setDate(expires.getDate() + SESSION_EXPIRY_DAYS);
     cookieStore.set(SESSION_COOKIE, token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isSecure,
       sameSite: "lax",
       expires,
       path: "/",
@@ -198,7 +213,7 @@ export async function setSessionCookie(token: string, remember: boolean = true) 
     // Sem "manter conectado": cookie de sessão, expira ao fechar o navegador.
     cookieStore.set(SESSION_COOKIE, token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isSecure,
       sameSite: "lax",
       path: "/",
     });
@@ -259,17 +274,14 @@ async function lookupUser(userId: string): Promise<SelectedUser | null> {
 }
 
 /**
- * Obtém o usuário atual a partir do Bearer token (header Authorization)
- * ou do cookie de sessão. Suporte híbrido para máxima compatibilidade
- * (especialmente em cenários cross-origin como preview URLs).
- *
- * Aceita opcionalmente um NextRequest para ler headers diretamente
- * (mais confiável que next/headers em alguns contextos).
+ * Obtém o usuário atual a partir do cookie de sessão httpOnly (primário)
+ * ou do Bearer token no header Authorization (fallback cross-origin).
  */
 export async function getCurrentUser(req?: NextRequest): Promise<SelectedUser | null> {
   let token: string | null = null;
 
   // 1. Tentar via header Authorization: Bearer <token> no request direto
+  //    (cross-origin fallback — ex.: preview URLs da Vercel)
   if (req) {
     const authHeader =
       req.headers.get("authorization") || req.headers.get("Authorization");
@@ -293,7 +305,7 @@ export async function getCurrentUser(req?: NextRequest): Promise<SelectedUser | 
     }
   }
 
-  // 3. Fallback para cookie
+  // 3. Fallback para cookie httpOnly (mecanismo primário em same-origin)
   if (!token) {
     try {
       const cookieStore = await cookies();

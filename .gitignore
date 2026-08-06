@@ -52,3 +52,11 @@ prompt
 server.log
 # Skills directory
 /skills/
+
+# ═══ Security: nunca commitar dados sensíveis ═══
+# CSVs com PII/senhas
+download/*.csv
+*.csv
+# Backups de banco com dados reais
+*.sql.backup
+*.dump

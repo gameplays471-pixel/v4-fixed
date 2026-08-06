@@ -88,7 +88,14 @@ const phoneRegex = /^\D*(\d{2})\D*(\d{4,5})\D*(\d{4})\D*$/;
 
 export const signupSchema = z.object({
   email: z.string().trim().toLowerCase().email("Email inválido").max(200),
-  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").max(200),
+  // #23 FIX: Requisitos de senha mais fortes
+  // Antes: apenas min(6) — aceitava "aaaaaa", "123456"
+  password: z.string()
+    .min(8, "Senha deve ter pelo menos 8 caracteres")
+    .max(200)
+    .regex(/[A-Z]/, "Senha deve conter ao menos uma letra maiúscula")
+    .regex(/[a-z]/, "Senha deve conter ao menos uma letra minúscula")
+    .regex(/[0-9]/, "Senha deve conter ao menos um número"),
   name: z.string().trim().min(1).max(100).optional(),
   phone: z
     .string()

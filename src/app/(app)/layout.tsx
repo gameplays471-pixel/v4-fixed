@@ -9,7 +9,6 @@ import { useAppStore } from "@/lib/store";
 import { AuthScreen } from "@/components/auth-screen";
 import { Sidebar } from "@/components/sidebar";
 import { OnboardingTour } from "@/components/onboarding-tour";
-import { PersoGemChat } from "@/components/persogem/persogem-chat";
 import { getToken, setToken, apiPost } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { LogOut, User, Gamepad2 } from "lucide-react";
@@ -231,34 +230,14 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
         if (!data.user) setToken(null);
       })
       .catch(() => {
-        // Só confiamos no cache de usuário quando há evidência REAL de
-        // que estamos offline (navigator.onLine === false) — nesse caso
-        // sim vale manter a pessoa "logada" com dados antigos (pode estar
-        // no meio de um treino e a rede da academia caiu); quando a
-        // conexão voltar, o token/cookie é revalidado normalmente.
-        //
-        // Se o fetch de /api/auth/me falhou por outro motivo (bloqueador
-        // de conteúdo/extensão, engasgo pontual de rede, etc.) COM a rede
-        // no ar, confiar no cache aqui é perigoso: a sessão pode já estar
-        // realmente inválida (cookie expirado), e a Dashboard vai montar
-        // achando que está logada, disparar 5 chamadas autenticadas em
-        // paralelo (workouts, stats, plans, gamification, sessions), TODAS
-        // tomarem 401 do servidor, e forçar um reload — pior experiência
-        // (flash de dashboard + storm de erros) do que só mostrar a tela
-        // de login direto. Esse fallback otimista era a causa raiz dos
-        // 401 em cascata reportados: /api/auth/me falhava na rede,
-        // caíamos aqui, e "logávamos" a pessoa com o cache mesmo sem a
-        // sessão ter sido revalidada de fato.
-        const trulyOffline = typeof navigator !== "undefined" && navigator.onLine === false;
+        // Se a rede caiu mas temos um token OU cache de usuário,
+        // não derrubar — o usuário pode estar no meio de um treino.
+        // O token será verificado quando a conexão voltar.
         const cached = getCachedUser();
-        if (trulyOffline && (token || cached)) {
+        if (token || cached) {
           if (cached && !user) setUser(cached);
           setLoading(false);
-          return;
         }
-        setUser(null);
-        setCachedUser(null);
-        setLoading(false);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -273,63 +252,6 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, activeWorkoutId, pathname]);
-
-  // Sincroniza o `user` do layout com a query de perfil. Sem isso, quando o
-  // usuário ativa/desativa o mini-game em /perfil, a tela de Perfil atualiza
-  // o cache `queryKeys.profile` (ver `handleToggleGame` em
-  // components/views/profile.tsx) — mas o layout, que mantém seu próprio
-  // `useState<AppUser>` pra alimentar a Sidebar e o menu mobile, nunca fica
-  // sabendo. Resultado: o item "Mini-game" no menu lateral só aparecia (ou
-  // sumia) depois de F5 / logout-login. A correção é subscrever à mesma
-  // query e fazer merge superficial dos campos que afetam a navegação.
-  // Roda uma vez só na montagem do layout: o callback usa `setUser` com
-  // updater function (referência estável), então não precisa recriar.
-  //
-  // A query `queryKeys.profile` guarda o `user` diretamente (ver
-  // `queryFn` e `setQueryData` em components/views/profile.tsx) — não
-  // `data?.user`.
-  useEffect(() => {
-    const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
-      if (event.type !== "updated") return;
-      const query = event.query;
-      if (query.queryKey[0] !== queryKeys.profile[0]) return;
-      const updated = query.state.data as Partial<AppUser> | undefined;
-      if (!updated) return;
-      setUser((prev) => {
-        // Sem mudança real → retorna a mesma referência pra não causar
-        // re-render desnecessário (importante: a Sidebar filtra `items`
-        // por `user.gameEnabled`; uma ref estável evita remontagem).
-        if (
-          prev &&
-          prev.gameEnabled === updated.gameEnabled &&
-          prev.name === updated.name &&
-          prev.email === updated.email &&
-          prev.role === updated.role
-        ) {
-          return prev;
-        }
-        // `Partial<AppUser>` significa que qualquer campo pode chegar
-        // `undefined`, mas a Sidebar e o menu mobile precisam de valores
-        // concretos em `name`/`email` (são exibidos). Mantemos os antigos
-        // como fallback quando o update trouxer `undefined` em algum
-        // desses campos — é mais seguro que quebrar a UI.
-        const base: AppUser = prev ?? { name: "", email: "" };
-        const merged: AppUser = {
-          name: updated.name ?? base.name,
-          email: updated.email ?? base.email,
-          role: updated.role ?? base.role,
-          gameEnabled: updated.gameEnabled ?? base.gameEnabled,
-        };
-        // Atualiza também o cache local (USER_CACHE_KEY) pra o próximo
-        // cold-start já pegar o gameEnabled novo sem depender do
-        // /api/auth/me.
-        setCachedUser(merged);
-        return merged;
-      });
-    });
-    return unsubscribe;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryClient]);
 
   const handleAuth = (u: unknown, token?: string, rememberMe = true, isSignup = false) => {
     if (token) setToken(token, rememberMe);
@@ -444,8 +366,6 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       </main>
 
       <MobileBottomNav />
-
-      <PersoGemChat />
 
       <OnboardingTour
         open={showOnboarding}

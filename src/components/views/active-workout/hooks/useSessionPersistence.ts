@@ -145,41 +145,6 @@ export function useSessionPersistence(workoutId: string) {
     });
   }, [workoutId, setsMap, cardioMap, collapsedExercises, startedAt]);
 
-  // Reforço extra do autosave acima: guarda numa ref o estado mais recente
-  // pra poder gravar de forma síncrona em "pagehide"/"visibilitychange"
-  // (aba minimizada, app trocado no celular, navegador fechado). O efeito
-  // acima já cobre isso na prática (roda a cada mudança de estado), mas
-  // mobile pode suspender/matar uma aba em segundo plano sem aviso — este
-  // listener garante que o último estado em memória seja persistido antes
-  // disso acontecer. "pagehide" é preferido a "beforeunload" (mais
-  // confiável em Safari/Chrome mobile e não quebra o bfcache).
-  const latestRef = useRef({ workoutId, startedAt, setsMap, cardioMap, collapsedExercises });
-  latestRef.current = { workoutId, startedAt, setsMap, cardioMap, collapsedExercises };
-
-  useEffect(() => {
-    const flush = () => {
-      if (!hydratedRef.current) return;
-      const s = latestRef.current;
-      saveWorkoutDraft({
-        workoutId: s.workoutId,
-        startedAt: s.startedAt.toISOString(),
-        setsMap: s.setsMap,
-        cardioMap: s.cardioMap,
-        collapsedExercises: Array.from(s.collapsedExercises),
-        savedAt: new Date().toISOString(),
-      });
-    };
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "hidden") flush();
-    };
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    window.addEventListener("pagehide", flush);
-    return () => {
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-      window.removeEventListener("pagehide", flush);
-    };
-  }, []);
-
   // Cronômetro de treino
   useEffect(() => {
     const interval = setInterval(() => {

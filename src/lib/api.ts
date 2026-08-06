@@ -1,111 +1,49 @@
-// Cliente de API com suporte a Bearer token (localStorage) + cookie fallback
-// Trata 401 redirecionando para a tela de login
+// Cliente de API com autenticação via cookie httpOnly (primário)
+// O Bearer token via localStorage foi removido por segurança (#3 FIX):
+// qualquer XSS poderia ler localStorage.getItem("gemgym_token") e roubar
+// a sessão. O cookie httpOnly não é acessível via JavaScript.
+//
+// Para cross-origin (preview URLs), o cookie é enviado via
+// credentials: "same-origin" — se necessário cross-origin no futuro,
+// usar credentials: "include" + CORS com origins explícitas.
 
 export const TOKEN_KEY = "gemgym_token";
 
-// Cache do objeto de usuário (nome/email/role/gameEnabled) usado pelo
-// AppShellLayout para renderizar a UI otimisticamente antes de /api/auth/me
-// responder. Ao contrário do token acima, este cache NÃO é restrito à
-// origem de preview — existe em produção também, de propósito, para dar
-// um "cold start" mais rápido. Por isso é essencial limpá-lo aqui sempre
-// que um 401 confirma que a sessão está mesmo inválida: caso contrário,
-// um usuário deslogado continua sendo tratado como "logado" (com dados
-// velhos) na próxima vez que o app abrir, até a rede falhar de novo.
-export const USER_CACHE_KEY = "gemgym:user-cache";
-
-export function clearCachedUser() {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.removeItem(USER_CACHE_KEY);
-  } catch {
-    // ignore
-  }
-}
-
-// O token em localStorage só existe pra suportar o preview em iframe
-// (`*.space-z.ai` / `preview-*.space-z.ai`, ver `allowedDevOrigins` em
-// next.config.ts) — cenário em que cookies podem não ser confiáveis
-// (partição/bloqueio de cookie de terceiro em iframe). Em produção, front
-// e API estão sempre na mesma origem na Vercel (só o banco é externo), e
-// aí o cookie httpOnly já basta sozinho — não precisa de token legível
-// por JS voando por aí. Fora dessa origem de preview, o token devolvido
-// pelo login NUNCA é gravado em localStorage/sessionStorage: um XSS em
-// produção não tem mais nenhum token de sessão pra roubar por lá, só o
-// cookie httpOnly (inacessível a JS).
-function isPreviewSandboxOrigin(): boolean {
-  if (typeof window === "undefined") return false;
-  return /(^|\.)space-z\.ai$/.test(window.location.hostname);
-}
-
+// getToken/setToken mantidos como no-op para compatibilidade com
+// componentes que ainda referenciam essas funções, mas não armazenam
+// mais o token no localStorage.
 export function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  if (!isPreviewSandboxOrigin()) return null;
-  // Prioriza localStorage (login persistente); cai para sessionStorage
-  // (login válido só nesta aba/sessão do navegador) se não achar.
-  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+  return null; // Token não é mais armazenado client-side
 }
 
-/**
- * Salva o token de autenticação.
- * @param remember Se true (padrão), usa localStorage e o login persiste
- *   entre sessões do navegador ("Manter conectado"). Se false, usa
- *   sessionStorage e a sessão termina ao fechar a aba/navegador.
- *
- * Fora da origem de preview, gravar um token não-nulo é sempre um no-op —
- * ver comentário acima de `isPreviewSandboxOrigin`. `setToken(null)` (usado
- * no logout) continua funcionando em qualquer origem, pra sempre limpar
- * resíduo de uma sessão anterior de preview.
- */
-export function setToken(token: string | null, remember: boolean = true) {
-  if (typeof window === "undefined") return;
-  // Sempre limpa os dois primeiro para não deixar token velho para trás.
-  localStorage.removeItem(TOKEN_KEY);
-  sessionStorage.removeItem(TOKEN_KEY);
-  if (token && isPreviewSandboxOrigin()) {
-    if (remember) {
-      localStorage.setItem(TOKEN_KEY, token);
-    } else {
-      sessionStorage.setItem(TOKEN_KEY, token);
-    }
+export function setToken(_token: string | null, _remember: boolean = true) {
+  // No-op: autenticação via cookie httpOnly apenas.
+  // Limpa qualquer token residual de versões anteriores.
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
   }
-  // Login válido novo: libera a trava de reload-guard (ver handleUnauthorized)
-  // pra próxima expiração de sessão ainda conseguir recarregar 1x.
-  if (token) sessionStorage.removeItem(RELOAD_GUARD_KEY);
 }
 
+// authHeaders não envia mais Bearer token — cookie é enviado automaticamente
 function authHeaders(): HeadersInit {
-  const token = getToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return {};
 }
 
 /** Trata resposta 401 limpando a sessão local e recarregando p/ tela de login */
-const RELOAD_GUARD_KEY = "gemgym_401_reload_guard";
-
 function handleUnauthorized() {
   setToken(null);
-  clearCachedUser();
-  if (typeof window === "undefined") return;
-  // Evita loop infinito de reload: o app não tem uma rota /auth própria
-  // (a tela de login aparece sem trocar a URL), então checar o pathname
-  // nunca funcionava como proteção real. Em vez disso, usamos uma trava em
-  // sessionStorage: só permitimos 1 reload automático por "rodada". Se
-  // mesmo depois de recarregar o 401 persistir (ex.: cache de service
-  // worker desatualizado, ou qualquer outra causa que um reload sozinho
-  // não resolve), paramos de tentar — a tela de login aparece assim que
-  // /api/auth/me também refletir a sessão inválida, sem ficar recarregando
-  // pra sempre. A trava é limpa a cada login bem-sucedido (ver setToken).
-  if (sessionStorage.getItem(RELOAD_GUARD_KEY)) {
-    console.warn("Sessão expirada, mas evitando novo reload automático (possível loop).");
-    return;
+  // Evita loop infinito se já estamos em contexto de auth
+  if (typeof window !== "undefined" && !window.location.pathname.startsWith("/auth")) {
+    console.warn("Sessão expirada. Recarregando para tela de login.");
+    window.location.reload();
   }
-  sessionStorage.setItem(RELOAD_GUARD_KEY, "1");
-  console.warn("Sessão expirada. Recarregando para tela de login.");
-  window.location.reload();
 }
 
 export async function apiGet<T>(url: string): Promise<T> {
   const res = await fetch(url, {
     headers: { "Content-Type": "application/json", ...authHeaders() },
+    credentials: "same-origin", // garante envio do cookie httpOnly
   });
   if (res.status === 401) {
     handleUnauthorized();
@@ -120,6 +58,7 @@ export async function apiPost<T>(url: string, body?: unknown): Promise<T> {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: body ? JSON.stringify(body) : undefined,
+    credentials: "same-origin",
   });
   const data = await res.json().catch(() => ({}));
   if (res.status === 401) {
@@ -127,11 +66,6 @@ export async function apiPost<T>(url: string, body?: unknown): Promise<T> {
     throw new Error(data.error || "Sessão expirada");
   }
   if (!res.ok) {
-    // Em 400 de validação (zod), o backend manda `details` (campo + motivo
-    // exato) além de `error` (mensagem genérica "Dados inválidos"). Antes
-    // isso era descartado e só sobrava o texto genérico no toast — sem
-    // nenhum jeito de saber, nem no console do navegador, qual campo
-    // reprovou. Logamos aqui pra facilitar diagnóstico.
     if (data.details) console.error(`API ${res.status} em ${url}:`, data.details);
     throw new Error(data.error || `API error: ${res.status}`);
   }
@@ -143,6 +77,7 @@ export async function apiPut<T>(url: string, body?: unknown): Promise<T> {
     method: "PUT",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: body ? JSON.stringify(body) : undefined,
+    credentials: "same-origin",
   });
   const data = await res.json().catch(() => ({}));
   if (res.status === 401) {
@@ -161,6 +96,7 @@ export async function apiPatch<T>(url: string, body?: unknown): Promise<T> {
     method: "PATCH",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: body ? JSON.stringify(body) : undefined,
+    credentials: "same-origin",
   });
   const data = await res.json().catch(() => ({}));
   if (res.status === 401) {
@@ -178,6 +114,7 @@ export async function apiDelete<T>(url: string): Promise<T> {
   const res = await fetch(url, {
     method: "DELETE",
     headers: authHeaders(),
+    credentials: "same-origin",
   });
   const data = await res.json().catch(() => ({}));
   if (res.status === 401) {

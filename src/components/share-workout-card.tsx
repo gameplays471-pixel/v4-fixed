@@ -37,42 +37,23 @@ function fmtVolume(v: number) {
 }
 
 // Lista "3× Supino Inclinado" usada nas variantes silhouette-list e list.
-// Em vez de cortar tudo além de `maxItems` num "+N exercícios" (o que escondia
-// a maior parte do treino já a partir de 5-6 exercícios), a lista agora:
-//  1. muda para 2 colunas automaticamente quando há muitos exercícios, e
-//  2. reduz fonte/padding/gap em degraus conforme a quantidade cresce,
-// para caber o treino inteiro dentro da altura fixa do card. Só aplicamos o
-// "+N" como último recurso, com um teto bem mais alto (`hardCap`) — na
-// prática cobre qualquer treino razoável (raramente > 20 exercícios).
+// `columns=2` (só na variante "list", que tem a área toda livre pro texto)
+// cabe bastante exercício sem estourar a altura do card; `maxItems` corta
+// o resto num "+N exercícios" em vez de deixar a imagem crescer/cortar.
 function ExerciseList({
   exercises,
   columns,
-  hardCap,
+  maxItems,
 }: {
   exercises: WorkoutSummaryData["exercises"];
   columns: 1 | 2;
-  hardCap: number;
+  maxItems: number;
 }) {
-  const shown = exercises.slice(0, hardCap);
+  const shown = exercises.slice(0, maxItems);
   const extra = exercises.length - shown.length;
-  const count = shown.length;
-
-  // Colunas: força 2 quando há exercícios demais para 1 coluna só, mesmo em
-  // variantes que por padrão usariam 1 (silhouette-list).
-  const effectiveColumns: 1 | 2 = count > 6 ? 2 : columns;
-
-  // Degraus de tamanho — quanto mais exercícios, mais compacto cada item.
-  const tier =
-    count <= 6 ? 0 :
-    count <= 10 ? 1 :
-    count <= 16 ? 2 : 3;
-  const fontSize = [12, 11, 10, 9][tier];
-  const padding = ["8px 10px", "6px 8px", "5px 7px", "4px 5px"][tier];
-  const gap = [7, 5, 4, 3][tier];
-  const countFontSize = fontSize + 0.5;
 
   return (
-    <div style={{ width: "100%", display: "grid", gridTemplateColumns: `repeat(${effectiveColumns}, 1fr)`, gap }}>
+    <div style={{ width: "100%", display: "grid", gridTemplateColumns: `repeat(${columns}, 1fr)`, gap: 7 }}>
       {shown.map((ex, i) => (
         <div
           key={i}
@@ -83,17 +64,17 @@ function ExerciseList({
             background: "rgba(255,255,255,0.05)",
             border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: 10,
-            padding,
+            padding: "8px 10px",
             minWidth: 0,
           }}
         >
-          <span style={{ flexShrink: 0, fontWeight: 900, fontSize: countFontSize, color: "#4ade80" }}>
+          <span style={{ flexShrink: 0, fontWeight: 900, fontSize: 12.5, color: "#4ade80" }}>
             {ex.sets.length}×
           </span>
           <span
             style={{
               fontWeight: 700,
-              fontSize,
+              fontSize: 12,
               color: "rgba(245,245,245,0.9)",
               lineHeight: 1.25,
               overflow: "hidden",
@@ -108,7 +89,7 @@ function ExerciseList({
       {extra > 0 && (
         <div
           style={{
-            gridColumn: `span ${effectiveColumns}`,
+            gridColumn: `span ${columns}`,
             textAlign: "center",
             fontSize: 11,
             color: "rgba(245,245,245,0.45)",
@@ -164,10 +145,7 @@ export const ShareWorkoutCard = forwardRef<HTMLDivElement, ShareWorkoutCardProps
     // menos itens (o resto vira "+N exercícios"). Na variante só-lista, o
     // espaço todo do manequim é reaproveitado, então cabe muito mais.
     const silhouetteMaxHeight = variant === "silhouette" ? (isStory ? 300 : 170) : isStory ? 168 : 96;
-    // Teto alto — a lista mesma decide colunas/tamanho de fonte conforme a
-    // quantidade (ver ExerciseList). Isso evita truncar treinos comuns de
-    // 5-8 exercícios num "+N exercícios" quase vazio.
-    const listHardCap = variant === "list" ? (isStory ? 24 : 18) : isStory ? 20 : 14;
+    const listMaxItems = variant === "list" ? (isStory ? 12 : 8) : isStory ? 5 : 4;
     const listColumns: 1 | 2 = variant === "list" ? 2 : 1;
 
     const totalSets = data.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
@@ -373,7 +351,7 @@ export const ShareWorkoutCard = forwardRef<HTMLDivElement, ShareWorkoutCardProps
               </div>
             )}
             {showList && (
-              <ExerciseList exercises={data.exercises} columns={listColumns} hardCap={listHardCap} />
+              <ExerciseList exercises={data.exercises} columns={listColumns} maxItems={listMaxItems} />
             )}
           </div>
 

@@ -2,16 +2,7 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  // "standalone" é usado só pelo script `build` (self-hosting/Docker), que
-  // copia .next/standalone manualmente depois. Na Vercel (`vercel-build`)
-  // esse modo não é usado pra nada — o deploy é empacotado de outro jeito —
-  // e combinado com o Turbopack (padrão a partir do Next 16) ele dispara um
-  // bug conhecido onde o arquivo de trace `middleware.js.nft.json` não é
-  // gerado, quebrando o build com ENOENT. A Vercel sempre define a env var
-  // VERCEL=1 durante o build, então usamos isso pra desativar o standalone
-  // só nesse ambiente. Ver: github.com/vercel/next.js/issues (múltiplas
-  // issues abertas sobre Turbopack + output:standalone + middleware).
-  output: process.env.VERCEL ? undefined : "standalone",
+  output: "standalone",
   /* config options here */
   typescript: {
     ignoreBuildErrors: false,
@@ -39,6 +30,24 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // ── Headers de segurança globais (#20 FIX) ────────────────────
+      // Aplicados em TODAS as rotas via Next.js config.
+      // O middleware (src/middleware.ts) também seta esses headers
+      // para requests que passam pelo edge — a duplicação é
+      // intencional (defense in depth: se o middleware falhar,
+      // o Next.js config ainda aplica).
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          // HSTS: 2 anos com includeSubDomains + preload
+          // Só efetivo em HTTPS (HTTP headers são ignorados pelo browser)
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+        ],
+      },
       {
         // O arquivo do service worker nunca pode ficar em cache "velho"
         // no navegador/CDN, senão uma atualização do app não chega no

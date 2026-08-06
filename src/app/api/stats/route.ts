@@ -35,12 +35,7 @@ export const GET = withErrorHandling("Get stats", async (req: NextRequest) => {
   };
   type MuscleRow = { muscleGroup: string; c: number };
 
-  type WeeklyRow = { week_start: Date; volume: number; sessions: number };
-
-  const eightWeeksAgo = new Date(weekStart);
-  eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 7 * 7);
-
-  const [sessionAgg, weeklyAgg, weeklyRows, heatmapRows, distinctDays, exerciseAggs, topMuscleRows] =
+  const [sessionAgg, weeklyAgg, heatmapRows, distinctDays, exerciseAggs, topMuscleRows] =
     await Promise.all([
       db.workoutSession.aggregate({
         where: { userId },
@@ -50,19 +45,7 @@ export const GET = withErrorHandling("Get stats", async (req: NextRequest) => {
       db.workoutSession.aggregate({
         where: { userId, startedAt: { gte: weekStart } },
         _sum: { totalVolume: true },
-        _count: { _all: true },
       }),
-      db.$queryRaw<WeeklyRow[]>`
-        SELECT
-          date_trunc('week', "startedAt")::date AS week_start,
-          COALESCE(SUM("totalVolume"), 0)::float AS volume,
-          COUNT(*)::int AS sessions
-        FROM "WorkoutSession"
-        WHERE "userId" = ${userId}
-          AND "startedAt" >= ${eightWeeksAgo}
-        GROUP BY 1
-        ORDER BY 1
-      `,
       db.$queryRaw<HeatmapRow[]>`
         SELECT
           date_trunc('day', "startedAt")::date AS day,
@@ -111,37 +94,7 @@ export const GET = withErrorHandling("Get stats", async (req: NextRequest) => {
   const totalVolume = sessionAgg._sum.totalVolume ?? 0;
   const totalDuration = sessionAgg._sum.durationSec ?? 0;
   const avgDuration = totalSessions > 0 ? totalDuration / totalSessions : 0;
-  // Mapa semana ISO → dados; preenche as últimas 8 semanas (mesmo sem treino)
-  const weeklyMap = new Map<string, { volume: number; sessions: number }>();
-  for (const row of weeklyRows) {
-    const d = new Date(row.week_start);
-    d.setHours(0, 0, 0, 0);
-    // date_trunc('week') no Postgres = segunda (ISO) em muitos locales
-    const key = d.toISOString().split("T")[0];
-    weeklyMap.set(key, {
-      volume: Number(row.volume),
-      sessions: Number(row.sessions),
-    });
-  }
-
-  const weeklyVolume: Array<{ week: string; weekLabel: string; volume: number; sessions: number }> = [];
-  for (let i = 7; i >= 0; i--) {
-    const d = new Date(weekStart);
-    d.setDate(d.getDate() - i * 7);
-    d.setHours(0, 0, 0, 0);
-    const key = d.toISOString().split("T")[0];
-    const cell = weeklyMap.get(key) ?? { volume: 0, sessions: 0 };
-    const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
-    weeklyVolume.push({
-      week: key,
-      weekLabel: label,
-      volume: cell.volume,
-      sessions: cell.sessions,
-    });
-  }
-
-  const weeklyVolumeCurrent = weeklyAgg._sum.totalVolume ?? 0;
-  const weeklySessionsCurrent = weeklyAgg._count._all ?? 0;
+  const weeklyVolume = weeklyAgg._sum.totalVolume ?? 0;
 
   const daySet = new Set(
     distinctDays.map((d) => new Date(d.day).toISOString().split("T")[0])
@@ -207,8 +160,6 @@ export const GET = withErrorHandling("Get stats", async (req: NextRequest) => {
       avgDuration,
       streak,
       weeklyVolume,
-      weeklyVolumeCurrent,
-      weeklySessionsCurrent,
       topMuscleGroup,
       favoriteExercise,
       records,

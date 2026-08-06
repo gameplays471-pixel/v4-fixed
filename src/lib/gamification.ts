@@ -3,6 +3,8 @@
 // ranking de grupo (/api/groups/[id]/ranking) — se um dia os pesos
 // mudarem, muda num lugar só.
 
+import crypto from "crypto";
+
 export const GAME_POINTS = {
   WORKOUT: 10, // por treino concluído (WorkoutSession) na semana
   DIET_DAY: 5, // por dia marcado "segui a dieta"
@@ -46,12 +48,14 @@ export function computeGameScore(counts: { workouts: number; dietDays: number; w
   );
 }
 
-/** Gera um código de convite curto e fácil de digitar (sem caracteres ambíguos). */
+/** Gera um código de convite curto e fácil de digitar (sem caracteres ambíguos).
+ * #13 FIX: Usa crypto.randomInt() em vez de Math.random() — PRNG criptográfico
+ * impossibilita previsão por atacante observando saídas anteriores. */
 export function generateInviteCode(): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sem 0/O, 1/I
   let code = "";
   for (let i = 0; i < 6; i++) {
-    code += alphabet[Math.floor(Math.random() * alphabet.length)];
+    code += alphabet[crypto.randomInt(alphabet.length)];
   }
   return code;
 }

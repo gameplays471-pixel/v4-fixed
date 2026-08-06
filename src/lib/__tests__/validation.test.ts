@@ -13,7 +13,6 @@ describe("signupSchema", () => {
   const validPayload = {
     email: "user@example.com",
     password: "123456",
-    phone: "11987654321",
   };
 
   it("aceita payload válido mínimo (email + senha)", () => {
@@ -62,7 +61,6 @@ describe("signupSchema", () => {
     const result = signupSchema.safeParse({
       email: "  user@example.com  ",
       password: "123456",
-      phone: "11987654321",
     });
     expect(result.success).toBe(true);
     if (result.success) {

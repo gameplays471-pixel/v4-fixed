@@ -1,55 +1,63 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Radio,
-  WifiOff,
-  Clock,
-  Dumbbell,
-  Check,
-  Trophy,
-} from "lucide-react";
-import { formatVolume } from "@/lib/api";
-import type { LiveSnapshot } from "@/components/views/active-workout/hooks/useLiveShare";
+import { Radio, Clock, Dumbbell, CheckCircle2, Circle, WifiOff } from "lucide-react";
 
-const POLL_INTERVAL_MS = 1_500;
-const STALE_AFTER_MS = 20_000;
+const POLL_INTERVAL_MS = 5000;
+// Se não chegar snapshot novo por esse tempo, tratamos como "sinal fraco" —
+// não necessariamente encerrado (o servidor só apaga o registro quando o
+// treino é finalizado/cancelado/desligado explicitamente).
+const STALE_AFTER_MS = 45_000;
 
-type LivePayload = {
+interface LiveExercise {
+  name: string;
+  isCardio: boolean;
+  totalSets: number;
+  completedSets: number;
+  current: boolean;
+}
+
+interface LiveSnapshot {
+  elapsed: number;
+  totalSets: number;
+  completedSets: number;
+  totalVolume: number;
+  totalCardioMin: number;
+  exercises: LiveExercise[];
+}
+
+interface LivePayload {
   workoutName: string;
   ownerName: string;
   startedAt: string;
   updatedAt: string;
   snapshot: LiveSnapshot;
-};
-
-function formatTime(sec: number) {
-  const s = Math.max(0, Math.floor(sec));
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
 }
 
-export default function LivePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const resolved = use(params);
-  const slug = resolved.slug;
+function formatTime(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
 
+export default function LiveWorkoutPage({ params }: { params: Promise<{ slug: string }> }) {
+  const [slug, setSlug] = useState<string | null>(null);
   const [data, setData] = useState<LivePayload | null>(null);
   const [ended, setEnded] = useState(false);
+  const [lastFetchedAt, setLastFetchedAt] = useState<number>(Date.now());
+  const [tick, setTick] = useState(0);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-  const [lastFetchedAt, setLastFetchedAt] = useState(0);
-  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    params.then((p) => setSlug(p.slug));
+  }, [params]);
 
   useEffect(() => {
     if (!slug) return;
+
     let cancelled = false;
 
     const poll = async () => {
@@ -60,26 +68,13 @@ export default function LivePage({
           setEnded(true);
           return;
         }
-        const json = (await res.json()) as LivePayload;
-        // Garante shape mínimo se snapshot antigo
-        if (!json.snapshot) {
-          json.snapshot = {
-            elapsed: 0,
-            totalSets: 0,
-            completedSets: 0,
-            totalVolume: 0,
-            totalCardioMin: 0,
-            exercises: [],
-          };
-        }
-        if (!Array.isArray(json.snapshot.exercises)) {
-          json.snapshot.exercises = [];
-        }
+        const json = await res.json();
         setData(json);
         setEnded(false);
         setLastFetchedAt(Date.now());
       } catch {
-        /* rede instável */
+        // rede instável — só marca "fim" se a gente já sabia que tinha dados antes,
+        // não achamos que a transmissão acabou por causa de um blip de conexão.
       } finally {
         setHasLoadedOnce(true);
       }
@@ -93,6 +88,7 @@ export default function LivePage({
     };
   }, [slug]);
 
+  // Só pra re-renderizar o relógio local a cada segundo (elapsed sobe entre polls).
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(id);
@@ -100,237 +96,105 @@ export default function LivePage({
 
   const isStale = data ? Date.now() - lastFetchedAt > STALE_AFTER_MS : false;
   const secondsSincePoll = data ? Math.floor((Date.now() - lastFetchedAt) / 1000) : 0;
-  const liveElapsed = data ? (data.snapshot.elapsed || 0) + secondsSincePoll : 0;
+  const liveElapsed = data ? data.snapshot.elapsed + secondsSincePoll : 0;
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-10 border-b border-border/60 bg-background/90 backdrop-blur-xl px-4 h-14 flex items-center justify-between">
+      <header className="sticky top-0 z-10 border-b border-border/60 bg-background/90 backdrop-blur-xl px-4 h-14 flex items-center">
         <Link href="/" className="flex items-center gap-2.5">
-          <Image
-            src="/logo.png"
-            alt="GEMgym"
-            width={28}
-            height={28}
-            className="w-7 h-7 rounded-xl object-cover ring-1 ring-primary/25"
-          />
+          <Image src="/logo.png" alt="GEMgym" width={28} height={28} className="w-7 h-7 rounded-xl object-cover ring-1 ring-primary/25" />
           <span className="font-black text-sm tracking-tight">GEMgym</span>
         </Link>
-        <span className="flex items-center gap-1.5 text-xs font-bold text-red-500 bg-red-500/10 rounded-full px-2.5 py-1">
-          <Radio className="w-3 h-3 animate-pulse" />
-          AO VIVO
-        </span>
       </header>
 
-      <div className="max-w-lg mx-auto px-4 py-5 space-y-4 pb-16">
+      <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
         {ended || (!data && hasLoadedOnce) ? (
           <Card className="p-8 text-center space-y-2">
             <p className="font-bold">Essa transmissão terminou</p>
             <p className="text-sm text-muted-foreground">
-              O treino foi finalizado, cancelado, ou a pessoa parou de compartilhar.
+              O treino foi finalizado, cancelado, ou a pessoa parou de compartilhar. O link não é mais válido.
             </p>
-            <Link
-              href="/"
-              className="inline-block text-sm text-primary font-semibold underline underline-offset-2 mt-2"
-            >
+            <Link href="/" className="inline-block text-sm text-primary font-semibold underline underline-offset-2 mt-2">
               Ir para o GEMgym
             </Link>
           </Card>
         ) : !data ? (
           <Card className="p-8 text-center">
-            <p className="text-sm text-muted-foreground">Carregando transmissão…</p>
+            <p className="text-sm text-muted-foreground">Carregando transmissão...</p>
           </Card>
         ) : (
           <>
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-red-500 bg-red-500/10 rounded-full px-2.5 py-1">
+                  <Radio className="w-3 h-3 animate-pulse" />
+                  AO VIVO
+                </span>
                 {isStale && (
                   <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                     <WifiOff className="w-3 h-3" /> sem atualização recente
                   </span>
                 )}
               </div>
-              <p className="text-xs font-semibold text-primary uppercase tracking-wide mt-1">
+              <p className="text-xs font-semibold text-primary uppercase tracking-wide mt-2">
                 {data.ownerName} está treinando
               </p>
-              <h1 className="text-2xl font-black tracking-tight mt-0.5">{data.workoutName}</h1>
+              <h1 className="text-2xl font-black tracking-tight mt-1">{data.workoutName}</h1>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
-              <Card className="p-3 text-center">
-                <Clock className="w-4 h-4 text-primary mx-auto mb-1" />
-                <p className="text-lg font-black tabular-nums leading-none">
-                  {formatTime(liveElapsed)}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-1">tempo</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="p-4 flex items-center gap-3">
+                <Clock className="w-5 h-5 text-primary shrink-0" />
+                <div>
+                  <p className="text-lg font-black tabular-nums leading-none">{formatTime(liveElapsed)}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">tempo decorrido</p>
+                </div>
               </Card>
-              <Card className="p-3 text-center">
-                <Dumbbell className="w-4 h-4 text-primary mx-auto mb-1" />
-                <p className="text-lg font-black tabular-nums leading-none">
-                  {data.snapshot.completedSets}/{data.snapshot.totalSets}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-1">séries</p>
-              </Card>
-              <Card className="p-3 text-center">
-                <Trophy className="w-4 h-4 text-primary mx-auto mb-1" />
-                <p className="text-lg font-black tabular-nums leading-none">
-                  {formatVolume(data.snapshot.totalVolume || 0)}
-                </p>
-                <p className="text-[10px] text-muted-foreground mt-1">kg vol.</p>
+              <Card className="p-4 flex items-center gap-3">
+                <Dumbbell className="w-5 h-5 text-primary shrink-0" />
+                <div>
+                  <p className="text-lg font-black tabular-nums leading-none">
+                    {data.snapshot.completedSets}/{data.snapshot.totalSets}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">séries concluídas</p>
+                </div>
               </Card>
             </div>
 
-            {/* Progresso geral */}
-            <div className="h-2 rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-500"
-                style={{
-                  width: `${
-                    data.snapshot.totalSets > 0
-                      ? Math.min(
-                          100,
-                          (data.snapshot.completedSets / data.snapshot.totalSets) * 100
-                        )
-                      : 0
-                  }%`,
-                }}
-              />
-            </div>
-
-            <div className="space-y-4">
+            <Card className="p-5 space-y-0.5">
+              <h2 className="font-bold text-sm mb-2">Exercícios</h2>
               {data.snapshot.exercises.map((ex, i) => {
                 const done = ex.completedSets >= ex.totalSets && ex.totalSets > 0;
                 return (
-                  <Card
+                  <div
                     key={i}
-                    className={`overflow-hidden transition-all ${
-                      ex.current
-                        ? "ring-2 ring-primary/60 border-primary/40"
-                        : done
-                          ? "opacity-70"
-                          : ""
+                    className={`flex items-center justify-between py-2.5 border-b border-border/40 last:border-0 rounded-lg ${
+                      ex.current ? "bg-primary/5 -mx-2 px-2" : ""
                     }`}
                   >
-                    <div className="flex gap-3 p-3">
-                      {/* Imagem do exercício */}
-                      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-muted shrink-0">
-                        {ex.imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={ex.imageUrl}
-                            alt={ex.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Dumbbell className="w-6 h-6 text-muted-foreground/50" />
-                          </div>
-                        )}
-                        {done && (
-                          <div className="absolute inset-0 bg-emerald-500/70 flex items-center justify-center">
-                            <Check className="w-6 h-6 text-white" strokeWidth={3} />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="font-bold text-sm leading-snug truncate">{ex.name}</p>
-                            {ex.muscleGroup && (
-                              <p className="text-[11px] text-muted-foreground mt-0.5">
-                                {ex.muscleGroup}
-                              </p>
-                            )}
-                          </div>
-                          {ex.current && (
-                            <Badge className="bg-primary text-primary-foreground text-[10px] shrink-0">
-                              Agora
-                            </Badge>
-                          )}
-                          {done && !ex.current && (
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] text-emerald-500 border-emerald-500/30 shrink-0"
-                            >
-                              OK
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-muted-foreground mt-1">
-                          {ex.isCardio
-                            ? "Cardio"
-                            : `${ex.completedSets}/${ex.totalSets} séries`}
-                        </p>
-                      </div>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {done ? (
+                        <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                      ) : (
+                        <Circle className={`w-4 h-4 shrink-0 ${ex.current ? "text-primary" : "text-muted-foreground/40"}`} />
+                      )}
+                      <p className={`text-sm truncate ${ex.current ? "font-bold" : done ? "text-muted-foreground line-through" : "font-medium"}`}>
+                        {ex.name}
+                      </p>
                     </div>
-
-                    {/* Séries — como no treino ativo */}
-                    {!ex.isCardio && ex.sets && ex.sets.length > 0 && (
-                      <div className="border-t border-border/50">
-                        <div className="grid grid-cols-[40px_1fr_1fr_40px] gap-1 px-3 py-1.5 text-[10px] uppercase tracking-wide text-muted-foreground font-semibold bg-muted/30">
-                          <span>Set</span>
-                          <span>Peso</span>
-                          <span>Reps</span>
-                          <span></span>
-                        </div>
-                        {ex.sets.map((s) => (
-                          <div
-                            key={s.setNumber}
-                            className={`grid grid-cols-[40px_1fr_1fr_40px] gap-1 px-3 py-2.5 text-sm border-t border-border/30 items-center ${
-                              s.completed ? "bg-primary/5" : ""
-                            }`}
-                          >
-                            <span className="font-bold tabular-nums text-muted-foreground">
-                              {s.setNumber}
-                            </span>
-                            <span className="font-semibold tabular-nums">
-                              {s.completed || s.weight > 0 ? `${s.weight} kg` : "—"}
-                            </span>
-                            <span className="font-semibold tabular-nums">
-                              {s.completed || s.reps > 0 ? s.reps : "—"}
-                            </span>
-                            <span className="flex justify-end">
-                              {s.completed ? (
-                                <span className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                                  <Check className="w-3.5 h-3.5 text-primary-foreground" strokeWidth={3} />
-                                </span>
-                              ) : (
-                                <span className="w-6 h-6 rounded-full border border-border/80" />
-                              )}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                    {!ex.isCardio && (
+                      <span className="shrink-0 text-xs font-medium text-muted-foreground tabular-nums">
+                        {ex.completedSets}/{ex.totalSets}
+                      </span>
                     )}
-
-                    {ex.isCardio && ex.cardio && (
-                      <div className="border-t border-border/50 px-3 py-3 text-sm space-y-1">
-                        {ex.cardio.durationSec != null && (
-                          <p>
-                            Duração:{" "}
-                            <span className="font-semibold">
-                              {Math.round(ex.cardio.durationSec / 60)} min
-                            </span>
-                          </p>
-                        )}
-                        {ex.cardio.distanceKm != null && (
-                          <p>
-                            Distância:{" "}
-                            <span className="font-semibold">{ex.cardio.distanceKm} km</span>
-                          </p>
-                        )}
-                        {ex.cardio.intensity && (
-                          <p>
-                            Intensidade:{" "}
-                            <span className="font-semibold">{ex.cardio.intensity}</span>
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </Card>
+                  </div>
                 );
               })}
-            </div>
+            </Card>
+
+            <p className="text-[11px] text-center text-muted-foreground">
+              Atualiza automaticamente a cada poucos segundos.
+            </p>
           </>
         )}
       </div>
