@@ -60,3 +60,10 @@ download/*.csv
 # Backups de banco com dados reais
 *.sql.backup
 *.dump
+# Pastas de export/download com dados de usuários reais ou prints de referência
+/download/
+# Arquivos de processo/PID de scripts locais
+*.pid
+# Resíduos de sessões de ferramentas de IA / uploads de trabalho local
+/tool-results/
+/upload/

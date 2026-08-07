@@ -37,6 +37,14 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "GEMgym",
   },
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport: Viewport = {
